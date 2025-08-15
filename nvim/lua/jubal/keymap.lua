@@ -27,7 +27,59 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- LSP Keybindings --
 ---------------------
 
+-------------------------
+-- Telescope Keymappings --
+-------------------------
+
 local telescope_builtin = require('telescope.builtin')
+local telescope_dropdown = require('telescope.themes').get_dropdown
+
+-- File navigation
+vim.keymap.set('n', '<leader>?', telescope_builtin.oldfiles, { desc = '[?] Find recently opened files' })
+vim.keymap.set('n', '<leader><space>', function()
+	telescope_builtin.buffers(telescope_dropdown {
+		sort_mru = true,
+		ignore_current_buffer = true,
+		previewer = false,
+	})
+end, { desc = '[ ] Find existing buffers' })
+vim.keymap.set('n', '<leader>/', function()
+	telescope_builtin.current_buffer_fuzzy_find(telescope_dropdown {
+		winblend = 10,
+		previewer = false,
+	})
+end, { desc = '[/] Fuzzily search in current buffer' })
+vim.keymap.set('n', '<leader>gf', telescope_builtin.git_files, { desc = 'Search [G]it [F]iles' })
+vim.keymap.set('n', '<leader>p', function()
+	telescope_builtin.find_files(telescope_dropdown {
+		find_command = { 'rg', '--files', '--iglob', '!.git', '--hidden' },
+		ignore_current_buffer = true,
+		previewer = false,
+	})
+end, { desc = 'Search Files' })
+
+-- Search functionality
+vim.keymap.set('n', '<leader>sh', telescope_builtin.help_tags, { desc = '[S]earch [H]elp' })
+vim.keymap.set('n', '<leader>sw', telescope_builtin.grep_string, { desc = '[S]earch current [W]ord' })
+vim.keymap.set('n', '<leader>sg', function()
+	telescope_builtin.live_grep({ layout_strategy = 'vertical' })
+end, { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', '<leader>sd', telescope_builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>sq', telescope_builtin.quickfix, { desc = '[S]earch [Q]uickfix' })
+
+----------------------------
+-- Diagnostic Navigation --
+----------------------------
+
+-- Diagnostic navigation keymaps
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
+vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+
+---------------------
+-- LSP Keybindings --
+---------------------
 
 local M = {}
 
