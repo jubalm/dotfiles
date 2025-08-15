@@ -93,21 +93,43 @@ create_symlink() {
     log_success "Created symlink: $target -> $source"
 }
 
-# Install Neovim configuration
-if [[ -d "$DOTFILES_DIR/nvim" ]]; then
-    log_info "Installing Neovim configuration..."
-    create_symlink "$DOTFILES_DIR/nvim" "$HOME/.config/nvim" "nvim"
+# Install shell configuration
+log_info "Installing shell configuration..."
+if [[ -f "$DOTFILES_DIR/.zshrc" ]]; then
+    create_symlink "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
+fi
+
+if [[ -f "$DOTFILES_DIR/.gitignore_global" ]]; then
+    create_symlink "$DOTFILES_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
+fi
+
+# Install .config directory structure (mirrors repo structure)
+log_info "Installing .config directory structure..."
+if [[ -d "$DOTFILES_DIR/.config" ]]; then
+    # Create .config directory if it doesn't exist
+    mkdir -p "$HOME/.config"
     
-    # Initialize Neovim plugins
+    # Symlink each subdirectory in .config
+    for config_dir in "$DOTFILES_DIR/.config"/*; do
+        if [[ -d "$config_dir" ]]; then
+            dir_name=$(basename "$config_dir")
+            create_symlink "$config_dir" "$HOME/.config/$dir_name" "$dir_name"
+        fi
+    done
+    
+    log_success ".config structure installed"
+else
+    log_error ".config directory not found in $DOTFILES_DIR"
+    exit 1
+fi
+
+# Initialize Neovim plugins
+if [[ -d "$HOME/.config/nvim" ]]; then
     log_info "Installing Neovim plugins..."
     nvim --headless -c "Lazy! sync" -c "qall" 2>/dev/null || {
         log_warning "Plugin installation failed, but continuing..."
     }
-    
-    log_success "Neovim configuration installed"
-else
-    log_error "nvim directory not found in $DOTFILES_DIR"
-    exit 1
+    log_success "Neovim plugins installed"
 fi
 
 # Set up Node.js using n
