@@ -1,35 +1,44 @@
 # ===[ Taps ]===
 tap "oven-sh/bun"
+tap "derailed/k9s"
 
-# ===[ Essential Development Tools ]===
+# ===[ Development & Code Tools ]===
 
-brew "git"			# Version control system
-brew "lazygit"		# Terminal UI for git commands
-brew "neovim"		# Modern text editor (nvim)
-brew "ripgrep"		# Fast text search tool (rg)
-brew "fd"			# Fast file finder (alternative to find)
-cask "docker"		# Containerization platform
+brew "git"					# Version control system
+brew "gh"					# GitHub CLI for pull requests and issues
+brew "lazygit"				# Terminal UI for git commands
+brew "neovim"				# Modern text editor (nvim)
+brew "biome"				# Fast linter and formatter for JavaScript/TypeScript
 
-# ===[ Runtimes ]===
+# ===[ CLI Utilities ]===
+
+brew "ripgrep"				# Fast text search tool (rg)
+brew "httpie"				# User-friendly HTTP client
+brew "jq"					# JSON processor and query tool
+brew "zsh-autosuggestions"	# Command line auto-completion
+# brew "fd"					# Fast file finder (alternative to find)
+# brew "fzf"				# Command-line fuzzy finder
+
+# ===[ Language Runtimes ]===
 
 brew "n"			# Node.js version manager
 brew "bun"			# Fast JavaScript runtime and package manager
 # brew "deno"		# Modern JavaScript/TypeScript runtime
+# brew "yarn"		# JavaScript package manager
+# brew "pnpm"		# Fast, disk space efficient package manager
 
-# ===[ Cloud & Container Tools ]===
+# ===[ Cloud & Infrastructure ]===
 
-brew "kubectl"		# Kubernetes command line tool
-brew "eksctl"		# EKS cluster management tool
-# brew "awscli"		# AWS command line interface
+cask "docker"			# Containerization platform
+brew "kubectl"			# Kubernetes command line tool
+brew "eksctl"			# EKS cluster management tool
+# brew "awscli"			# AWS command line interface
+# brew "helm"			# Kubernetes package manager
+# brew "flyctl"			# Fly.io deployment CLI
+# brew "k9s"			# Kubernetes cluster management UI
+# brew "cloudflared"	# Cloudflare tunnel client
 
-# ===[ Programming Fonts ]===
+# ===[ Misc ]===
+
 # https://github.com/ryanoasis/nerd-fonts#patched-fonts
-
 cask "font-hack-nerd-font"	# Programming font with icons
-
-# ===[ Optional Tools ]===
-# Uncomment if your workflow needs them
-
-# brew "zsh-autosuggestions"	# Command line auto-completion
-# brew "python3"				# Python programming language
-# brew "lua"					# Lua programming language

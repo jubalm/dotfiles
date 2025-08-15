@@ -19,29 +19,37 @@ This repository contains my personal development environment setup, featuring a 
 
 The following tools will be installed automatically via Homebrew:
 
-**Essential Development Tools:**
+**Development & Code Tools:**
 - `git` - Version control system
+- `gh` - GitHub CLI for pull requests and issues
 - `lazygit` - Terminal UI for git commands
 - `neovim` - Modern text editor (nvim)
+- `biome` - Fast linter and formatter for JavaScript/TypeScript
+
+**CLI Utilities:**
 - `ripgrep` - Fast text search tool (rg)
-- `fd` - Fast file finder (alternative to find)
-- `n` - Node.js version manager
-- `docker` - Containerization platform
-
-**Fonts:**
-- `font-hack-nerd-font` - Programming font with icons
-
-**Optional Tools:** (commented in Brewfile)
+- `httpie` - User-friendly HTTP client
+- `jq` - JSON processor and query tool
 - `zsh-autosuggestions` - Command line auto-completion
-- `python3` - Python programming language
-- `lua` - Lua programming language
+
+**Language Runtimes:**
+- `n` - Node.js version manager
+- `bun` - Fast JavaScript runtime and package manager
+
+**Cloud & Infrastructure:**
+- `docker` - Containerization platform
+- `kubectl` - Kubernetes command line tool
+- `eksctl` - EKS cluster management tool
+
+**Misc:**
+- `font-hack-nerd-font` - Programming font with icons
 
 ## Quick Install
 
 ```bash
 # Clone the repository
-git clone <your-repo-url> ~/dotfiles
-cd ~/dotfiles
+git clone git@github.com:jubalm/dotfiles.git ~/.config/dotfiles
+cd ~/.config/dotfiles
 
 # Run the installation script
 ./install.sh
@@ -70,7 +78,6 @@ cd ~/dotfiles
 
 ### Navigation & UI
 - **Fuzzy Finding**: Telescope for files, grep, git, and more
-- **File Explorer**: Integrated file navigation
 - **Git Integration**: Gitsigns and Telescope git commands (uses lazygit for operations)
 - **Status Line**: Beautiful lualine with git and LSP information
 
@@ -80,33 +87,12 @@ cd ~/dotfiles
 - **LSP**: `gd` (definition), `gr` (references), `K` (hover)
 - **Git**: `<leader>gf` (git files), `<leader>gp/gn` (hunk navigation)
 
-## Manual Setup
-
-If you prefer manual installation or want to customize:
-
-```bash
-# Install Homebrew (if needed)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install dependencies
-brew bundle
-
-# Create symlinks manually
-ln -sf ~/dotfiles/.config/nvim ~/.config/nvim
-ln -sf ~/dotfiles/.config/zsh ~/.config/zsh
-ln -sf ~/dotfiles/.zshrc ~/.zshrc
-ln -sf ~/dotfiles/.gitignore_global ~/.gitignore_global
-
-# Initialize Neovim plugins
-nvim --headless -c "Lazy! sync" -c "qall"
-```
-
 ## Terminal Setup
 
 For the best experience:
 
 1. **Font**: Set your terminal font to "Hack Nerd Font" (installed automatically)
-2. **Color Scheme**: Use a dark theme that complements the Nord colorscheme  
+2. **Color Scheme**: Use a dark theme that complements the Nord colorscheme
 3. **Shell**: Optimized for zsh with custom prompt and completions
 
 ## Updates
@@ -114,7 +100,7 @@ For the best experience:
 To update the configuration:
 
 ```bash
-cd ~/dotfiles
+cd ~/.config/dotfiles
 git pull origin main
 nvim --headless -c "Lazy! sync" -c "qall"
 ```
@@ -128,13 +114,21 @@ dotfiles/
 ├── .config/                   # XDG Base Directory structure
 │   ├── nvim/                  # Complete Neovim configuration
 │   │   ├── init.lua          # Entry point
-│   │   ├── lua/jubal/        # Modular configuration
+│   │   ├── lua/user/         # Modular configuration
+│   │   │   ├── editor.lua    # Core editor settings
+│   │   │   ├── keymap.lua    # Global keymaps
+│   │   │   ├── plugins.lua   # Lazy.nvim setup
+│   │   │   └── plugin_setup/ # Plugin configurations
+│   │   │       ├── editing.lua    # Completion, snippets, commenting
+│   │   │       ├── insight.lua    # LSP, Treesitter, diagnostics
+│   │   │       ├── navigation.lua # Telescope fuzzy finder
+│   │   │       └── ui.lua         # Status line, UI elements
 │   │   └── colors/           # Custom colorscheme
 │   └── zsh/                  # Shell enhancements
 │       ├── completions/      # Custom completions (AWS, kubectl, etc.)
 │       ├── prompt/           # Git prompt configuration
 │       └── functions/        # Custom shell functions
-├── Brewfile                  # Homebrew dependencies  
+├── Brewfile                  # Homebrew dependencies
 ├── install.sh                # Automated installer
 ├── CLAUDE.md                 # Development documentation
 └── README.md                 # This file
