@@ -1,23 +1,4 @@
 return {
-	-- Theme
-	-- {
-	-- 	'swaits/colorsaver.nvim',
-	-- 	lazy = true,
-	-- 	event = 'VimEnter',
-	-- 	opts = {},
-	-- 	dependencies = {
-	-- 		{ 'AlexvZyl/nordic.nvim' },
-	-- 	}
-	-- },
-	-- {
-	-- 	'folke/tokyonight.nvim',
-	-- 	config = function()
-	-- 		require'tokyonight'.setup {
-	-- 			transparent = false
-	-- 		}
-	-- 		vim.cmd('colorscheme tokyonight')
-	-- 	end
-	-- },
 
 	-- Statusbar details
 	{
