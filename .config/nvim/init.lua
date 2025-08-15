@@ -1,3 +1,3 @@
-require'jubal.editor'
-require'jubal.plugins'
-require'jubal.keymap'
+require'user.editor'
+require'user.plugins'
+require'user.keymap'

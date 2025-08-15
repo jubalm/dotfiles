@@ -114,7 +114,7 @@ return {
 			{ 'nvim-telescope/telescope.nvim' }
 		},
 		config = function()
-			local keymap = require('jubal.keymap')
+			local keymap = require('user.keymap')
 
 			local user_lsp_group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true })
 

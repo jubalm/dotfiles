@@ -1,3 +1,6 @@
+# ===[ Taps ]===
+tap "oven-sh/bun"
+
 # ===[ Essential Development Tools ]===
 
 brew "git"			# Version control system
