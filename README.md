@@ -1,72 +1,27 @@
-# Personal Dotfiles
+# Jubal's Personal Dotfiles
 
-**Clean, portable dotfiles for macOS development environment**
+**Clean, portable dotfiles most development environment**
 
 This repository contains my personal development environment setup, featuring a modular Neovim configuration, organized shell setup, and automated installation scripts. Designed to quickly bootstrap a complete development environment on any macOS machine.
 
 ## Features
 
-- **Modern Neovim Setup**: Lua-based configuration with LSP, Treesitter, and fuzzy finding
-- **Organized Shell Configuration**: Custom zsh setup with completions and git prompt
-- **XDG Base Directory Compliant**: Clean organization following modern Unix standards
-- **Automated Installation**: One-command setup with dependency management
-- **Homebrew Integration**: Declarative package management with Brewfile
-- **Nerd Font Support**: Hack Nerd Font for beautiful terminal icons
-- **Custom Theme**: Nord-inspired colorscheme optimized for readability
-- **Container Ready**: Docker and modern development tooling
+- **One-command setup**: Complete development environment with automated Homebrew integration
+- **Minimal but functional zsh**: Stripped down configuration with essential completions and fast startup
+- **Custom git-aware prompt**: Clean, minimal design showing branch status and changes
+- **Modern Neovim with LSP**: Full development environment with code completion and formatting
+- **Portable organization**: XDG-compliant structure that's easy to understand and modify
 
-## Dependencies
-
-The following tools will be installed automatically via Homebrew:
-
-**Development & Code Tools:**
-- `git` - Version control system
-- `gh` - GitHub CLI for pull requests and issues
-- `lazygit` - Terminal UI for git commands
-- `neovim` - Modern text editor (nvim)
-- `biome` - Fast linter and formatter for JavaScript/TypeScript
-
-**CLI Utilities:**
-- `ripgrep` - Fast text search tool (rg)
-- `httpie` - User-friendly HTTP client
-- `jq` - JSON processor and query tool
-- `zsh-autosuggestions` - Command line auto-completion
-
-**Language Runtimes:**
-- `n` - Node.js version manager
-- `bun` - Fast JavaScript runtime and package manager
-
-**Cloud & Infrastructure:**
-- `docker` - Containerization platform
-- `kubectl` - Kubernetes command line tool
-- `eksctl` - EKS cluster management tool
-
-**Misc:**
-- `font-hack-nerd-font` - Programming font with icons
-
-## Quick Install
+## Install
 
 ```bash
-# Clone the repository
+# Clone and install everything
 git clone git@github.com:jubalm/dotfiles.git ~/.config/dotfiles
 cd ~/.config/dotfiles
-
-# Run the installation script
 ./install.sh
 ```
 
-## What the installer does
-
-1. **Installs Homebrew** (if not already present)
-2. **Installs all dependencies** from Brewfile
-3. **Backs up existing configs** to `~/.config/backups/`
-4. **Creates symlinks** mirroring the repo structure:
-   - `.zshrc` → `~/.zshrc`
-   - `.gitignore_global` → `~/.gitignore_global`
-   - `.config/nvim/` → `~/.config/nvim/`
-   - `.config/zsh/` → `~/.config/zsh/`
-5. **Initializes Neovim plugins** automatically
-6. **Sets up Node.js** via n package manager
+The installer handles everything: Homebrew setup, tool installation, config symlinks, and Neovim plugin initialization. Your existing configs are safely backed up to `~/.config/backups/`.
 
 ## Neovim Features
 
@@ -89,11 +44,7 @@ cd ~/.config/dotfiles
 
 ## Terminal Setup
 
-For the best experience:
-
-1. **Font**: Set your terminal font to "Hack Nerd Font" (installed automatically)
-2. **Color Scheme**: Use a dark theme that complements the Nord colorscheme
-3. **Shell**: Optimized for zsh with custom prompt and completions
+Set your terminal font to **"Hack Nerd Font"** (installed automatically) for the best experience with icons and symbols.
 
 ## Updates
 
@@ -134,12 +85,12 @@ dotfiles/
 └── README.md                 # This file
 ```
 
-## Shell Features
+## Shell Philosophy
 
-- **Custom Git Prompt**: Shows branch, status, and changes
-- **Vi Mode**: Vim keybindings in the terminal
-- **Smart Completions**: AWS CLI, kubectl, eksctl, and more
-- **Clean Organization**: XDG-compliant structure in `~/.config/`
+- **Minimal**: Essential tools and configs only - nothing extra
+- **Functional**: Everything works out of the box with smart defaults
+- **Fast**: Quick startup times and responsive performance
+- **Clean**: Well-organized, easy to understand and modify
 
 ## Contributing
 
