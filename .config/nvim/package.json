@@ -1,7 +1,0 @@
-{
-  "name": "neovim-config",
-  "version": "0.0.1",
-  "description": "Personal neovim configuration",
-  "author": "Jubal Mabaquiao <jubal.mabaquiao@gmail.com>",
-  "license": "ISC"
-}
