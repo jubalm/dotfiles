@@ -89,37 +89,30 @@ return {
 				ensure_installed = {}
 			}
 
-			mason_lspconfig.setup_handlers {
-				function(server_name)
-					lspconfig[server_name].setup {
-						capabilities = capabilities,
-						on_attach = on_attach,
-					}
-				end,
-				["biome"] = function()
-					require 'lspconfig'.biome.setup {
-						root_dir = function(fname)
-							return lspconfig.util.find_package_json_ancestor(fname)
-								or lspconfig.util.find_node_modules_ancestor(fname)
-								or lspconfig.util.find_git_ancestor(fname)
-						end,
-					}
-				end,
-				['tsserver'] = function()
-					require 'lspconfig'.tsserver.setup {
-						capabilities = capabilities,
-						on_attach = on_attach,
-						settings = {
-							typescript = {
-								format = {
-									insertSpaceAfterConstructor = true,
-									insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces = true
-								}
-							}
+			-- Configure LSP servers using the new vim.lsp.config API
+			vim.lsp.config('*', {
+				capabilities = capabilities,
+				on_attach = on_attach,
+			})
+
+			-- Configure specific servers
+			vim.lsp.config('biome', {
+				root_markers = { 'package.json', 'node_modules', '.git' },
+			})
+
+			vim.lsp.config('ts_ls', {
+				capabilities = capabilities,
+				on_attach = on_attach,
+				settings = {
+					typescript = {
+						format = {
+							insertSpaceAfterConstructor = true,
+							insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces = true
 						}
 					}
-				end
-			}
+				},
+				single_file_support = false,
+			})
 		end
 	},
 

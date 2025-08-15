@@ -1,8 +1,9 @@
 return {
-	'nvim-telescope/telescope.nvim',
-	dependencies = {
-		'nvim-lua/plenary.nvim',
-	},
+	{
+		'nvim-telescope/telescope.nvim',
+		dependencies = {
+			'nvim-lua/plenary.nvim',
+		},
 	config = function()
 		local telescope_builtin = require('telescope.builtin')
 		local telescope_actions = require('telescope.actions')
@@ -58,4 +59,5 @@ return {
 		vim.keymap.set('n', '<leader>sd', telescope_builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
 		vim.keymap.set('n', '<leader>sq', telescope_builtin.quickfix, { desc = '[S]earch [Q]uickfix' })
 	end
+	},
 }
