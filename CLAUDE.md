@@ -4,14 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Dotfiles Architecture
 
-This is a personal dotfiles repository containing a clean Neovim configuration and installation scripts for setting up a development environment across machines.
+This is a personal dotfiles repository containing a clean Neovim configuration, organized shell setup, and installation scripts for setting up a development environment across machines. The repository follows XDG Base Directory specification with 1:1 file structure mirroring.
 
 ## Repository Structure
 
-- `nvim/` - Complete Neovim configuration 
+**Root Files:**
+- `.zshrc` → `~/.zshrc` - Shell configuration with custom prompt and vi mode
+- `.gitignore_global` → `~/.gitignore_global` - Global git ignore patterns
 - `Brewfile` - Homebrew dependencies for macOS setup
-- `install.sh` - Automated installation script
+- `install.sh` - Automated installation script with 1:1 structure mirroring
 - `README.md` - Setup and usage documentation
+
+**XDG Structure (mirrors `~/.config/`):**
+- `.config/nvim/` → `~/.config/nvim/` - Complete Neovim configuration
+- `.config/zsh/` → `~/.config/zsh/` - Organized shell enhancements
+  - `completions/` - Custom completions (AWS, kubectl, eksctl, deno)
+  - `prompt/` - Git prompt configuration
+  - `functions/` - Custom shell functions (empty, for future use)
 
 ## Installation
 
@@ -23,8 +32,8 @@ Run the installation script to set up the development environment:
 This will:
 - Install Homebrew (if not present)
 - Install all dependencies via Brewfile
-- Create symlinks for configurations
-- Set up Neovim plugins
+- Create 1:1 symlinks mirroring repo structure to home directory
+- Set up Neovim plugins automatically
 
 ## Neovim Configuration Architecture
 
@@ -39,12 +48,27 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 - `lua/jubal/editor.lua` - Core editor settings, UI options, leader key configuration
 - `lua/jubal/plugins.lua` - Lazy.nvim bootstrap and setup
 - `lua/jubal/keymap.lua` - Global keymaps and autocommands
-- `lua/jubal/plugin_setup/` - Modular plugin configurations:
-  - `code-hints.lua` - nvim-cmp and snippet configuration
-  - `code-analysis.lua` - LSP, Mason, formatting, and development tools
-  - `file-navigation.lua` - Telescope configuration and keymaps
-  - `syntax-highlight.lua` - Treesitter configuration
-  - `user-interface.lua` - Lualine, themes, Git signs, visual enhancements
+- `lua/jubal/plugin_setup/` - Modular plugin configurations by function:
+  - `editing.lua` - nvim-cmp, snippets, commenting, auto-tags, indentation
+  - `insight.lua` - Treesitter, LSP, diagnostics, folding, visual aids, gitsigns
+  - `navigation.lua` - Telescope configuration (keymaps in keymap.lua)
+  - `ui.lua` - Lualine status line and which-key hints
+
+## Shell Configuration
+
+### ZSH Features
+- **Custom Git Prompt**: Shows branch status, dirty state, untracked files
+- **Vi Mode**: Vim keybindings in terminal with visual cursor indicators
+- **Smart Completions**: AWS CLI, kubectl, eksctl, deno completions
+- **Auto-suggestions**: Via Homebrew zsh-autosuggestions package
+- **Clean Organization**: XDG-compliant structure in `~/.config/zsh/`
+
+### Essential Tools  
+- **git** + **lazygit**: Version control with terminal UI
+- **neovim**: Modern text editor with LSP integration
+- **ripgrep** + **fd**: Fast search tools
+- **docker**: Containerization platform
+- **n**: Node.js version manager
 
 ## Development Commands
 
@@ -87,18 +111,20 @@ return {
 - File navigation: `<leader>p` (files), `<leader>sg` (grep), `<leader>gf` (git files)
 - LSP: `gd` (definition), `gr` (references), `K` (hover), `<leader>ca` (code actions)
 - Diagnostics: `[d`/`]d` (navigate), `<leader>e` (float), `<leader>q` (quickfix)
+- Git hunks: `<leader>gp/gn` (navigate), `<leader>h` (preview)
 
 ### Development Patterns
 - Use tabs (not spaces) with 4-character width by default
-- Plugin configurations are self-contained with their keymaps
+- Global keymaps centralized in `keymap.lua`, plugin configs focus on setup
 - LSP servers auto-configure based on project files (package.json, .git)
 - Treesitter languages: CSS, JavaScript, TypeScript, TSX, JSON, HTML, Bash, Lua
 
 ## Important Technical Notes
 
 - Configuration uses the new Neovim 0.10+ `vim.lsp.config()` API
-- Telescope integrations are configured within individual plugin files
+- Telescope keymaps centralized in `keymap.lua`, config in `navigation.lua`
 - Custom autocmds for yank highlighting and LSP document highlighting
-- Git integration with fugitive, gitsigns, and Telescope git commands
+- Git integration with gitsigns for visual indicators, lazygit for operations
 - Code folding enabled with nvim-ufo plugin
 - Auto-indentation detection with vim-sleuth and .editorconfig support
+- Shell completions organized in `~/.config/zsh/completions/` for cloud tools
