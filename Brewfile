@@ -1,16 +1,21 @@
-# Essential development tools
-brew "git"
-brew "lazygit"
-brew "neovim" 
-brew "ripgrep"
-brew "fd"
-brew "n"
+# ===[ Essential Development Tools ]===
 
+brew "git"          # Version control system
+brew "lazygit"      # Terminal UI for git commands
+brew "neovim"       # Modern text editor (nvim)
+brew "ripgrep"      # Fast text search tool (rg)
+brew "fd"           # Fast file finder (alternative to find)
+brew "n"            # Node.js version manager
+cask "docker"       # Containerization platform
 
-# Nerd Font for terminal/editor
-cask "font-hack-nerd-font"
+# ===[ Programming Fonts ]===
+# https://github.com/ryanoasis/nerd-fonts#patched-fonts
 
-# Optional development tools (commented out by default)
-# brew "python3"
-# brew "lua"
-# cask "docker"
+cask "font-hack-nerd-font"    # Programming font with icons
+
+# ===[ Optional Tools ]===
+# Uncomment if your workflow needs them
+
+# brew "zsh-autosuggestions"  # Command line auto-completion
+# brew "python3"             # Python programming language
+# brew "lua"                 # Lua programming language
