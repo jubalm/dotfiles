@@ -2,9 +2,33 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Configuration Architecture
+## Dotfiles Architecture
 
-This is a clean, personal Neovim configuration built with Lua using a modular structure:
+This is a personal dotfiles repository containing a clean Neovim configuration and installation scripts for setting up a development environment across machines.
+
+## Repository Structure
+
+- `nvim/` - Complete Neovim configuration 
+- `Brewfile` - Homebrew dependencies for macOS setup
+- `install.sh` - Automated installation script
+- `README.md` - Setup and usage documentation
+
+## Installation
+
+Run the installation script to set up the development environment:
+```bash
+./install.sh
+```
+
+This will:
+- Install Homebrew (if not present)
+- Install all dependencies via Brewfile
+- Create symlinks for configurations
+- Set up Neovim plugins
+
+## Neovim Configuration Architecture
+
+The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 
 - **Entry Point**: `init.lua` contains only 3 essential require statements: `jubal.editor`, `jubal.plugins`, `jubal.keymap`
 - **Plugin Manager**: Uses Lazy.nvim for plugin management with automatic installation
@@ -16,8 +40,8 @@ This is a clean, personal Neovim configuration built with Lua using a modular st
 - `lua/jubal/plugins.lua` - Lazy.nvim bootstrap and setup
 - `lua/jubal/keymap.lua` - Global keymaps and autocommands
 - `lua/jubal/plugin_setup/` - Modular plugin configurations:
-  - `code-completion.lua` - nvim-cmp and snippet configuration
-  - `code-formatting.lua` - LSP, Mason, formatting, and development tools
+  - `code-hints.lua` - nvim-cmp and snippet configuration
+  - `code-analysis.lua` - LSP, Mason, formatting, and development tools
   - `file-navigation.lua` - Telescope configuration and keymaps
   - `syntax-highlight.lua` - Treesitter configuration
   - `user-interface.lua` - Lualine, themes, Git signs, visual enhancements
@@ -39,7 +63,7 @@ This is a clean, personal Neovim configuration built with Lua using a modular st
 ### LSP Configuration
 - Uses the modern `vim.lsp.config()` API for server setup
 - Global LSP configuration applied to all servers with fallback to specific overrides
-- LSP keymaps are configured in the `on_attach` function in `code-formatting.lua`
+- LSP keymaps are configured in the `on_attach` function in `code-analysis.lua`
 - Document highlighting with 1.5s delay on cursor hold
 
 ### Plugin Setup Pattern
