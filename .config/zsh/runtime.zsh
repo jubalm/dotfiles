@@ -27,6 +27,9 @@ zle -N zle-keymap-select
 echo -ne '\e[5 q'
 preexec() { echo -ne '\e[5 q' }
 
+# ===[ Shell Options ]===
+setopt PROMPT_SUBST  # Enable parameter expansion in prompts
+
 # ===[ Completion System ]===
 autoload -Uz compinit
 if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
