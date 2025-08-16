@@ -26,7 +26,7 @@ source ~/.config/zsh/completions/deno.zsh
 fpath+=(~/.config/ionosctl/completion/zsh)
 
 # ===[ Git Prompt Setup ]===
-source ~/.config/zsh/prompt/working_git_prompt.zsh
+source ~/.config/zsh/prompt/simple_git_prompt.zsh
 
 # ===[ Custom Prompt ]===
 NL=$'\n'
@@ -34,7 +34,6 @@ PROMPT_DIR='%F{cyan}%~%f'
 PROMPT_SYMBOL='%(?.%F{gray}.%F{red})%(!.#.→)%f '
 
 precmd () { 
-    setopt PROMPT_SUBST  # Ensure color expansion is enabled
-    local git_info=$(working_git_prompt)
+    local git_info=$(simple_git_prompt)
     PS1="$NL$PROMPT_DIR$git_info$NL$PROMPT_SYMBOL"
 }
