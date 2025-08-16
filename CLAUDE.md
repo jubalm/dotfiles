@@ -18,6 +18,10 @@ This is a personal dotfiles repository containing a clean Neovim configuration, 
 **XDG Structure (mirrors `~/.config/`):**
 - `.config/nvim/` → `~/.config/nvim/` - Complete Neovim configuration
 - `.config/zsh/` → `~/.config/zsh/` - Organized shell enhancements
+  - `platform.zsh` - Foundation layer (environment, Homebrew, PATH)
+  - `runtime.zsh` - Shell behavior layer (vi mode, completion system)
+  - `interface.zsh` - User interaction layer (auto-suggestions, completions, prompt)
+  - `workflow.zsh` - Personal productivity layer (aliases, functions)
   - `completions/` - Custom completions (AWS, kubectl, eksctl, deno)
   - `prompt/` - Git prompt configuration
   - `functions/` - Custom shell functions (empty, for future use)
@@ -39,16 +43,16 @@ This will:
 
 The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 
-- **Entry Point**: `init.lua` contains only 3 essential require statements: `jubal.editor`, `jubal.plugins`, `jubal.keymap`
+- **Entry Point**: `init.lua` contains only 3 essential require statements: `user.editor`, `user.plugins`, `user.keymap`
 - **Plugin Manager**: Uses Lazy.nvim for plugin management with automatic installation
-- **Module Structure**: All configuration lives under `lua/jubal/` directory
+- **Module Structure**: All configuration lives under `lua/user/` directory
 - **Plugin Setup**: Individual plugin configurations are organized in `lua/jubal/plugin_setup/` by category
 
 ### Key Directories
-- `lua/jubal/editor.lua` - Core editor settings, UI options, leader key configuration
-- `lua/jubal/plugins.lua` - Lazy.nvim bootstrap and setup
-- `lua/jubal/keymap.lua` - Global keymaps and autocommands
-- `lua/jubal/plugin_setup/` - Modular plugin configurations by function:
+- `lua/user/editor.lua` - Core editor settings, UI options, leader key configuration
+- `lua/user/plugins.lua` - Lazy.nvim bootstrap and setup
+- `lua/user/keymap.lua` - Global keymaps and autocommands
+- `lua/user/plugin_setup/` - Modular plugin configurations by function:
   - `editing.lua` - nvim-cmp, snippets, commenting, auto-tags, indentation
   - `insight.lua` - Treesitter, LSP, diagnostics, folding, visual aids, gitsigns
   - `navigation.lua` - Telescope configuration (keymaps in keymap.lua)
@@ -56,12 +60,18 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 
 ## Shell Configuration
 
+### ZSH Architecture (4-Layer Structure)
+- **Platform Layer** (`platform.zsh`): Foundation environment, Homebrew setup, PATH configuration
+- **Runtime Layer** (`runtime.zsh`): Vi mode, completion system initialization, core shell behavior
+- **Interface Layer** (`interface.zsh`): Auto-suggestions, tool completions, git prompt integration
+- **Workflow Layer** (`workflow.zsh`): Personal aliases, functions, productivity customizations
+
 ### ZSH Features
 - **Custom Git Prompt**: Shows branch status, dirty state, untracked files
 - **Vi Mode**: Vim keybindings in terminal with visual cursor indicators
 - **Smart Completions**: AWS CLI, kubectl, eksctl, deno completions
 - **Auto-suggestions**: Via Homebrew zsh-autosuggestions package
-- **Clean Organization**: XDG-compliant structure in `~/.config/zsh/`
+- **Modular Organization**: Clear architectural layers with dependency flow
 
 ### Essential Tools  
 - **git** + **lazygit**: Version control with terminal UI

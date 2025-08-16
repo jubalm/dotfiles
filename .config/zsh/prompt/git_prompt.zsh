@@ -1,6 +1,6 @@
 # Minimal, fast git prompt - single command, essential info only
 
-simple_git_prompt() {
+git_prompt() {
     # Single git command to get all needed info
     local git_output=$(git status --porcelain=v1 -b 2>/dev/null) || return
     
