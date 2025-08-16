@@ -1,0 +1,41 @@
+# ============================================================
+#                   INTERFACE LAYER (3/4)
+# ============================================================
+# User interaction layer that enhances the command-line experience.
+#
+# What goes here:
+# - Auto-suggestions and input enhancements
+# - Tool-specific completions (AWS, kubectl, etc.)
+# - Prompt configuration and git integration
+# - Visual styling and user feedback
+#
+# Depends on runtime layer for completion system and platform layer for HOMEBREW_PREFIX.
+
+# ===[ Auto-suggestions ]===
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=95"
+source $HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# ===[ Tool Completions ]===
+# Explicit sourcing of completion files for readability
+source ~/.config/zsh/completions/aws.zsh
+source ~/.config/zsh/completions/kubectl.zsh
+source ~/.config/zsh/completions/eksctl.zsh
+source ~/.config/zsh/completions/deno.zsh
+
+# ionos CLI completions
+fpath+=(~/.config/ionosctl/completion/zsh)
+
+# ===[ Git Prompt Setup ]===
+source ~/.config/zsh/prompt/git_prompt.sh
+GIT_PS1_SHOWDIRTYSTATE=true
+GIT_PS1_SHOWUNTRACKEDFILES=true
+GIT_PS1_HIDE_IF_PWD_IGNORED=true
+GIT_PS1_COMPRESSSPARSESTATE=true
+GIT_PS1_SHOWCOLORHINTS=true
+
+# ===[ Custom Prompt ]===
+NL=$'\n'
+PROMPT_DIR='%F{cyan}%~%f' 
+PROMPT_SYMBOL='%(?.%F{gray}.%F{red})%(!.#.→)%f '
+PROMPT_FORMAT=' %s' 
+precmd () { __git_ps1 $NL$PROMPT_DIR $NL$PROMPT_SYMBOL $PROMPT_FORMAT }
