@@ -2,7 +2,7 @@
 #                    PLATFORM LAYER (1/4)
 # ============================================================
 # Foundation layer that establishes the basic environment.
-# 
+#
 # What goes here:
 # - Core shell options (unsetopt, setopt)
 # - Environment variables (EDITOR, HOMEBREW_PREFIX)
@@ -41,3 +41,6 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 # npm global packages
 export PATH=~/.npm-global/bin:$PATH
+
+# local binaries
+export PATH=$HOME/.local/bin:$PATH

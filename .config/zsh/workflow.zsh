@@ -11,8 +11,5 @@
 #
 # Depends on all previous layers for full shell functionality.
 
-# ===[ Aliases ]===
-alias claude="$HOME/.claude/local/claude"
-
 # ===[ Custom Functions ]===
 # (space for future custom functions and workflow helpers)
