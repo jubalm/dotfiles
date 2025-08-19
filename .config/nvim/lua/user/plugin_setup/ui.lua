@@ -36,4 +36,30 @@ return {
 		'folke/which-key.nvim',
 		opts = {}
 	},
+
+	-- Enhanced markdown rendering
+	{
+		'MeanderingProgrammer/render-markdown.nvim',
+		dependencies = {
+			'nvim-treesitter/nvim-treesitter',
+			'echasnovski/mini.nvim'
+		},
+		opts = {
+			heading = {
+				position = 'inline',
+			},
+			bullet = {
+				left_pad = 2,
+			},
+			code = {
+				enabled = true,
+				border = 'thin',
+				left_pad = 2,
+				right_pad = 2,
+			},
+			indent = {
+				enabled = true
+			}
+		}
+	},
 }

@@ -140,7 +140,9 @@ call s:hi("iCursor", s:nord0_gui, s:nord4_gui, "", "NONE", "", "")
 call s:hi("LineNr", s:nord3_gui, "NONE", s:nord3_term, "NONE", "", "")
 call s:hi("MatchParen", s:nord8_gui, s:nord3_gui, s:nord8_term, s:nord3_term, "", "")
 call s:hi("NonText", s:nord2_gui, "", s:nord3_term, "", "", "")
-call s:hi("Normal", s:nord4_gui, s:nord0_gui, "NONE", "NONE", "", "")
+" Original: call s:hi("Normal", s:nord4_gui, s:nord0_gui, "NONE", "NONE", "", "")
+" Dimmed for eye strain: s:nord4_gui = "#B6C1CD" -> "#9CA0B0"
+call s:hi("Normal", "#9CA0B0", s:nord0_gui, "NONE", "NONE", "", "")
 call s:hi("Pmenu", s:nord4_gui, s:nord1_gui, "NONE", s:nord1_term, "NONE", "")
 call s:hi("PmenuSbar", s:nord4_gui, s:nord1_gui, "NONE", s:nord1_term, "", "")
 call s:hi("PmenuSel", s:nord8_gui, s:nord3_gui, s:nord8_term, s:nord3_term, "", "")
@@ -836,6 +838,16 @@ hi! link VimwikiList markdownListMarker
 " YAML
 " > stephpy/vim-yaml
 call s:hi("yamlKey", s:nord7_gui, "", s:nord7_term, "", "", "")
+
+"+--- render-markdown.nvim ---+
+" Note: RenderMarkdownH*Bg groups control heading text color (not RenderMarkdownH* which are icon-only)
+" Uses foreground colors with NONE backgrounds for colored text with transparent backgrounds
+call s:hi("RenderMarkdownH1Bg", s:nord8_gui, "NONE", s:nord8_term, "NONE", "", "")
+call s:hi("RenderMarkdownH2Bg", s:nord9_gui, "NONE", s:nord9_term, "NONE", "", "")
+call s:hi("RenderMarkdownH3Bg", s:nord8_gui, "NONE", s:nord8_term, "NONE", "", "")
+call s:hi("RenderMarkdownH4Bg", s:nord8_gui, "NONE", s:nord8_term, "NONE", "", "")
+call s:hi("RenderMarkdownH5Bg", s:nord3_gui_bright, "NONE", s:nord3_term, "NONE", "", "")
+call s:hi("RenderMarkdownH6Bg", s:nord3_gui, "NONE", s:nord3_term, "NONE", "", "")
 
 "+------------+
 "+ Public API +
