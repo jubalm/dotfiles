@@ -157,6 +157,15 @@ if command -v n >/dev/null 2>&1; then
     fi
 fi
 
+# Install Claude CLI
+log_info "Installing Claude CLI..."
+if ! command -v claude >/dev/null 2>&1; then
+    curl -fsSL https://claude.ai/install.sh | bash
+    log_success "Claude CLI installed"
+else
+    log_success "Claude CLI already installed"
+fi
+
 log_success "✨ Dotfiles installation complete!"
 log_info "💡 Configure your terminal to use 'Hack Nerd Font' for best experience"
 log_info "🚀 Restart your terminal or run 'source ~/.zshrc' to apply changes"

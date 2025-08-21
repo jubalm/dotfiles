@@ -12,7 +12,7 @@
 # Depends on all previous layers for full shell functionality.
 
 # ===[ Aliases ]===
-alias cc='claude --dangerously-skip-permissions'
+alias cld='claude --dangerously-skip-permissions'
 
 # ===[ Custom Functions ]===
 # (space for future custom functions and workflow helpers)
