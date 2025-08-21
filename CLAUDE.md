@@ -12,7 +12,7 @@ This is a personal dotfiles repository containing a clean Neovim configuration, 
 - `.zshrc` → `~/.zshrc` - Shell configuration with custom prompt and vi mode
 - `.gitignore_global` → `~/.gitignore_global` - Global git ignore patterns
 - `Brewfile` - Homebrew dependencies for macOS setup
-- `install.sh` - Automated installation script with 1:1 structure mirroring
+- `install.py` - Automated installation script with 1:1 structure mirroring
 - `README.md` - Setup and usage documentation
 
 **XDG Structure (mirrors `~/.config/`):**
@@ -30,7 +30,7 @@ This is a personal dotfiles repository containing a clean Neovim configuration, 
 
 Run the installation script to set up the development environment:
 ```bash
-./install.sh
+./install.py
 ```
 
 This will:

@@ -18,10 +18,10 @@ This repository contains my personal development environment setup, featuring a 
 # Clone and install everything
 git clone git@github.com:jubalm/dotfiles.git ~/.config/dotfiles
 cd ~/.config/dotfiles
-./install.sh
+./install.py
 ```
 
-The installer handles everything: Homebrew setup, tool installation, config symlinks, and Neovim plugin initialization. Your existing configs are safely backed up to `~/.config/backups/`.
+The installer handles everything: Homebrew setup, tool installation, config symlinks, and Neovim plugin initialization. Your existing configs are safely backed up to `dotfiles/backups/`.
 
 ## Neovim Features
 
@@ -80,7 +80,7 @@ dotfiles/
 │       ├── prompt/           # Git prompt configuration
 │       └── functions/        # Custom shell functions
 ├── Brewfile                  # Homebrew dependencies
-├── install.sh                # Automated installer
+├── install.py                # Automated installer
 ├── CLAUDE.md                 # Development documentation
 └── README.md                 # This file
 ```
