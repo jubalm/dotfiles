@@ -60,47 +60,67 @@ else
     exit 1
 fi
 
-# Function to backup existing config
-backup_config() {
-    local config_path="$1"
+# Backup whatever exists at the target location (file, dir, or symlink target)
+backup_if_needed() {
+    local target="$1"
     local backup_name="$2"
     
-    if [[ -e "$config_path" ]]; then
-        local backup_dir="$HOME/.config/backups"
-        local backup_path="$backup_dir/${backup_name}.backup.$(date +%Y%m%d_%H%M%S)"
-        
-        mkdir -p "$backup_dir"
-        mv "$config_path" "$backup_path"
-        log_success "Backed up existing config to $backup_path"
+    # Nothing to backup if path doesn't exist
+    [[ ! -e "$target" && ! -L "$target" ]] && return 0
+    
+    local backup_dir="$HOME/.config/backups"
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local backup_path="$backup_dir/${backup_name}.backup.${timestamp}"
+    
+    mkdir -p "$backup_dir"
+    
+    # Determine what to backup
+    local source_to_backup="$target"
+    local backup_type="file/directory"
+    
+    if [[ -L "$target" ]]; then
+        # For symlinks, backup the target if it exists and isn't our dotfile
+        local link_target=$(readlink -f "$target" 2>/dev/null)
+        if [[ -n "$link_target" && -e "$link_target" && "$link_target" != "$DOTFILES_DIR"/* ]]; then
+            source_to_backup="$link_target"
+            backup_type="symlink target"
+        else
+            # Symlink points to dotfiles or nowhere, no backup needed
+            log_info "Skipping backup of symlink (points to dotfiles or broken)"
+            return 0
+        fi
     fi
+    
+    # Perform the backup
+    cp -a "$source_to_backup" "$backup_path"
+    log_success "Backed up $backup_type to $backup_path"
 }
 
-# Function to create symlink
-create_symlink() {
+# Create or update symlink (handles all cases)
+install_symlink() {
     local source="$1"
     local target="$2"
     local name="$3"
     
-    if [[ -e "$target" || -L "$target" ]]; then
-        backup_config "$target" "$name"
-    fi
+    # Backup if needed
+    backup_if_needed "$target" "$name"
     
-    # Create parent directory if it doesn't exist
+    # Create parent directory if needed
     mkdir -p "$(dirname "$target")"
     
-    # Create symlink
-    ln -sf "$source" "$target"
-    log_success "Created symlink: $target -> $source"
+    # Create/update symlink (ln -sf handles everything!)
+    ln -sfn "$source" "$target"
+    log_success "Installed symlink: $target -> $source"
 }
 
 # Install shell configuration
 log_info "Installing shell configuration..."
 if [[ -f "$DOTFILES_DIR/.zshrc" ]]; then
-    create_symlink "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
+    install_symlink "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc" ".zshrc"
 fi
 
 if [[ -f "$DOTFILES_DIR/.gitignore_global" ]]; then
-    create_symlink "$DOTFILES_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
+    install_symlink "$DOTFILES_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
 fi
 
 if [[ -d "$DOTFILES_DIR/.claude" ]]; then
@@ -111,7 +131,7 @@ if [[ -d "$DOTFILES_DIR/.claude" ]]; then
     for claude_file in "$DOTFILES_DIR/.claude"/*; do
         if [[ -f "$claude_file" ]]; then
             file_name=$(basename "$claude_file")
-            create_symlink "$claude_file" "$HOME/.claude/$file_name" ".claude/$file_name"
+            install_symlink "$claude_file" "$HOME/.claude/$file_name" ".claude/$file_name"
         fi
     done
 fi
@@ -126,7 +146,7 @@ if [[ -d "$DOTFILES_DIR/.config" ]]; then
     for config_dir in "$DOTFILES_DIR/.config"/*; do
         if [[ -d "$config_dir" ]]; then
             dir_name=$(basename "$config_dir")
-            create_symlink "$config_dir" "$HOME/.config/$dir_name" "$dir_name"
+            install_symlink "$config_dir" "$HOME/.config/$dir_name" "$dir_name"
         fi
     done
     
