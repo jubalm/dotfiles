@@ -103,6 +103,19 @@ if [[ -f "$DOTFILES_DIR/.gitignore_global" ]]; then
     create_symlink "$DOTFILES_DIR/.gitignore_global" "$HOME/.gitignore_global" ".gitignore_global"
 fi
 
+if [[ -d "$DOTFILES_DIR/.claude" ]]; then
+    # Create .claude directory if it doesn't exist
+    mkdir -p "$HOME/.claude"
+    
+    # Symlink each file in .claude (not the directory itself)
+    for claude_file in "$DOTFILES_DIR/.claude"/*; do
+        if [[ -f "$claude_file" ]]; then
+            file_name=$(basename "$claude_file")
+            create_symlink "$claude_file" "$HOME/.claude/$file_name" ".claude/$file_name"
+        fi
+    done
+fi
+
 # Install .config directory structure (mirrors repo structure)
 log_info "Installing .config directory structure..."
 if [[ -d "$DOTFILES_DIR/.config" ]]; then
