@@ -10,6 +10,7 @@ This repository contains my personal development environment setup, featuring a 
 - **Minimal but functional zsh**: Stripped down configuration with essential completions and fast startup
 - **Custom git-aware prompt**: Clean, minimal design showing branch status and changes
 - **Modern Neovim with LSP**: Full development environment with code completion and formatting
+- **Tmux with which-key**: Terminal multiplexer with visual key guide menus for easy learning
 - **Portable organization**: XDG-compliant structure that's easy to understand and modify
 
 ## Install
@@ -41,6 +42,23 @@ The installer handles everything: Homebrew setup, tool installation, config syml
 - **File Navigation**: `<leader>p` (files), `<leader>sg` (grep)
 - **LSP**: `gd` (definition), `gr` (references), `K` (hover)
 - **Git**: `<leader>gf` (git files), `<leader>gp/gn` (hunk navigation)
+
+## Tmux Features
+
+### Session Management
+- **Which-key Interface**: Press `Ctrl+b ?` for visual command menu
+- **Vi-mode Navigation**: Use `hjkl` for pane navigation
+- **Intuitive Splits**: `|` for vertical, `-` for horizontal splits
+- **Mouse Support**: Click to select panes and scroll through history
+
+### Key Bindings
+- **Prefix**: `Ctrl+b` (default, two-handed but ergonomic)
+- **Help Menu**: `Ctrl+b ?` - Visual which-key style menu
+- **Quick Pane Menu**: `Ctrl+b P` - Fast pane operations
+- **Split Panes**: `Ctrl+b |` (vertical), `Ctrl+b -` (horizontal)
+- **Navigate Panes**: `Ctrl+b h/j/k/l` (vim-style)
+- **Copy Mode**: `Ctrl+b v` (vi-style with system clipboard)
+- **Reload Config**: `Ctrl+b r`
 
 ## Terminal Setup
 
@@ -75,6 +93,8 @@ dotfiles/
 │   │   │       ├── navigation.lua # Telescope fuzzy finder
 │   │   │       └── ui.lua         # Status line, UI elements
 │   │   └── colors/           # Custom colorscheme
+│   ├── tmux/                  # Tmux configuration
+│   │   └── tmux.conf         # Main tmux config with which-key menus
 │   └── zsh/                  # Shell enhancements
 │       ├── completions/      # Custom completions (AWS, kubectl, etc.)
 │       ├── prompt/           # Git prompt configuration

@@ -17,6 +17,8 @@ This is a personal dotfiles repository containing a clean Neovim configuration, 
 
 **XDG Structure (mirrors `~/.config/`):**
 - `.config/nvim/` → `~/.config/nvim/` - Complete Neovim configuration
+- `.config/tmux/` → `~/.config/tmux/` - Tmux terminal multiplexer configuration
+  - `tmux.conf` - Main configuration with which-key style visual menus
 - `.config/zsh/` → `~/.config/zsh/` - Organized shell enhancements
   - `platform.zsh` - Foundation layer (environment, Homebrew, PATH)
   - `runtime.zsh` - Shell behavior layer (vi mode, completion system)
@@ -76,6 +78,7 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 ### Essential Tools  
 - **git** + **lazygit**: Version control with terminal UI
 - **neovim**: Modern text editor with LSP integration
+- **tmux**: Terminal multiplexer with session management
 - **ripgrep** + **fd**: Fast search tools
 - **docker**: Containerization platform
 - **n**: Node.js version manager
@@ -91,6 +94,14 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 - `:Mason` - Open Mason LSP installer interface
 - `:LspInfo` - Show LSP server status for current buffer
 - `:Format` - Format current buffer (available in LSP-enabled buffers)
+
+### Tmux Management
+- `tmux` - Start new tmux session
+- `tmux new -s <name>` - Create named session
+- `tmux list-sessions` - Show all sessions
+- `tmux attach -t <name>` - Attach to session
+- `Ctrl+b ?` - Visual which-key menu (inside tmux)
+- `Ctrl+b d` - Detach from session
 
 ## Key Features and Patterns
 
@@ -123,6 +134,15 @@ return {
 - Diagnostics: `[d`/`]d` (navigate), `<leader>e` (float), `<leader>q` (quickfix)
 - Git hunks: `<leader>gp/gn` (navigate), `<leader>h` (preview)
 
+### Tmux Keymap Conventions
+- Prefix key: `Ctrl+b` (default, ergonomic two-handed)
+- Which-key menu: `Ctrl+b ?` (visual command guide)
+- Pane splits: `Ctrl+b |` (vertical), `Ctrl+b -` (horizontal)
+- Pane navigation: `Ctrl+b h/j/k/l` (vim-style)
+- Copy mode: `Ctrl+b v` (vi-style with system clipboard)
+- Session detach: `Ctrl+b d`
+- Config reload: `Ctrl+b r`
+
 ### Development Patterns
 - Use tabs (not spaces) with 4-character width by default
 - Global keymaps centralized in `keymap.lua`, plugin configs focus on setup
@@ -138,3 +158,6 @@ return {
 - Code folding enabled with nvim-ufo plugin
 - Auto-indentation detection with vim-sleuth and .editorconfig support
 - Shell completions organized in `~/.config/zsh/completions/` for cloud tools
+- Tmux follows XDG Base Directory specification (`~/.config/tmux/tmux.conf`)
+- Tmux which-key menus use native `display-menu` (no external plugins required)
+- Tmux configuration includes Nord-inspired color scheme matching Neovim theme

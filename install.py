@@ -124,6 +124,7 @@ class DotfilesInstaller:
             self._install_nodejs()
             self._install_claude()
             self._install_neovim()
+            self._install_tmux()
             
             self.logger.log("\n🚀 Dotfiles installation complete!")
             self.logger.log("   Configure your terminal to use 'Hack Nerd Font' for best experience")
@@ -349,6 +350,15 @@ class DotfilesInstaller:
                 self.logger.warning("Plugin installation failed, but continuing…")
         
         self.logger.success("Neovim configuration installed")
+    
+    def _install_tmux(self) -> None:
+        """Install tmux configuration"""
+        # Install tmux configuration
+        tmux_source = self.dotfiles_dir / ".config" / "tmux"
+        if tmux_source.exists():
+            self._install_symlink(tmux_source, self.home_dir / ".config" / "tmux", "tmux")
+        
+        self.logger.success("Tmux configuration installed")
 
 
 def main():
@@ -362,6 +372,7 @@ def main():
         print("  • Node.js")
         print("  • Claude")
         print("  • Neovim")
+        print("  • Tmux")
         return
     
     installer = DotfilesInstaller()
