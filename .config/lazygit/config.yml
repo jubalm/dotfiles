@@ -1,0 +1,59 @@
+gui:
+  theme:
+    # Nord-inspired theme matching terminal colors
+    activeBorderColor:
+      - '#81a1c1'  # Nord blue
+      - bold
+    inactiveBorderColor:
+      - '#4c566a'  # Nord dark gray
+    optionsTextColor:
+      - '#81a1c1'  # Nord blue
+    selectedLineBgColor:
+      - '#2e3440'  # Nord darkest gray - very subtle
+    selectedRangeBgColor:
+      - '#2e3440'  # Nord darkest gray
+    inactiveViewSelectedLineBgColor:
+      - '#434c5e'  # Nord medium gray
+    cherryPickedCommitBgColor:
+      - '#434c5e'  # Nord medium gray
+    cherryPickedCommitFgColor:
+      - '#88c0d0'  # Nord cyan
+    markedBaseCommitBgColor:
+      - '#5e81ac'  # Nord blue
+    markedBaseCommitFgColor:
+      - '#eceff4'  # Nord light
+    unstagedChangesColor:
+      - '#bf616a'  # Nord red
+    defaultFgColor:
+      - '#d8dee9'  # Nord light gray
+    searchingActiveBorderColor:
+      - '#ebcb8b'  # Nord yellow
+    
+    # Tone down bright colors
+    commitHashColor:
+      - '#81a1c1'  # Nord blue instead of bright green
+    branchColor:
+      - '#88c0d0'  # Nord cyan for branch names
+    remoteBranchColor:
+      - '#5e81ac'  # Nord darker blue for remote branches
+    tagColor:
+      - '#b48ead'  # Nord purple for tags
+  
+  # UI improvements
+  showFileTree: true
+  showRandomTip: false
+  mouseEvents: true
+  sidePanelWidth: 0.2
+  
+git:
+  paging:
+    colorArg: always
+    pager: delta --dark --paging=never
+  
+refresher:
+  refreshInterval: 10
+  fetchInterval: 60
+
+# Custom author colors using Nord palette
+authorColors:
+  'default': '#81a1c1'  # Nord blue for unknown authors

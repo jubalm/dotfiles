@@ -125,6 +125,7 @@ class DotfilesInstaller:
             self._install_claude()
             self._install_neovim()
             self._install_tmux()
+            self._install_lazygit()
             
             self.logger.log("\n🚀 Dotfiles installation complete!")
             self.logger.log("   Configure your terminal to use 'Hack Nerd Font' for best experience")
@@ -359,6 +360,15 @@ class DotfilesInstaller:
             self._install_symlink(tmux_source, self.home_dir / ".config" / "tmux", "tmux")
         
         self.logger.success("Tmux configuration installed")
+    
+    def _install_lazygit(self) -> None:
+        """Install lazygit configuration"""
+        # Install lazygit configuration
+        lazygit_source = self.dotfiles_dir / ".config" / "lazygit"
+        if lazygit_source.exists():
+            self._install_symlink(lazygit_source, self.home_dir / ".config" / "lazygit", "lazygit")
+        
+        self.logger.success("Lazygit configuration installed")
 
 
 def main():
@@ -373,6 +383,7 @@ def main():
         print("  • Claude")
         print("  • Neovim")
         print("  • Tmux")
+        print("  • Lazygit")
         return
     
     installer = DotfilesInstaller()

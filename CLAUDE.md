@@ -19,6 +19,8 @@ This is a personal dotfiles repository containing a clean Neovim configuration, 
 - `.config/nvim/` → `~/.config/nvim/` - Complete Neovim configuration
 - `.config/tmux/` → `~/.config/tmux/` - Tmux terminal multiplexer configuration
   - `tmux.conf` - Main configuration with which-key style visual menus
+- `.config/lazygit/` → `~/.config/lazygit/` - Lazygit git UI configuration
+  - `config.yml` - Nord-themed color scheme with better readability
 - `.config/zsh/` → `~/.config/zsh/` - Organized shell enhancements
   - `platform.zsh` - Foundation layer (environment, Homebrew, PATH)
   - `runtime.zsh` - Shell behavior layer (vi mode, completion system)
@@ -75,7 +77,7 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 - **Auto-suggestions**: Via Homebrew zsh-autosuggestions package
 - **Modular Organization**: Clear architectural layers with dependency flow
 
-### Essential Tools  
+### Essential Tools
 - **git** + **lazygit**: Version control with terminal UI
 - **neovim**: Modern text editor with LSP integration
 - **tmux**: Terminal multiplexer with session management

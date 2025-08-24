@@ -18,6 +18,9 @@ setopt NO_BEEP
 # ===[ Editor ]===
 export EDITOR='nvim'
 
+# ===[ XDG Base Directory ]===
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # ===[ Homebrew Environment ]===
 if [[ -f "/opt/homebrew/bin/brew" ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
