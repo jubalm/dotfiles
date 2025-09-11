@@ -82,7 +82,8 @@ dotfiles/
 ├── .zshrc                      # Shell configuration
 ├── .gitignore_global          # Global git ignore patterns
 ├── .claude/                   # Claude CLI configuration
-│   └── settings.json         # Model and tool settings
+│   ├── settings.json         # Model and tool settings
+│   └── mcp/                  # MCP server configurations
 ├── .config/                   # XDG Base Directory structure
 │   ├── nvim/                  # Complete Neovim configuration
 │   │   ├── init.lua          # Entry point

@@ -253,9 +253,15 @@ class DotfilesInstaller:
         original_cwd = os.getcwd()
         try:
             os.chdir(self.dotfiles_dir)
-            with self.logger.busy("Installing dependencies…"):
-                self._run_command(['brew', 'bundle', '--quiet'], quiet=True)
-            self.logger.success("Dependencies installed successfully")
+            try:
+                with self.logger.busy("Installing dependencies…"):
+                    self._run_command(['brew', 'bundle', '--quiet'], quiet=True)
+                self.logger.success("Dependencies installed successfully")
+            except RuntimeError:
+                # Some packages may fail (like Docker needing sudo)
+                # Continue with what we have
+                self.logger.warning("Some packages require manual installation")
+                self.logger.info("Run 'brew bundle' manually to see which packages need attention")
         finally:
             os.chdir(original_cwd)
     
@@ -316,6 +322,11 @@ class DotfilesInstaller:
                         claude_home / claude_file.name,
                         f".claude/{claude_file.name}"
                     )
+            
+            # Install .claude/mcp directory if it exists
+            mcp_source = claude_dir / "mcp"
+            if mcp_source.exists() and mcp_source.is_dir():
+                self._install_symlink(mcp_source, claude_home / "mcp", ".claude/mcp")
         
         # Install Claude CLI
         if not self._command_exists('claude'):

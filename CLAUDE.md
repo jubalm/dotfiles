@@ -16,6 +16,7 @@ This is a personal dotfiles repository containing a clean Neovim configuration, 
 - `README.md` - Setup and usage documentation
 - `.claude/` → `~/.claude/` - Claude CLI configuration directory
   - `settings.json` - Claude Code settings and model configuration
+  - `mcp/` - MCP (Model Context Protocol) server configurations
 - `misc/` - Miscellaneous files and themes
   - `theme.itermcolors` - iTerm2 color scheme matching Nord theme
 - `backups/` - Automatic backups created during installation
@@ -44,9 +45,11 @@ Run the installation script to set up the development environment:
 
 This will:
 - Install Homebrew (if not present)
-- Install all dependencies via Brewfile
+- Install all dependencies via Brewfile (packages requiring sudo will need manual installation)
 - Create 1:1 symlinks mirroring repo structure to home directory
 - Set up Neovim plugins automatically
+
+**Note**: Some packages (like Docker Desktop) require administrator privileges and will need to be installed manually. The installer will continue with other packages and provide guidance for manual steps.
 
 ## Neovim Configuration Architecture
 
@@ -81,6 +84,7 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 - **Smart Completions**: AWS CLI, kubectl, eksctl, deno completions
 - **Auto-suggestions**: Via Homebrew zsh-autosuggestions package
 - **Modular Organization**: Clear architectural layers with dependency flow
+- **Claude CLI Aliases**: `cld` (bypass permissions), `cldd` (development with MCP config)
 
 ### Essential Tools
 - **git** + **lazygit**: Version control with terminal UI
