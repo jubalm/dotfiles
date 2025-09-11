@@ -12,8 +12,13 @@ This is a personal dotfiles repository containing a clean Neovim configuration, 
 - `.zshrc` → `~/.zshrc` - Shell configuration with custom prompt and vi mode
 - `.gitignore_global` → `~/.gitignore_global` - Global git ignore patterns
 - `Brewfile` - Homebrew dependencies for macOS setup
-- `install.py` - Automated installation script with 1:1 structure mirroring
+- `install.py` - Python-based installation script with modern UX and backup functionality
 - `README.md` - Setup and usage documentation
+- `.claude/` → `~/.claude/` - Claude CLI configuration directory
+  - `settings.json` - Claude Code settings and model configuration
+- `misc/` - Miscellaneous files and themes
+  - `theme.itermcolors` - iTerm2 color scheme matching Nord theme
+- `backups/` - Automatic backups created during installation
 
 **XDG Structure (mirrors `~/.config/`):**
 - `.config/nvim/` → `~/.config/nvim/` - Complete Neovim configuration
@@ -50,7 +55,7 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
 - **Entry Point**: `init.lua` contains only 3 essential require statements: `user.editor`, `user.plugins`, `user.keymap`
 - **Plugin Manager**: Uses Lazy.nvim for plugin management with automatic installation
 - **Module Structure**: All configuration lives under `lua/user/` directory
-- **Plugin Setup**: Individual plugin configurations are organized in `lua/jubal/plugin_setup/` by category
+- **Plugin Setup**: Individual plugin configurations are organized in `lua/user/plugin_setup/` by category
 
 ### Key Directories
 - `lua/user/editor.lua` - Core editor settings, UI options, leader key configuration
@@ -60,7 +65,7 @@ The Neovim configuration in `nvim/` is built with Lua using a modular structure:
   - `editing.lua` - nvim-cmp, snippets, commenting, auto-tags, indentation
   - `insight.lua` - Treesitter, LSP, diagnostics, folding, visual aids, gitsigns
   - `navigation.lua` - Telescope configuration (keymaps in keymap.lua)
-  - `ui.lua` - Lualine status line and which-key hints
+  - `ui.lua` - Lualine status line, which-key hints, and render-markdown for enhanced markdown display
 
 ## Shell Configuration
 

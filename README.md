@@ -36,6 +36,7 @@ The installer handles everything: Homebrew setup, tool installation, config syml
 - **Fuzzy Finding**: Telescope for files, grep, git, and more
 - **Git Integration**: Gitsigns and Telescope git commands (uses lazygit for operations)
 - **Status Line**: Beautiful lualine with git and LSP information
+- **Markdown Rendering**: Enhanced markdown display with render-markdown plugin
 
 ### Key Bindings
 - **Leader Key**: `<space>`
@@ -80,6 +81,8 @@ nvim --headless -c "Lazy! sync" -c "qall"
 dotfiles/
 ├── .zshrc                      # Shell configuration
 ├── .gitignore_global          # Global git ignore patterns
+├── .claude/                   # Claude CLI configuration
+│   └── settings.json         # Model and tool settings
 ├── .config/                   # XDG Base Directory structure
 │   ├── nvim/                  # Complete Neovim configuration
 │   │   ├── init.lua          # Entry point
@@ -91,16 +94,25 @@ dotfiles/
 │   │   │       ├── editing.lua    # Completion, snippets, commenting
 │   │   │       ├── insight.lua    # LSP, Treesitter, diagnostics
 │   │   │       ├── navigation.lua # Telescope fuzzy finder
-│   │   │       └── ui.lua         # Status line, UI elements
+│   │   │       └── ui.lua         # Status line, UI, markdown rendering
 │   │   └── colors/           # Custom colorscheme
+│   ├── lazygit/              # Lazygit configuration
+│   │   └── config.yml        # Nord-themed color scheme
 │   ├── tmux/                  # Tmux configuration
 │   │   └── tmux.conf         # Main tmux config with which-key menus
-│   └── zsh/                  # Shell enhancements
+│   └── zsh/                  # Shell enhancements (4-layer architecture)
+│       ├── platform.zsh      # Foundation layer (Homebrew, PATH)
+│       ├── runtime.zsh       # Shell behavior (vi mode, completions)
+│       ├── interface.zsh     # User interaction (prompt, suggestions)
+│       ├── workflow.zsh      # Personal productivity (aliases, functions)
 │       ├── completions/      # Custom completions (AWS, kubectl, etc.)
 │       ├── prompt/           # Git prompt configuration
 │       └── functions/        # Custom shell functions
+├── misc/                      # Additional resources
+│   └── theme.itermcolors    # iTerm2 Nord theme
+├── backups/                  # Created during installation (your existing configs)
 ├── Brewfile                  # Homebrew dependencies
-├── install.py                # Automated installer
+├── install.py                # Python-based automated installer
 ├── CLAUDE.md                 # Development documentation
 └── README.md                 # This file
 ```

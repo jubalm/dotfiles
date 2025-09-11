@@ -5,7 +5,10 @@
     "allow": [
       "Bash(nvim:*)",
       "WebFetch(domain:docs.anthropic.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:etherscan.io)",
+      "WebFetch(domain:github.com)",
+      "mcp__playwright",
+      "mcp__context7"
     ],
     "deny": [],
     "ask": []
@@ -13,6 +16,6 @@
   "model": "opusplan",
   "statusLine": {
     "type": "command",
-    "command": "input=$(cat); echo \"\\033[36m$(echo \"$input\" | jq -r '.workspace.current_dir | split(\"/\") | last')\\033[0m \\033[90m→\\033[0m $(echo \"$input\" | jq -r '.model.display_name')\""
+    "command": "input=$(cat); current_dir=\"$(echo \"$input\" | jq -r '.workspace.current_dir')\"; model_name=\"$(echo \"$input\" | jq -r '.model.display_name')\"; cd \"$current_dir\" 2>/dev/null; git_info=\"\"; if git rev-parse --git-dir >/dev/null 2>&1; then branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); [[ \"$branch\" == \"HEAD\" ]] && branch=\"$(git rev-parse --short HEAD)...\"; git_status=$(git status --porcelain 2>/dev/null); [[ -n \"$git_status\" ]] && status_indicator=\" *\" || status_indicator=\"\"; git_info=\" $(printf '\\033[32m%s\\033[0m\\033[31m%s\\033[0m' \"$branch\" \"$status_indicator\")\"; fi; display_dir=\"${current_dir/#$HOME/~}\"; printf '\\033[36m%s\\033[0m%s\\n\\033[90m→\\033[0m %s\\n' \"$display_dir\" \"$git_info\" \"$model_name\""
   }
 }
