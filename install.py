@@ -327,6 +327,11 @@ class DotfilesInstaller:
             mcp_source = claude_dir / "mcp"
             if mcp_source.exists() and mcp_source.is_dir():
                 self._install_symlink(mcp_source, claude_home / "mcp", ".claude/mcp")
+
+            # Install .claude/commands directory if it exists
+            commands_source = claude_dir / "commands"
+            if commands_source.exists() and commands_source.is_dir():
+                self._install_symlink(commands_source, claude_home / "commands", ".claude/commands")
         
         # Install Claude CLI
         if not self._command_exists('claude'):
