@@ -25,6 +25,9 @@ source ~/.config/zsh/completions/deno.zsh
 # ionos CLI completions
 fpath+=(~/.config/ionosctl/completion/zsh)
 
+# Docker CLI completions
+fpath+=(~/.docker/completions)
+
 # ===[ Git Prompt Setup ]===
 source ~/.config/zsh/prompt/git_prompt.zsh
 
