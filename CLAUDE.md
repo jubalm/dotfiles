@@ -172,3 +172,4 @@ return {
 - Tmux follows XDG Base Directory specification (`~/.config/tmux/tmux.conf`)
 - Tmux which-key menus use native `display-menu` (no external plugins required)
 - Tmux configuration includes Nord-inspired color scheme matching Neovim theme
+- always use subagents whenever you can

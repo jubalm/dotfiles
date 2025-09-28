@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git log:*), Bash(git diff:*), Bash(git status:*), Bash(gh pr:*), Bash(gh pr status:*), Bash(gh pr edit:*)
+allowed-tools: Bash(git log:*), Bash(git diff:*), Bash(git status:*), Bash(gh pr:*), Bash(gh pr status:*), Bash(gh pr edit:*), Bash(gh pr view:*), Bash(gh auth:*), Bash(cat:*), Bash(echo:*), Bash(jq:*), Bash(rm:*), Write
 argument-hint: [pr-instructions]
 description: Create conventional PR title and description with automated branch analysis
 ---
@@ -27,6 +27,10 @@ Create conventional PR title and description using automated analysis of branch 
 - **Description Quality**: Generate comprehensive descriptions with Summary, Test Plan, and Breaking Changes sections when appropriate
 - **Issue Linking**: Include issue references ("Closes #123") when mentioned in instructions or detected in commit messages
 - **Content Focus**: Emphasize motivation and reasoning, not just code changes
+- **Environment Setup**: Set proper environment variables for GitHub CLI to prevent interactive mode issues
+- **Error Handling**: If `gh pr edit` fails with "not running interactively", use temporary files and retry with environment setup
+- **File Operations**: Use temporary files (`/tmp/pr_description.md`) for large PR descriptions to avoid shell escaping issues
+- **CLI Best Practices**: Use `--body-file` for complex descriptions instead of `--body` to avoid command line limits
 
 ## Workflow
 
@@ -41,10 +45,13 @@ Create conventional PR title and description using automated analysis of branch 
    - For new PRs: Generate conventional title and comprehensive description
    - For existing PRs: Generate updates based on new changes and user intent
 6. **Conditional Execution**: Execute appropriate operation based on intent:
-   - View operations: Display current/generated PR information and stop
-   - Update operations: Use `gh pr edit` to modify existing PR
-   - Create operations: Use `gh pr create` for new PR (with conflict handling)
-   - Preview operations: Show generated content without executing changes
+   - **Environment Setup**: Set `export GH_PAGER=""` to prevent interactive pager issues
+   - **File Preparation**: Create temporary files (`/tmp/pr_description.md`) for complex PR descriptions
+   - **View operations**: Display current/generated PR information and stop
+   - **Update operations**: Use `gh pr edit` with `--body-file` for large descriptions, retry with environment setup if fails
+   - **Create operations**: Use `gh pr create` for new PR (with conflict handling)
+   - **Preview operations**: Show generated content without executing changes
+   - **Error Recovery**: If `gh pr edit` fails with "not running interactively", verify environment and retry
 7. **Result Verification**: Confirm operation success and provide relevant URLs/status
 
 ## Reporting

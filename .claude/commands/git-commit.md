@@ -23,12 +23,13 @@ Create conventional git commit using automated analysis of current changes.
 - Never commit sensitive files (.env, keys, credentials) regardless of instructions
 - Use HEREDOC format for multi-line commit messages, never interactive git commands
 - If pre-commit hooks modify files, retry commit once to include automated changes
+- **NEVER** use `git add .` or `git add -A`. **ALWAYS** stage files as a batch with `git add <file1> <file2> ...`
 
 ## Workflow
 
-1. Run `git status`, `git diff --staged`, `git diff`, and `git log --oneline -10` to gather repository state
-2. Analyze `EXTRA_INSTRUCTIONS` for file selection strategy and workflow modification intent
-3. Execute `git add` commands to stage selected files
+1. Analyze `EXTRA_INSTRUCTIONS` for file selection strategy and workflow modification intent
+2. Run only necessary git commands to get repository state based on intent from step 1
+3. Stage files based intent from step 1
 4. Generate conventional commit message from staged changes
 5. **Conditional execution based on workflow intent**:
    - If message-only intent ("just show message", "what would the message be?"): Display message and stop
