@@ -50,3 +50,9 @@ export PATH=$HOME/.local/bin:$PATH
 
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
+
+# ===[ Docker Desktop CLI ]===
+# Add Docker Desktop CLI tools to PATH if available
+if [[ -d "/Applications/Docker.app/Contents/Resources/bin" ]]; then
+  export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
+fi
