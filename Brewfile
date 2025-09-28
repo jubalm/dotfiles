@@ -30,7 +30,7 @@ brew "bun"			# Fast JavaScript runtime and package manager
 
 # ===[ Cloud & Infrastructure ]===
 
-cask "docker"			# Containerization platform
+cask "docker-desktop"		# Containerization platform (Docker Desktop)
 brew "kubectl"			# Kubernetes command line tool
 brew "eksctl"			# EKS cluster management tool
 # brew "awscli"			# AWS command line interface

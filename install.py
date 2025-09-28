@@ -245,26 +245,26 @@ class DotfilesInstaller:
         """Install dependencies from Brewfile"""
         self.logger.info("Installing dependencies from Brewfile…")
         brewfile = self.dotfiles_dir / "Brewfile"
-        
+
         if not brewfile.exists():
             raise FileNotFoundError("Brewfile not found!")
-        
+
         # Change to dotfiles directory and run brew bundle
         original_cwd = os.getcwd()
         try:
             os.chdir(self.dotfiles_dir)
             try:
-                with self.logger.busy("Installing dependencies…"):
-                    self._run_command(['brew', 'bundle', '--quiet'], quiet=True)
+                # Run brew bundle without quiet flag to show actual progress and errors
+                self._run_command(['brew', 'bundle'], check=True)
                 self.logger.success("Dependencies installed successfully")
-            except RuntimeError:
-                # Some packages may fail (like Docker needing sudo)
-                # Continue with what we have
-                self.logger.warning("Some packages require manual installation")
-                self.logger.info("Run 'brew bundle' manually to see which packages need attention")
+            except RuntimeError as e:
+                self.logger.error("Some packages failed to install")
+                self.logger.info("Run 'brew bundle' manually to see detailed error messages")
+                self.logger.info("You can also run 'brew bundle --verbose' for more information")
+                # Don't re-raise - continue with other installation steps
         finally:
             os.chdir(original_cwd)
-    
+
     def _install_zsh(self) -> None:
         """Install ZSH configuration"""
         # Install .zshrc
