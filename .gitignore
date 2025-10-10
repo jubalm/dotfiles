@@ -1,2 +1,5 @@
 # Backups created by install script
 backups/
+
+# Claude Code
+.claude/settings.local.json

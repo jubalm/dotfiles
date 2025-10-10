@@ -13,9 +13,9 @@
     "deny": [],
     "ask": []
   },
-  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
-  }
+  },
+  "alwaysThinkingEnabled": true
 }

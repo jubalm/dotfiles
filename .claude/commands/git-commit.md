@@ -13,8 +13,9 @@ Create conventional git commit using automated analysis of current changes.
 - **EXTRA_INSTRUCTIONS**: `$ARGUMENTS` or "include all relevant changes" (default)
    - Contains natural language instructions for both file selection and workflow behavior modification
 
-## Instructions
+## Guidelines
 
+- Command to get context: `git status -s && echo "---" && git log -5 --oneline --no-decorate && echo "---" && git diff --staged && echo "---" && git diff`
 - Parse natural language in `EXTRA_INSTRUCTIONS` for both file selection and workflow modification intent
 - File selection patterns: exclusions ("do not include"), inclusions ("only"), semantic filters ("bug fixes only")
 - Workflow modification intent: "just show message", "don't commit yet", "let me review", "what would be committed?"
@@ -28,7 +29,7 @@ Create conventional git commit using automated analysis of current changes.
 ## Workflow
 
 1. Analyze `EXTRA_INSTRUCTIONS` for file selection strategy and workflow modification intent
-2. Run only necessary git commands to get repository state based on intent from step 1
+2. Get up-to-date repository context
 3. Stage files based intent from step 1
 4. Generate conventional commit message from staged changes
 5. **Conditional execution based on workflow intent**:

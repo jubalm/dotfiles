@@ -37,7 +37,7 @@ return {
 				modules = {},
 				sync_install = false,
 				ignore_install = {},
-				ensure_installed = { "css", "javascript", "typescript", "tsx", "json", "html", "bash", "lua", "markdown", "markdown_inline" },
+				ensure_installed = { "css", "javascript", "typescript", "tsx", "json", "html", "bash", "lua", "markdown", "markdown_inline", "dockerfile" },
 				auto_install = true,
 				highlight = {
 					enable = true,
