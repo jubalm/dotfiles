@@ -1,290 +1,267 @@
 ---
 name: Authoring Agent Skills
-description: Create Agent Skills that package domain expertise into reusable capabilities Claude can discover and use automatically. Use when building custom Skills, organizing domain knowledge, or structuring specialized procedures for Claude.
+description: Create a Skill that Claude discovers and uses automatically. Use when building custom Skills, packaging domain expertise, or creating reusable procedures.
 ---
 
 # Authoring Agent Skills
 
-**Focused capability:** Write Skills that Claude discovers and uses when relevant to requests.
-
-Agent Skills are modular capabilities that extend Claude's functionality. Each Skill packages instructions, metadata, and optional resources (scripts, templates) that Claude uses automatically when relevant. Unlike prompts (conversation-level instructions), Skills load on-demand and eliminate repetition across conversations.
+Create Skills that Claude discovers and uses when relevant.
 
 ---
 
-## How Agent Skills Work
+## What Is a Skill?
 
-### Three-Level Progressive Disclosure
+Modular capability: procedure + metadata + optional resources.
 
-Skills use a filesystem-based architecture with three loading levels:
-
-**Level 1: Metadata (Always loaded at startup)**
-- YAML frontmatter: `name` and `description`
-- Loaded automatically with system prompt
-- ~100 tokens per Skill
-- Enables Claude to know what Skills exist and when to use them
-
-**Level 2: Instructions (Loaded when Skill is triggered)**
-- Main body of SKILL.md
-- Loaded when user request matches Skill's description
-- Contains procedural knowledge, workflows, best practices, guidance
-- Claude reads via bash: `bash: read skill-name/SKILL.md`
-- Keep under 500 lines for optimal performance
-
-**Level 3: Resources (Loaded as needed)**
-- Additional files (reference.md, examples.md, templates)
-- Executable scripts in `scripts/` directory
-- Loaded only when referenced in instructions
-- Scripts are executed (output enters context, code does not)
-- No practical limit on bundled content since unused files don't consume tokens
-
-**Example**: User asks "Extract text from this PDF."
-1. Claude reads metadata: "PDF Processing - Extract text and tables from PDF files..."
-2. Matches user request, loads SKILL.md
-3. Sees reference to `ADVANCED.md` but doesn't need it
-4. Executes instructions from SKILL.md
+Claude loads in 3 levels:
+- **Metadata** (always): name + description
+- **Instructions** (when triggered): SKILL.md body
+- **Resources** (on-demand): files + scripts
 
 ---
 
-## Skill Structure
+## Create Your Skill: 5 Steps
 
-### Required File: SKILL.md
+### Step 1: Decide the Capability
 
-Every Skill requires a `SKILL.md` file with YAML frontmatter and markdown body:
+What do you explain repeatedly? That's your Skill.
+
+- NOT: "Helps with documents" ✗
+- YES: "Extract text from PDFs" ✓
+
+### Step 2: Create Directory
+
+```bash
+mkdir ~/.claude/skills/my-skill
+```
+
+### Step 3: Write SKILL.md Frontmatter
 
 ```yaml
 ---
-name: Skill Name (64 chars max)
-description: What it does + when to use (1024 chars max)
+name: PDF Text Extraction
+description: Extract text and tables from PDF files. Use when working with PDF files or when the user mentions PDFs, text extraction, or document parsing.
 ---
-
-# Skill Name
-
-[Markdown body with instructions]
 ```
 
-### YAML Frontmatter
+**Description rules:**
+- Specific capabilities + when to use
+- Third person ("Extracts...", not "I can extract")
+- Include words users actually say
 
-**`name`** (64 chars max)
-- Human-readable name for reference
-- Use gerund form: "Processing PDFs", "Analyzing spreadsheets"
-- Or noun phrase: "PDF Processing", "Spreadsheet Analysis"
-- Avoid: "Helper", "Utils", "Tools"
+### Step 4: Write the Procedure
 
-**`description`** (1024 chars max, CRITICAL for discovery)
-- What the Skill does (specific capabilities, not vague)
-- When to use it (triggers, contexts, key terms)
-- Written in third person (for system prompt injection)
-- Claude uses this to select from 100+ potential Skills
-
-**Good descriptions:**
-```yaml
-description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
-```
-
-```yaml
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when analyzing Excel files, spreadsheets, tabular data, or .xlsx files.
-```
-
-**Bad descriptions:**
-```yaml
-description: Helps with documents
-description: Processes data
-description: Does stuff with files
-```
-
-### SKILL.md Body
-
-Keep under 500 lines. Structure:
-
-1. **What it does** - Specific capability (1-2 sentences)
-2. **Quick start** - Minimal working example
-3. **Core workflows** - 1-3 main procedures
-4. **Advanced features** - Links to additional files if needed
-
-**Minimal example:**
+Keep body under 500 lines. Structure:
 
 ```markdown
-# PDF Processing
+# PDF Text Extraction
 
 ## What it does
-Extracts text and tables from PDFs using pdfplumber.
+Extracts text from PDFs using pdfplumber.
 
-## Quick start
+## How to use
 
 ```python
 import pdfplumber
 
 with pdfplumber.open("file.pdf") as pdf:
+    # Extract text from first page
     text = pdf.pages[0].extract_text()
+
+    # Extract all text
+    full_text = ""
+    for page in pdf.pages:
+        full_text += page.extract_text()
 ```
 
-## Extracting tables
-[Instructions...]
+## Extract tables
 
-## Advanced features
-- Form filling: See [FORMS.md](FORMS.md)
-- API reference: See [REFERENCE.md](REFERENCE.md)
+```python
+with pdfplumber.open("file.pdf") as pdf:
+    tables = pdf.pages[0].extract_tables()
 ```
 
----
+## Advanced
 
-## Progressive Disclosure Patterns
-
-Structure Skills using one of three patterns:
-
-### Pattern 1: High-level guide with references
-
-```
-skill-name/
-├── SKILL.md (overview + quick start)
-├── ADVANCED.md (detailed workflows)
-└── REFERENCE.md (API documentation)
+For complex workflows: See [ADVANCED.md](ADVANCED.md)
 ```
 
-SKILL.md contains high-level guidance. References to other files load only when needed.
+### Step 5: Test Discovery
 
-### Pattern 2: Domain-specific organization
-
-For multi-domain Skills, organize by domain to keep context focused:
+Does Claude load it?
 
 ```
-bigquery-skill/
-├── SKILL.md (overview and navigation)
-└── domains/
-    ├── finance.md (revenue, billing)
-    ├── sales.md (opportunities, pipeline)
-    └── product.md (API usage)
-```
-
-When user asks about sales, Claude loads only `sales.md`, not finance or product data.
-
-### Pattern 3: Conditional details
-
-Show basic content, link to advanced:
-
-```markdown
-# Word Processing
-
-## Creating documents
-
-Use docx-js. Basic usage:
-[Example]
-
-## Tracked changes
-
-See [TRACKED-CHANGES.md](TRACKED-CHANGES.md)
+"Extract text from this PDF"
+→ Claude loads your Skill ✓
 ```
 
 ---
 
-## Core Principles
+## File Organization
 
-### Concise is key
+**Minimal (start here):**
+```
+my-skill/
+└── SKILL.md
+```
 
-The context window is shared. Only add what Claude doesn't already know.
+**With details (SKILL.md > 400 lines):**
+```
+my-skill/
+├── SKILL.md (overview + quick examples)
+├── ADVANCED.md (complex workflows)
+└── REFERENCE.md (complete patterns)
+```
+
+**With scripts (error-prone operations):**
+```
+my-skill/
+├── SKILL.md
+└── scripts/
+    └── validate.py
+```
+
+Claude reads referenced files only when needed. Unused files = 0 tokens.
+
+---
+
+## Writing Rules
+
+### Concise
+
+Assume Claude is smart. Only add what Claude doesn't know.
 
 **Good (50 tokens):**
 ```markdown
-## Extract text
-
 Use pdfplumber:
+
 ```python
 import pdfplumber
-with pdfplumber.open("file.pdf") as pdf:
-    text = pdf.pages[0].extract_text()
+pdf = pdfplumber.open("file.pdf")
+text = pdf.pages[0].extract_text()
 ```
 ```
 
 **Bad (150+ tokens):**
 ```markdown
-## Extract text
-
-PDF files are a common format. To extract text, you need a library.
-Many libraries exist, but pdfplumber is recommended because...
-First, install it using pip. Then you can use...
+PDF files are documents. You need a library to read them.
+Many libraries exist. We recommend pdfplumber because it's easy
+to use and handles most cases well...
 ```
 
-Default assumption: Claude is already very smart.
+### Degrees of Freedom
 
-### Set appropriate degrees of freedom
+Match specificity to fragility:
 
-Match specificity to task fragility:
+**High freedom** (multiple approaches OK)
+- "Analyze code for bugs, style, and performance"
 
-**High freedom** (multiple valid approaches)
-- Use heuristics, text-based guidance
-- Example: "1. Analyze code structure 2. Check for bugs 3. Suggest improvements"
+**Low freedom** (exact steps required)
+- "Run this script: `python migrate.py --verify --backup`"
 
-**Medium freedom** (preferred pattern with variation)
-- Use templates with parameters
-- Example: Code template that Claude can customize
+### Test with All Models
 
-**Low freedom** (specific sequence required)
-- Fragile or error-prone operations
-- Example: "Run exactly this script: `python migrate.py --verify --backup`"
-
-### Test with all models
-
-Skills effectiveness depends on the underlying model:
-
-- **Claude Haiku** (fast): Does the Skill provide enough guidance?
-- **Claude Sonnet** (balanced): Is it clear and efficient?
-- **Claude Opus** (powerful): Does it avoid over-explaining?
-
-Test with all models you plan to use.
+- **Haiku**: Enough guidance?
+- **Sonnet**: Clear and efficient?
+- **Opus**: Avoid over-explaining?
 
 ---
 
-## Skill Resources
+## Examples
 
-### Optional: Bundled scripts
+### Simple Skill
 
-Include pre-made scripts for deterministic operations:
+```yaml
+---
+name: Git Commit Messages
+description: Generate semantic commit messages from git diffs. Use when making commits or writing conventional commit messages.
+---
+
+# Git Commit Messages
+
+## Structure
+- `feat(scope): description` - New feature
+- `fix(scope): description` - Bug fix
+- `docs: description` - Documentation
+
+## Example
+
+Analyze staged changes:
+```bash
+git diff --staged
+```
+
+Suggest: `feat(auth): add oauth login`
+
+## Details
+
+See [COMMITS.md](COMMITS.md) for complex commits.
+```
+
+### Multi-Domain Skill
 
 ```
-skill-name/
-└── scripts/
-    ├── validate.py
-    ├── extract.py
-    └── process.sh
+analytics-skill/
+├── SKILL.md (navigation)
+└── domains/
+    ├── sales.md (pipeline, revenue)
+    ├── finance.md (billing, ARR)
+    └── product.md (usage, features)
 ```
 
-Scripts are **executed** (not loaded into context). Only output enters context, making scripts efficient for error-prone or complex operations.
+SKILL.md:
+```markdown
+---
+name: Analytics Data Query
+description: Query analytics data for sales, finance, or product metrics. Use when asking about pipeline, revenue, billing, API usage, or feature adoption.
+---
 
-### Optional: Additional files
+# Analytics Data Query
 
-Organize detailed content in separate files:
+## Available domains
 
-- `REFERENCE.md` - API documentation, complete patterns
-- `EXAMPLES.md` - Usage examples, templates
-- `ADVANCED.md` - Complex workflows, edge cases
+**Sales**: Pipeline and revenue → See [domains/sales.md](domains/sales.md)
+**Finance**: Billing and ARR → See [domains/finance.md](domains/finance.md)
+**Product**: Usage and features → See [domains/product.md](domains/product.md)
 
-Claude loads these only when referenced. No token penalty for unused files.
+## Search
+
+```bash
+grep -r "revenue" domains/finance.md
+grep -r "pipeline" domains/sales.md
+```
+```
 
 ---
 
-## Quick Start: Create Your First Skill
+## What NOT to Do
 
-1. **Choose a capability** - Something you explain repeatedly
-2. **Create directory**: `my-skill/`
-3. **Write SKILL.md** with:
-   - YAML frontmatter (name + specific description)
-   - What it does (1-2 sentences)
-   - Quick start (minimal working example)
-   - Link to advanced files if needed
-4. **Test discovery**:
-   - Does your description match what users would ask?
-   - Does Claude load it when relevant?
-5. **Add advanced files** only if SKILL.md approaches 500 lines
+❌ Explain how Skills work (that's documentation)
+❌ Include framework tutorials or library docs
+❌ Make it longer than 500 lines for SKILL.md
+❌ Nest references: SKILL.md → advanced.md → details.md
+❌ Use vague descriptions: "Helps with documents"
+❌ Use first person: "I can extract PDFs"
+
+---
+
+## Verify Before Using
+
+- [ ] Description specific + includes key terms?
+- [ ] SKILL.md under 500 lines?
+- [ ] Procedure is step-by-step, not theory?
+- [ ] Quick example works end-to-end?
+- [ ] Claude discovers it with your description?
+- [ ] Tested with Haiku + Sonnet?
 
 ---
 
 ## Next Steps
 
-For detailed patterns and principles:
-- See [reference.md](reference.md) for structure patterns and organization
-- See [best-practices.md](best-practices.md) for writing principles
-- See [official-agent-skills.md](official-agent-skills.md) for complete official architecture
+1. Create directory: `~/.claude/skills/your-skill/`
+2. Write SKILL.md with procedure (not explanation)
+3. Include 1-2 concrete examples
+4. Test discovery: does Claude find it?
+5. Add ADVANCED.md only if > 400 lines needed
 
-For examples and getting started:
-- See [Agent Skills Cookbook](https://github.com/anthropics/claude-cookbooks/tree/main/skills) for community examples
-- See [official Anthropic documentation](https://docs.anthropic.com) for API integration
+See [reference.md](reference.md) for patterns and organization details.
