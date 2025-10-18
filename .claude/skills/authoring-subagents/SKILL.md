@@ -84,7 +84,7 @@ Your workflow:
 
 ## Design Patterns
 
-Quick patterns for common agent types. See [reference.md](reference.md) for complete examples.
+Quick patterns for common agent types. See [full-guide.md](full-guide.md) for complete examples.
 
 | Pattern | Use Case | Tools |
 |---------|----------|-------|
@@ -128,8 +128,7 @@ Agent: "Understood. Refactoring Component B..."
 
 ## Detailed Guidance
 
-- [reference.md](reference.md) - Official Claude Code subagent documentation
-- [examples.md](examples.md) - Advanced patterns: curator workflow, domain-specific agents, error handling, safe modifications
+- [full-guide.md](full-guide.md) - Comprehensive guide: curator workflow, design patterns, error handling, safe modifications
 - [choosing-a-model.md](choosing-a-model.md) - How to choose the right model for your agent
 
 ---
@@ -144,4 +143,4 @@ Agent: "Understood. Refactoring Component B..."
 6. Test with sample requests
 7. Iterate based on usage
 
-See [reference.md](reference.md) for complete examples and error handling patterns.
+See [full-guide.md](full-guide.md) for complete examples and error handling patterns.
