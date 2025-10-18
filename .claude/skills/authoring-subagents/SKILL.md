@@ -27,7 +27,7 @@ Agents that modify state → Show reasoning → Ask approval → Execute
 name: agent-name                        # Unique identifier (lowercase, hyphens)
 description: When to use this agent     # Purpose and triggers
 tools: Read, Write, Edit                # Comma-separated; omit to inherit all
-model: sonnet                           # See models-overview.md
+model: sonnet                           # See choosing-a-model.md
 ---
 ```
 
@@ -50,7 +50,7 @@ Your workflow:
 
 ### Model Selection
 
-See [models-overview.md](models-overview.md) for details. Quick reference:
+See [choosing-a-model.md](choosing-a-model.md) for details. Quick reference:
 - **Haiku**: Fast, simple tasks, low cost
 - **Sonnet**: Balanced (recommended default)
 - **Opus**: Complex reasoning, specialized tasks
@@ -130,7 +130,7 @@ Agent: "Understood. Refactoring Component B..."
 
 - [reference.md](reference.md) - Official Claude Code subagent documentation
 - [examples.md](examples.md) - Advanced patterns: curator workflow, domain-specific agents, error handling, safe modifications
-- [models-overview.md](models-overview.md) - Model selection and capabilities
+- [choosing-a-model.md](choosing-a-model.md) - How to choose the right model for your agent
 
 ---
 
