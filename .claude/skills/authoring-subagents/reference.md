@@ -1,512 +1,380 @@
-# Authoring Subagents: Advanced Patterns & Reference
+# Subagents
 
-Detailed patterns, curator architectures, and domain-specific agent design.
+> Create and use specialized AI subagents in Claude Code for task-specific workflows and improved context management.
 
+Custom subagents in Claude Code are specialized AI assistants that can be invoked to handle specific types of tasks. They enable more efficient problem-solving by providing task-specific configurations with customized system prompts, tools and a separate context window.
+
+## What are subagents?
+
+Subagents are pre-configured AI personalities that Claude Code can delegate tasks to. Each subagent:
+
+* Has a specific purpose and expertise area
+* Uses its own context window separate from the main conversation
+* Can be configured with specific tools it's allowed to use
+* Includes a custom system prompt that guides its behavior
+
+When Claude Code encounters a task that matches a subagent's expertise, it can delegate that task to the specialized subagent, which works independently and returns results.
+
+## Key benefits
+
+<CardGroup cols={2}>
+  <Card title="Context preservation" icon="layer-group">
+    Each subagent operates in its own context, preventing pollution of the main conversation and keeping it focused on high-level objectives.
+  </Card>
+
+  <Card title="Specialized expertise" icon="brain">
+    Subagents can be fine-tuned with detailed instructions for specific domains, leading to higher success rates on designated tasks.
+  </Card>
+
+  <Card title="Reusability" icon="rotate">
+    Once created, subagents can be used across different projects and shared with your team for consistent workflows.
+  </Card>
+
+  <Card title="Flexible permissions" icon="shield-check">
+    Each subagent can have different tool access levels, allowing you to limit powerful tools to specific subagent types.
+  </Card>
+</CardGroup>
+
+## Quick start
+
+To create your first subagent:
+
+<Steps>
+  <Step title="Open the subagents interface">
+    Run the following command:
+
+    ```
+    /agents
+    ```
+  </Step>
+
+  <Step title="Select 'Create New Agent'">
+    Choose whether to create a project-level or user-level subagent
+  </Step>
+
+  <Step title="Define the subagent">
+    * **Recommended**: Generate with Claude first, then customize to make it yours
+    * Describe your subagent in detail and when it should be used
+    * Select the tools you want to grant access to (or leave blank to inherit all tools)
+    * The interface shows all available tools, making selection easy
+    * If you're generating with Claude, you can also edit the system prompt in your own editor by pressing `e`
+  </Step>
+
+  <Step title="Save and use">
+    Your subagent is now available! Claude will use it automatically when appropriate, or you can invoke it explicitly:
+
+    ```
+    > Use the code-reviewer subagent to check my recent changes
+    ```
+  </Step>
+</Steps>
+
+## Subagent configuration
+
+### File locations
+
+Subagents are stored as Markdown files with YAML frontmatter in two possible locations:
+
+| Type                  | Location            | Scope                         | Priority |
+| :-------------------- | :------------------ | :---------------------------- | :------- |
+| **Project subagents** | `.claude/agents/`   | Available in current project  | Highest  |
+| **User subagents**    | `~/.claude/agents/` | Available across all projects | Lower    |
+
+When subagent names conflict, project-level subagents take precedence over user-level subagents.
+
+### Plugin agents
+
+[Plugins](/en/docs/claude-code/plugins) can provide custom subagents that integrate seamlessly with Claude Code. Plugin agents work identically to user-defined agents and appear in the `/agents` interface.
+
+**Plugin agent locations**: Plugins include agents in their `agents/` directory (or custom paths specified in the plugin manifest).
+
+**Using plugin agents**:
+
+* Plugin agents appear in `/agents` alongside your custom agents
+* Can be invoked explicitly: "Use the code-reviewer agent from the security-plugin"
+* Can be invoked automatically by Claude when appropriate
+* Can be managed (viewed, inspected) through `/agents` interface
+
+See the [plugin components reference](/en/docs/claude-code/plugins-reference#agents) for details on creating plugin agents.
+
+### CLI-based configuration
+
+You can also define subagents dynamically using the `--agents` CLI flag, which accepts a JSON object:
+
+```bash  theme={null}
+claude --agents '{
+  "code-reviewer": {
+    "description": "Expert code reviewer. Use proactively after code changes.",
+    "prompt": "You are a senior code reviewer. Focus on code quality, security, and best practices.",
+    "tools": ["Read", "Grep", "Glob", "Bash"],
+    "model": "sonnet"
+  }
+}'
+```
+
+**Priority**: CLI-defined subagents have lower priority than project-level subagents but higher priority than user-level subagents.
+
+**Use case**: This approach is useful for:
+
+* Quick testing of subagent configurations
+* Session-specific subagents that don't need to be saved
+* Automation scripts that need custom subagents
+* Sharing subagent definitions in documentation or scripts
+
+For detailed information about the JSON format and all available options, see the [CLI reference documentation](/en/docs/claude-code/cli-reference#agents-flag-format).
+
+### File format
+
+Each subagent is defined in a Markdown file with this structure:
+
+```markdown  theme={null}
+---
+name: your-sub-agent-name
+description: Description of when this subagent should be invoked
+tools: tool1, tool2, tool3  # Optional - inherits all tools if omitted
+model: sonnet  # Optional - specify model alias or 'inherit'
 ---
 
-## Curator Agent Architecture
+Your subagent's system prompt goes here. This can be multiple paragraphs
+and should clearly define the subagent's role, capabilities, and approach
+to solving problems.
 
-The curator agent is a complete example of a knowledge-organizing subagent.
-
-### Full Curator Agent Definition
-
-```yaml
----
-subagent_type: knowledge-curator
-description: Classify and organize project discoveries using Claude Code framework - Skills vs Memory, user/project scope, decision matrices. Maintains Memory systems. Use when organizing discoveries, promoting inbox items, auditing Memory, or bootstrapping new projects.
-tools: [Read, Write, Edit, Bash, Grep]
-model: claude-sonnet-4
----
-
-## Role
-
-You are a knowledge curator. Your responsibility is to organize project knowledge using the Claude Code framework for Skills (procedures) and Memory (facts).
-
-Your job:
-1. Read new discoveries or existing Memory content
-2. Classify using decision frameworks
-3. Propose organization changes with reasoning
-4. Ask for approval before writing
-5. Validate changes by reading back
-6. Report what was organized and where
-
-You maintain three responsibilities:
-- Bootstrap: Create Memory systems for new projects
-- Promote: Move inbox discoveries to permanent Memory
-- Audit: Maintain Memory quality and freshness
-
-## When you are invoked
-
-- User: "Organize these discoveries"
-- User: "Bootstrap Memory for [project]"
-- User: "Promote inbox items"
-- User: "Audit and refresh Memory"
-- System: Scheduled Memory maintenance
-
-## Your workflow
-
-### Phase 1: Load Framework
-
-1. Use `authoring-agent-skills` skill to understand Skill authoring
-2. Use `authoring-memory` skill to understand Memory organization
-3. Load decision matrices and classification framework
-4. Be ready to explain classification decisions
-
-### Phase 2: Read & Classify
-
-1. Read discoveries or inbox items provided by user
-2. Apply decision matrices:
-   - Is this a Skill (procedure) or Memory (fact)?
-   - If Skill: User-level or project-level?
-   - Decision matrix score: Will Claude miss? Project-specific? Prevent bugs? Save time? Stable?
-3. For each item, create classification:
-   ```
-   [Discovery]
-   → [Type: Skill | Memory]
-   → [Scope: User-level | Project-level | N/A]
-   → [Location: file.md | Skills/]
-   → [Reasoning: 3-4 sentence justification]
-   ```
-
-### Phase 3: Propose & Ask
-
-1. Show all classifications with reasoning
-2. Ask: "Should I organize these as proposed?"
-3. Wait for confirmation or corrections
-
-### Phase 4: Execute
-
-1. For each approved item:
-   - If new file: Create with content
-   - If existing file: Edit to add item semantically
-2. After each write: Read file to validate correctness
-3. Ensure consistent formatting and density
-
-### Phase 5: Report
-
-1. Summary: "Organized X discoveries into Y files"
-2. Changes made:
-   ```
-   ✓ Created/Updated file.md with [item]
-   ✓ Updated CLAUDE.md routing hints
-   ```
-3. Recommendations: "Suggest promoting 2 more inbox items next week"
-
-## Important: Negotiability
-
-During Phase 3, if user suggests changes:
-- Accept corrections: "Got it, I'll move [item] to [new location]"
-- Ask clarifying questions if ambiguous
-- Adjust plan and continue (don't restart)
-- Keep approved items, revise disputed ones
-
-During Phase 4, if validation fails:
-- Show the error
-- Propose fix: "I'll correct the formatting issue"
-- Ask approval for fix
-- Re-execute
-
-Never force decisions. Always show reasoning and wait for approval.
+Include specific instructions, best practices, and any constraints
+the subagent should follow.
 ```
 
-### Curator Workflow Visualization
+#### Configuration fields
+
+| Field         | Required | Description                                                                                                                                                                                                                      |
+| :------------ | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | Yes      | Unique identifier using lowercase letters and hyphens                                                                                                                                                                            |
+| `description` | Yes      | Natural language description of the subagent's purpose                                                                                                                                                                           |
+| `tools`       | No       | Comma-separated list of specific tools. If omitted, inherits all tools from the main thread                                                                                                                                      |
+| `model`       | No       | Model to use for this subagent. Can be a model alias (`sonnet`, `opus`, `haiku`) or `'inherit'` to use the main conversation's model. If omitted, defaults to the [configured subagent model](/en/docs/claude-code/model-config) |
+
+### Model selection
+
+The `model` field allows you to control which [AI model](/en/docs/claude-code/model-config) the subagent uses:
+
+* **Model alias**: Use one of the available aliases: `sonnet`, `opus`, or `haiku`
+* **`'inherit'`**: Use the same model as the main conversation (useful for consistency)
+* **Omitted**: If not specified, uses the default model configured for subagents (`sonnet`)
+
+<Note>
+  Using `'inherit'` is particularly useful when you want your subagents to adapt to the model choice of the main conversation, ensuring consistent capabilities and response style throughout your session.
+</Note>
+
+### Available tools
+
+Subagents can be granted access to any of Claude Code's internal tools. See the [tools documentation](/en/docs/claude-code/settings#tools-available-to-claude) for a complete list of available tools.
+
+<Tip>
+  **Recommended:** Use the `/agents` command to modify tool access - it provides an interactive interface that lists all available tools, including any connected MCP server tools, making it easier to select the ones you need.
+</Tip>
+
+You have two options for configuring tools:
+
+* **Omit the `tools` field** to inherit all tools from the main thread (default), including MCP tools
+* **Specify individual tools** as a comma-separated list for more granular control (can be edited manually or via `/agents`)
+
+**MCP Tools**: Subagents can access MCP tools from configured MCP servers. When the `tools` field is omitted, subagents inherit all MCP tools available to the main thread.
+
+## Managing subagents
+
+### Using the /agents command (Recommended)
+
+The `/agents` command provides a comprehensive interface for subagent management:
 
 ```
-User provides discoveries
-        ↓
-Curator loads frameworks (Skills, Memory)
-        ↓
-Curator classifies each discovery
-        ↓
-Curator proposes organization
-        ↓
-User approves / suggests changes
-        ↓
-Curator updates proposal
-        ↓
-Curator writes to Memory files
-        ↓
-Curator validates by reading back
-        ↓
-Curator reports results
+/agents
 ```
 
-### Example: Curator in Action
+This opens an interactive menu where you can:
 
-**User:** "I discovered 3 things today. Organize them."
+* View all available subagents (built-in, user, and project)
+* Create new subagents with guided setup
+* Edit existing custom subagents, including their tool access
+* Delete custom subagents
+* See which subagents are active when duplicates exist
+* **Easily manage tool permissions** with a complete list of available tools
 
-**Curator:**
-```
-Discovery 1: "PostgreSQL RLS policies enforce multi-tenant access control"
+### Direct file management
 
-Classification:
-- Type: Memory (fact about project architecture)
-- Scope: N/A (Memory always project-level)
-- Location: architecture.md → Security/Data Access section
-- Reasoning: This is a hard constraint that prevents bugs if violated.
-  Essential to document. Scores 5/5 on decision matrix.
+You can also manage subagents by working directly with their files:
 
-Discovery 2: "Always validate webhook signatures before processing"
-
-Classification:
-- Type: Memory (constraint/rule)
-- Scope: N/A
-- Location: security.md → Webhook Validation section
-- Reasoning: High stakes if wrong (security vulnerability). Project-specific implementation detail. 5/5 decision matrix.
-
-Discovery 3: "Custom pattern for handling form validation errors"
-
-Classification:
-- Type: Memory (pattern, could be Skill but project-specific)
-- Scope: N/A
-- Location: patterns.md → Form Handling section
-- Reasoning: Helps new developers understand error handling. Project-specific pattern. 4/5 decision matrix.
-
-All three recommended for Memory. Proceed with changes?
-```
-
-**User:** "Yes, but move Discovery 2 to architecture.md instead of separate file"
-
-**Curator:** "Understood. I'll add Discovery 2 to architecture.md → Constraints section. Proceeding with all changes..."
-
-[Curator writes to Memory files]
-[Curator validates each file]
-[Curator reports]
-
+```bash  theme={null}
+# Create a project subagent
+mkdir -p .claude/agents
+echo '---
+name: test-runner
+description: Use proactively to run tests and fix failures
 ---
 
-## Domain-Specific Agent Examples
+You are a test automation expert. When you see code changes, proactively run the appropriate tests. If tests fail, analyze the failures and fix them while preserving the original test intent.' > .claude/agents/test-runner.md
 
-### Code Reviewer Agent
-
-```yaml
----
-subagent_type: code-reviewer
-description: Review code for best practices, potential bugs, test coverage. Use when reviewing pull requests, checking code quality, or analyzing implementation.
-tools: [Read, Grep, Glob]
-model: claude-sonnet-4
----
-
-## Role
-
-You are a code reviewer. Your job is thorough code analysis without making changes.
-
-## Your workflow
-
-1. Read target files
-2. Analyze for: structure, errors, edge cases, best practices
-3. Search for related patterns (Grep)
-4. Identify issues and improvements
-5. Provide detailed feedback with reasoning
-6. Suggest but never implement fixes
-
-## Important
-
-- Read-only tools only (no Write/Edit)
-- Provide constructive feedback
-- Explain rationale for each suggestion
+# Create a user subagent
+mkdir -p ~/.claude/agents
+# ... create subagent file
 ```
 
-### Documentation Generator Agent
+## Using subagents effectively
 
-```yaml
----
-subagent_type: doc-generator
-description: Generate comprehensive documentation from code analysis. Use when creating API docs, setup guides, or architecture documentation.
-tools: [Read, Grep, Write, Bash]
-model: claude-sonnet-4
----
+### Automatic delegation
 
-## Role
+Claude Code proactively delegates tasks based on:
 
-You are a documentation specialist. Your job is extracting knowledge from code and generating clear documentation.
+* The task description in your request
+* The `description` field in subagent configurations
+* Current context and available tools
 
-## Your workflow
+<Tip>
+  To encourage more proactive subagent use, include phrases like "use PROACTIVELY" or "MUST BE USED" in your `description` field.
+</Tip>
 
-1. Analyze target code/system
-2. Extract key information
-3. Propose documentation structure
-4. Ask before writing
-5. Generate documentation files
-6. Validate completeness
+### Explicit invocation
+
+Request a specific subagent by mentioning it in your command:
+
+```
+> Use the test-runner subagent to fix failing tests
+> Have the code-reviewer subagent look at my recent changes
+> Ask the debugger subagent to investigate this error
 ```
 
-### Performance Optimizer Agent
+## Example subagents
 
-```yaml
+### Code reviewer
+
+```markdown  theme={null}
 ---
-subagent_type: performance-optimizer
-description: Analyze performance bottlenecks and suggest optimizations with measurements. Use when profiling code, identifying slow queries, or planning performance improvements.
-tools: [Read, Bash, Grep]
-model: claude-sonnet-4
+name: code-reviewer
+description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code.
+tools: Read, Grep, Glob, Bash
+model: inherit
 ---
 
-## Role
+You are a senior code reviewer ensuring high standards of code quality and security.
 
-You are a performance specialist. Your job is identifying and analyzing performance issues.
+When invoked:
+1. Run git diff to see recent changes
+2. Focus on modified files
+3. Begin review immediately
 
-## Your workflow
+Review checklist:
+- Code is simple and readable
+- Functions and variables are well-named
+- No duplicated code
+- Proper error handling
+- No exposed secrets or API keys
+- Input validation implemented
+- Good test coverage
+- Performance considerations addressed
 
-1. Profile the system (run benchmarks)
-2. Identify bottlenecks
-3. Propose optimizations with estimated impact
-4. Explain tradeoffs
-5. Ask for approval before applying changes
+Provide feedback organized by priority:
+- Critical issues (must fix)
+- Warnings (should fix)
+- Suggestions (consider improving)
+
+Include specific examples of how to fix issues.
 ```
 
+### Debugger
+
+```markdown  theme={null}
+---
+name: debugger
+description: Debugging specialist for errors, test failures, and unexpected behavior. Use proactively when encountering any issues.
+tools: Read, Edit, Bash, Grep, Glob
 ---
 
-## Error Handling in Agents
+You are an expert debugger specializing in root cause analysis.
 
-### File Modification Failures
+When invoked:
+1. Capture error message and stack trace
+2. Identify reproduction steps
+3. Isolate the failure location
+4. Implement minimal fix
+5. Verify solution works
 
-**Scenario:** Agent tries to edit a file and encounters an error
+Debugging process:
+- Analyze error messages and logs
+- Check recent code changes
+- Form and test hypotheses
+- Add strategic debug logging
+- Inspect variable states
 
-**Pattern:**
-1. Catch the error
-2. Show error to user: "Failed to edit file.md: [error details]"
-3. Propose fix: "I can work around this by [alternative approach]"
-4. Ask for approval
-5. Apply fix and validate
+For each issue, provide:
+- Root cause explanation
+- Evidence supporting the diagnosis
+- Specific code fix
+- Testing approach
+- Prevention recommendations
 
-**Example:**
-```
-Error: Cannot edit file - permission denied
-
-I'll check file permissions and suggest fixes:
-- Option A: Fix permissions (if I can)
-- Option B: Use sudo (if available)
-- Option C: Create in different location
-
-Which approach would you prefer?
-```
-
-### Ambiguous Classifications
-
-**Scenario:** Curator isn't sure if something is Skill or Memory
-
-**Pattern:**
-1. Show both options with reasoning
-2. Ask user for clarification
-3. Accept user's decision and apply
-4. Continue with confidence
-
-**Example:**
-```
-Discovery: "How to handle concurrent requests"
-
-Could be classified as:
-1. Memory (project-specific pattern) → patterns.md
-2. Skill (universal procedure) → universal skill
-
-I'm leaning toward Memory (project-specific), but could go either way.
-Which would you prefer?
+Focus on fixing the underlying issue, not just symptoms.
 ```
 
-### Validation Failures
+### Data scientist
 
-**Scenario:** Agent writes file but validation shows issues
-
-**Pattern:**
-1. Read written file
-2. Check against expected format
-3. If issues found: "Validation failed: [issue]"
-4. Propose correction
-5. Ask for approval
-6. Fix and re-validate
-
+```markdown  theme={null}
+---
+name: data-scientist
+description: Data analysis expert for SQL queries, BigQuery operations, and data insights. Use proactively for data analysis tasks and queries.
+tools: Bash, Read, Write
+model: sonnet
 ---
 
-## Token Efficiency in Agents
+You are a data scientist specializing in SQL and BigQuery analysis.
 
-### Separate Context Windows
+When invoked:
+1. Understand the data analysis requirement
+2. Write efficient SQL queries
+3. Use BigQuery command line tools (bq) when appropriate
+4. Analyze and summarize results
+5. Present findings clearly
 
-Each agent invocation gets its own context:
-- System prompt (small)
-- Agent definition (300-500 tokens)
-- Current task (user input)
-- Tools and skill metadata
-- **Skills loaded on-demand** (only when referenced)
+Key practices:
+- Write optimized SQL queries with proper filters
+- Use appropriate aggregations and joins
+- Include comments explaining complex logic
+- Format results for readability
+- Provide data-driven recommendations
 
-**Result:** Efficient, focused context per operation
+For each analysis:
+- Explain the query approach
+- Document any assumptions
+- Highlight key findings
+- Suggest next steps based on data
 
-### Progressive Disclosure in Agent Instructions
-
-Keep agent definition concise:
-
-```
-Bad (bloated):
-"Here is everything you need to know about Memory...
-[1000 lines of reference material]"
-
-Good (concise):
-"Use authoring-memory skill to understand Memory organization.
-Apply decision matrices when classifying."
-[Links to skills, details loaded on-demand]
+Always ensure queries are efficient and cost-effective.
 ```
 
-### Skill References
+## Best practices
 
-Agents can reference Skills for framework knowledge:
+* **Start with Claude-generated agents**: We highly recommend generating your initial subagent with Claude and then iterating on it to make it personally yours. This approach gives you the best results - a solid foundation that you can customize to your specific needs.
 
-```
-Your workflow:
-1. Use authoring-memory skill to load Memory principles
-2. Use authoring-agent-skills skill to understand Skill authoring
-3. Apply frameworks when classifying discoveries
-```
+* **Design focused subagents**: Create subagents with single, clear responsibilities rather than trying to make one subagent do everything. This improves performance and makes subagents more predictable.
 
-**Why:** Skills updated automatically → agent behavior updates without redeployment
+* **Write detailed prompts**: Include specific instructions, examples, and constraints in your system prompts. The more guidance you provide, the better the subagent will perform.
 
----
+* **Limit tool access**: Only grant tools that are necessary for the subagent's purpose. This improves security and helps the subagent focus on relevant actions.
 
-## Agent Development Workflow
+* **Version control**: Check project subagents into version control so your team can benefit from and improve them collaboratively.
 
-### 1. Start with Manual Process
+## Advanced usage
 
-Complete the task manually with Claude A (expert instance):
-- What information do you repeatedly provide?
-- What decisions does Claude make?
-- What could be automated?
+### Chaining subagents
 
-### 2. Identify Reusable Pattern
-
-Extract the procedure:
-- Input: What does the agent accept?
-- Process: What steps does it follow?
-- Output: What does it produce?
-- Decisions: What approval points exist?
-
-### 3. Design Agent Definition
-
-Write the agent definition with:
-- Clear role
-- Focused tools
-- Step-by-step workflow
-- Approval gates
-- Error handling
-
-### 4. Test with Claude B
-
-Test agent with representative scenarios:
-- Simple case (single step)
-- Complex case (multi-step with decisions)
-- Error case (something goes wrong)
-- User correction case (Claude accepts feedback)
-
-### 5. Iterate Based on Observation
-
-If agent struggles:
-- Add more explicit guidance
-- Simplify workflow steps
-- Improve approval point clarity
-- Add examples
-
-### 6. Deploy and Monitor
-
-Track actual usage:
-- Does it activate as expected?
-- How often does it need approval?
-- Are approval decisions reasonable?
-- Does user feedback suggest changes?
-
----
-
-## Safe Modification Patterns
-
-### Read-Validate-Write-Verify Pattern
-
-When an agent modifies files:
+For complex workflows, you can chain multiple subagents:
 
 ```
-1. Read current state
-   └─ Show user what's there
-
-2. Validate semantic correctness
-   └─ "Can I safely add this here?"
-
-3. Propose specific change
-   └─ "I'll add [text] to [location]"
-
-4. Wait for approval
-   └─ "Proceed?"
-
-5. Make the write
-   └─ Apply Edit tool
-
-6. Verify by reading back
-   └─ "✓ Confirmed: change applied correctly"
-
-7. Report
-   └─ "Successfully updated [file]"
+> First use the code-analyzer subagent to find performance issues, then use the optimizer subagent to fix them
 ```
 
-### Semantic Validation
+### Dynamic subagent selection
 
-Before writing, check:
-- ✓ File exists (or will create)
-- ✓ Location is semantically appropriate
-- ✓ Content follows existing patterns
-- ✓ No conflicts or duplicates
-- ✓ Formatting consistent
+Claude Code intelligently selects subagents based on context. Make your `description` fields specific and action-oriented for best results.
 
-### Rollback Capability
+## Performance considerations
 
-For critical agents, provide rollback:
-
-```
-Agent proposes: "I'll update auth.md"
-User: "Go ahead"
-Agent writes and validates
-Agent reports with before/after: "Here's what changed"
-User: "Oops, I didn't mean that"
-Agent: "I can revert to previous version"
-```
-
----
-
-## Agent Composition: Multiple Agents
-
-Agents can invoke other agents or work in sequence:
-
-```
-Bootstrap Workflow:
-└─ Context-Manager (main agent)
-   └─ Discovers and interviews
-   └─ Calls Curator (specialized)
-   └─ Curator organizes into Memory
-   └─ Context-Manager validates and reports
-```
-
-**Pattern:**
-1. Main agent handles orchestration
-2. Specialized agents handle domain tasks
-3. Each agent has focused responsibility
-4. Results flow between agents
-
----
-
-## Deployment Checklist
-
-Before deploying an agent:
-
-- [ ] Definition clear and complete?
-- [ ] Tools minimal and correct?
-- [ ] Workflow step-by-step?
-- [ ] Approval gates present?
-- [ ] Error handling included?
-- [ ] Negotiability supported?
-- [ ] Tested with 3+ scenarios?
-- [ ] User feedback incorporated?
-- [ ] Skills referenced (not duplicated)?
-
----
-
-## Next Steps
-
-1. Identify a task that would benefit from an agent
-2. Complete manually once to understand workflow
-3. Extract the procedure
-4. Write agent definition using patterns from this guide
-5. Test with representative requests
-6. Deploy and iterate
+* **Context efficiency**: Agents help preserve main context, enabling longer overall sessions
+* **Latency**: Subagents start off with a clean slate each time they are invoked and may add latency as they gather context that they require to do their job effectively.
