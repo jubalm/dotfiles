@@ -1,61 +1,22 @@
-# Skill Authoring Best Practices
+# Agent Skills: Best Practices
 
-Principles for writing Skills that Claude discovers and uses effectively in real workflows.
+Principles for writing Skills that Claude discovers and uses effectively.
 
----
-
-## #1 Priority: Discoverability
-
-A Skill only exists if Claude finds it. Everything else is secondary.
-
-### The Discovery Challenge
-
-Claude selects from 50+ built-in agents, 20+ user skills, and 10+ project skills. Your skill competes for attention based on a single field: **description**.
-
-**Description determines if your skill is discovered.**
-
-### Writing Discoverable Descriptions
-
-Structure: `What skill does + When to use + Key trigger words`
-
-**Bad (too generic):**
-```yaml
-description: Helps with data
-```
-
-**Good (specific, discoverable):**
-```yaml
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when working with Excel files, spreadsheets, or analyzing tabular data in .xlsx format.
-```
-
-**Ingredients:**
-- **Action verb** - Write, Generate, Create, Analyze (not "Helps with")
-- **Specific capability** - "Excel spreadsheets" not just "data"
-- **When to use** - Triggers and contexts that prompt user requests
-- **Key terms** - Words users actually mention
-
-### Test Discoverability
-
-Before publishing, manually test:
-```
-1. Invoke with description keywords → Works?
-2. Invoke with related phrasing → Works?
-3. Without invoking, does Claude use it? → Proactively invoked?
-```
-
-See [discovery-checklist.md](discovery-checklist.md) for complete testing guide.
+**Foundation:** See [SKILL.md](SKILL.md) for architecture and structure.
 
 ---
 
-## #2 Priority: Content Quality
+## Core Principles
 
-### Conciseness is Key
-
-**Default assumption:** Claude is already very smart.
+### 1. Concise is Key
 
 **Challenge every line:** Does Claude need this? Can Claude infer this?
 
-**Good example (concise, 50 tokens):**
+**Default assumption:** Claude is already very smart.
+
+The context window is shared. Only add what Claude doesn't already have.
+
+**Good (concise):**
 ```markdown
 ## Extract PDF text
 
@@ -67,229 +28,231 @@ with pdfplumber.open("file.pdf") as pdf:
 ```
 ```
 
-**Bad example (verbose, 150+ tokens):**
+**Bad (verbose):**
 ```markdown
 ## Extract PDF text
 
-PDF (Portable Document Format) files are a common file format containing text, images, and other content. To extract text, you'll need a library. Many libraries are available, but pdfplumber is recommended because it's easy to use and handles most cases well. First, install it...
+PDF files are a common format containing text and images. To extract text,
+you need a library. Many libraries exist, but pdfplumber is recommended
+because it's easy to use and handles most cases well. First, install it
+using pip. Then you can use...
 ```
 
-The concise version assumes Claude knows PDFs and libraries.
+The concise version assumes Claude knows what PDFs are and how libraries work.
 
-### Delta Principle: Only Non-Inferrable Knowledge
+### 2. Set Appropriate Degrees of Freedom
 
-**Ask:** Would Claude miss this by inspection or training?
+Match specificity to the task's fragility and variability.
 
-**Don't document:**
-- Framework patterns (React hooks, Django models)
-- Library behavior (Stripe API, Firebase)
-- Standard architectures (REST, MVC, CRUD)
-- Language features (loops, types, syntax)
-
-**Do document:**
-- Custom patterns unique to this skill
-- Non-obvious decisions (why X over Y?)
-- Hard constraints (performance limits, security rules)
-- Gotchas and edge cases
-- Project-specific configurations
-
-### Density Principles
-
-Maximize value per token:
-
-- **Code over prose** - Show the pattern, don't explain
-- **Bullets over paragraphs** - One idea per line
-- **Fragments over sentences** - Omit: the, a, an, is, are
-- **Symbols over words** - Use `✓` / `✗`, `→`, `:`
-
-**Example:**
-
-Before (27 words):
-> The reason we use the modular approach is because it makes maintenance easier and allows developers to understand one concern at a time.
-
-After (8 words):
-> Modular: ✓ easier maintenance, ✓ isolated concerns
-
----
-
-## #3 Priority: Appropriate Structure
-
-### SKILL.md is the Discovery Interface
-
-Keep it under 500 lines. Include:
-
-1. **What It Does** - 1-2 sentences
-2. **When to Use** - Specific triggers
-3. **Quick Reference** - Table, checklist, or type guide
-4. **Minimal Example** - Concrete, realistic scenario (30 seconds to understand)
-5. **Links** - To reference files for deeper content
-
-### Progressive Disclosure
-
-Structure for discovery + efficiency:
-
-```
-my-skill/
-├── SKILL.md (overview, quick reference)
-├── reference.md (detailed patterns)
-├── examples.md (complete workflows)
-└── scripts/ (utilities)
-```
-
-**Result:** Claude loads SKILL.md for discovery. Loads reference files only when needed.
-
-### One Level Deep References
-
-**Keep it simple:**
-```
-SKILL.md → reference.md
-        → examples.md
-        → workflows.md
-```
-
-**Never nest:**
-```
-SKILL.md → advanced.md → details.md  ✗
-```
-
-When Claude encounters nested references, it skips or reads incomplete content.
-
----
-
-## Principles by Task
-
-### Set Appropriate Freedom Levels
-
-Match specificity to task fragility:
-
-**High freedom (heuristic instructions):**
-- Multiple approaches valid
+**High freedom** (multiple approaches valid)
+- Use heuristics, text-based guidance
 - Decisions depend on context
 - Example: Code review process
 
-```markdown
-1. Analyze code structure
-2. Check for edge cases
-3. Suggest improvements
-```
-
-**Medium freedom (template + customization):**
-- Preferred pattern exists
+**Medium freedom** (preferred pattern with variation)
+- Use templates with parameters
 - Some variation acceptable
-- Example: Report generation
+- Configuration affects behavior
+- Example: Report generation with options
 
-```python
-def generate_report(data, format="markdown"):
-    # Process data
-    # Generate output
-```
+**Low freedom** (specific sequence required)
+- Operations are fragile or error-prone
+- Consistency is critical
+- Exact sequence must be followed
+- Example: Database migration (run exact script)
 
-**Low freedom (strict procedures):**
-- Operations fragile/error-prone
-- Consistency critical
-- Example: Database migration
+**Analogy:**
+- Narrow bridge with cliffs = low freedom (exact guardrails needed)
+- Open field with no hazards = high freedom (general direction sufficient)
 
-```bash
-# Run exactly this:
-python scripts/migrate.py --verify --backup
-# Do not modify
-```
+### 3. Test with All Models You Plan to Use
 
-**Analogy:** Narrow bridge with cliffs = low freedom. Open field = high freedom.
+Skills effectiveness depends on the underlying model:
 
-### Test with All Models
+- **Claude Haiku** (fast, economical): Does the Skill provide enough guidance?
+- **Claude Sonnet** (balanced): Is the Skill clear and efficient?
+- **Claude Opus** (powerful): Does the Skill avoid over-explaining?
 
-Skills effectiveness varies by model:
-
-- **Haiku** - Needs clear, concise guidance?
-- **Sonnet** - Works well with moderate detail?
-- **Opus** - Avoid over-explaining; needs challenge?
-
-Aim for instructions effective across all three.
+What works for Opus might need more detail for Haiku. Test with all.
 
 ---
 
-## Testing & Iteration
+## Writing Descriptions
 
-### Build Evaluations First
+The `description` field is **critical for discovery**. Claude uses it to select your Skill from 100+ potential Skills.
 
-Test BEFORE extensive documentation:
+### Structure
 
-1. Identify gaps (where does Claude fail without the skill?)
-2. Create 3 representative test scenarios
-3. Measure baseline (without skill)
-4. Write minimal instructions (just enough to pass)
-5. Iterate based on results
+```
+description: [What it does] + [Specific capabilities]. Use when [triggers/contexts] or [user mentions].
+```
 
-### Develop Iteratively with Claude
+### Key Ingredients
 
-1. **Complete task manually** - Note context you provide
-2. **Identify patterns** - What repeats?
-3. **Ask Claude to create Skill** - Capturing those patterns
-4. **Review for conciseness** - Remove known knowledge
-5. **Test on similar tasks** - Observe Claude's behavior
-6. **Iterate** - Based on observations, not assumptions
+- **Action verb** - "Processes", "Analyzes", "Generates" (not "Helps with")
+- **Specific capability** - "Excel spreadsheets" (not just "data")
+- **When to use** - Triggers and contexts that users mention
+- **Key terms** - Words users actually speak
 
-**Why this works:** Claude understands both skill format and what agents need.
+### Examples
 
-### Observe Real Usage
+**Specific, discoverable:**
+```yaml
+description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+```
 
-Pay attention to:
-- **Unexpected paths** - Does Claude read files in predicted order?
-- **Missed connections** - Does Claude follow references?
-- **Overreliance** - Does Claude re-read same file?
-- **Ignored content** - Do bundled files go unread?
+```yaml
+description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when analyzing Excel files, spreadsheets, tabular data, or .xlsx files.
+```
 
-**Iterate based on observations.**
+```yaml
+description: Generate descriptive commit messages by analyzing git diffs. Use when the user asks for help writing commit messages or reviewing staged changes.
+```
+
+**Vague, not discoverable:**
+```yaml
+description: Helps with documents
+description: Processes data
+description: Does stuff with files
+```
+
+### Write in Third Person
+
+The description is injected into the system prompt. Keep consistent point-of-view.
+
+- ✓ **Good:** "Processes Excel files and generates reports"
+- ✗ **Avoid:** "I can help you process Excel files"
+- ✗ **Avoid:** "You can use this to process Excel files"
 
 ---
 
-## Anti-Patterns to Avoid
+## SKILL.md Structure
+
+### Keep Under 500 Lines
+
+Once Claude loads SKILL.md, every token competes with conversation history and other context.
+
+**Guidelines:**
+- SKILL.md body: Under 500 lines
+- Approaching limit? Split into reference files
+- Use progressive disclosure patterns (see reference.md)
+
+### Recommended Structure
+
+1. **What it does** (1-2 sentences)
+   - Clear, specific capability
+   - Not generic
+
+2. **Quick start** (minimal example)
+   - Most common use case
+   - 20-50 lines maximum
+   - Can understand in 30 seconds
+
+3. **Core workflows** (1-3 main procedures)
+   - Step-by-step instructions
+   - Real examples
+   - Common variations
+
+4. **Advanced features** (links only)
+   - "See [ADVANCED.md](ADVANCED.md) for..."
+   - Don't include full content in SKILL.md
+
+### Naming Conventions
+
+**For Skill name:**
+- Gerund form (preferred): "Processing PDFs", "Analyzing spreadsheets"
+- Noun phrase: "PDF Processing", "Spreadsheet Analysis"
+- Action form: "Process PDFs", "Analyze Spreadsheets"
+- Avoid: "Helper", "Utils", "Tools", "Documents", "Data"
+
+---
+
+## Content Organization
+
+### When to Use Progressive Disclosure Patterns
+
+See [reference.md](reference.md) for complete pattern details.
+
+**Pattern 1:** High-level guide with references
+- Use when: Single domain with specialized topics
+- Structure: SKILL.md → ADVANCED.md, REFERENCE.md
+
+**Pattern 2:** Domain-specific organization
+- Use when: Multiple unrelated domains (sales vs. finance)
+- Structure: SKILL.md → domains/sales.md, domains/finance.md
+
+**Pattern 3:** Conditional details
+- Use when: Basic usage + advanced variations
+- Structure: SKILL.md → ADVANCED.md, EDGE_CASES.md
+
+### Bundling Scripts
+
+Include in `scripts/` directory for error-prone, deterministic operations:
+
+**Good use cases:**
+- Complex transformations
+- Operations requiring exact error handling
+- Consistency-critical operations
+
+**Why scripts work:**
+- Scripts are **executed** (not loaded into context)
+- Only output enters context
+- No token penalty for script code
+- Far more efficient than code generation
+
+---
+
+## Common Pitfalls
 
 ### Over-Documentation
-- Framework tutorials
-- Library API docs (link to official instead)
+
+Don't include content Claude already knows:
+- Framework tutorials or API docs (link to official)
 - Standard patterns (REST, CRUD, MVC)
 - Language features (syntax, types)
+- Basic library usage
+
+**Focus on delta:** What's unique to this Skill?
 
 ### Too Many Options
+
 **Bad:**
-```
-You can use pypdf, or pdfplumber, or PyMuPDF, or pdf2image...
+```markdown
+You can use pypdf, pdfplumber, PyMuPDF, or pdf2image...
 ```
 
 **Good:**
-```
+```markdown
 Use pdfplumber for text extraction.
 
 For scanned PDFs requiring OCR, use pdf2image with pytesseract instead.
 ```
 
 ### Nested References
-**Bad:**
+
+Don't nest references beyond one level:
+
+✗ Bad:
 ```
-SKILL.md → advanced.md → details.md
+SKILL.md → ADVANCED.md → DETAILS.md
 ```
 
-**Good:**
+✓ Good:
 ```
-SKILL.md → advanced.md
+SKILL.md → ADVANCED.md
+SKILL.md → REFERENCE.md
+SKILL.md → EXAMPLES.md
 ```
-
-### Wrong Tool Names
-Always use fully qualified MCP tool names:
-- ✓ `BigQuery:bigquery_schema`
-- ✓ `GitHub:create_issue`
-- ✗ `bigquery_schema` (ambiguous)
 
 ### Assuming Tools Are Installed
+
 **Bad:**
-```
-Use the pdf library.
+```markdown
+Use the pdf library to process files
 ```
 
 **Good:**
-```
+```markdown
 Install: `pip install pypdf`
 
 Then:
@@ -298,59 +261,53 @@ from pypdf import PdfReader
 ```
 ```
 
-### Windows-Style Paths
-Always use forward slashes:
-- ✓ `scripts/helper.py`
-- ✗ `scripts\helper.py`
-
 ---
 
-## Verification Checklist
+## Before Sharing
 
-### Before Publishing
+### Quality Checklist
 
-**Discovery**
-- [ ] Description includes verb + specifics + trigger words?
-- [ ] Would Claude discover with these keywords?
-- [ ] Description includes both WHAT and WHEN?
+**Naming & Description**
+- [ ] Name follows conventions (gerund or noun)?
+- [ ] Description specific and includes key terms?
+- [ ] Description includes WHAT and WHEN?
+- [ ] Third person throughout?
 
 **Content**
 - [ ] SKILL.md under 500 lines?
-- [ ] Every line justifies its token cost?
-- [ ] No framework basics or library docs?
-- [ ] Delta principle applied?
+- [ ] Concise (no tutorial content)?
+- [ ] Examples concrete, not abstract?
+- [ ] Code examples complete and runnable?
 
 **Structure**
+- [ ] Progressive disclosure patterns used?
 - [ ] References one level deep from SKILL.md?
-- [ ] Examples concrete, not abstract?
-- [ ] Code complete and runnable?
 - [ ] Large files have table of contents?
+- [ ] Scripts have error handling?
 
 **Testing**
-- [ ] Tested with real scenarios?
 - [ ] Tested with Haiku, Sonnet, Opus?
-- [ ] Manual discovery test passed?
-
-See [discovery-checklist.md](discovery-checklist.md) for comprehensive pre-launch testing.
-
----
-
-## Workflows & Examples
-
-- See [workflows.md](workflows.md) for 3 complete skill creation walkthroughs
-- See [reference.md](reference.md) for structure patterns and organization
-- See [SKILL.md](SKILL.md) for the 6-phase workflow
+- [ ] Description matches what users would ask?
+- [ ] Skill actually works end-to-end?
 
 ---
 
-## Key Takeaway
+## Quick Summary
 
-**Discoverable + Concise + Tested = Great Skills**
+Great Skills share these qualities:
 
-1. Write a description that Claude will find
-2. Make SKILL.md minimal (under 500 lines)
-3. Put detailed content in reference files (on-demand loading)
-4. Test with real scenarios across all models
-5. Iterate based on how Claude actually uses it
+1. **Specific description** - Claude can discover it reliably
+2. **Concise SKILL.md** - Under 500 lines, focused
+3. **Progressive disclosure** - Advanced content in separate files
+4. **Tested** - Works across models and with real requests
+5. **Focused scope** - One capability, not everything
 
-Focus on discovery first. Everything else follows.
+Write the minimum needed for Claude to succeed, then organize advanced content on-demand.
+
+---
+
+## Related Resources
+
+- [SKILL.md](SKILL.md) - Core architecture and structure
+- [reference.md](reference.md) - Pattern details and organization
+- [official-agent-skills.md](official-agent-skills.md) - Complete official documentation
