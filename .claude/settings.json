@@ -13,6 +13,7 @@
     "deny": [],
     "ask": []
   },
+  "model": "haiku",
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"

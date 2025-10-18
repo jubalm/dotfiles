@@ -338,6 +338,11 @@ class DotfilesInstaller:
             if agents_source.exists() and agents_source.is_dir():
                 self._install_symlink(agents_source, claude_home / "agents", ".claude/agents")
 
+            # Install .claude/skills directory if it exists
+            skills_source = claude_dir / "skills"
+            if skills_source.exists() and skills_source.is_dir():
+                self._install_symlink(skills_source, claude_home / "skills", ".claude/skills")
+
         # Install Claude CLI
         if not self._command_exists('claude'):
             with self.logger.busy("Installing Claude CLI…"):
