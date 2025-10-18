@@ -1,6 +1,8 @@
 # Authoring Agent Skills: Complete Reference
 
-Advanced patterns, structures, and decision-making for building effective Skills.
+Supporting patterns and implementation details for building effective Skills.
+
+**Primary reference:** See [SKILL.md](SKILL.md) for the 6-phase workflow.
 
 ---
 
@@ -8,251 +10,210 @@ Advanced patterns, structures, and decision-making for building effective Skills
 
 ### Directory Layout Patterns
 
-**Pattern 1: Simple (single capability, minimal content)**
+**Pattern 1: Simple (single capability)**
 ```
 git-commit-helper/
 └── SKILL.md
 ```
 
-**Pattern 2: Modular (related capabilities, progressive disclosure)**
+Single SKILL.md file. Use for focused skills.
+
+**Pattern 2: Modular (progressive disclosure)**
 ```
 pdf-processing/
 ├── SKILL.md (overview, quick start)
-├── forms.md (form-filling guide)
-├── reference.md (API reference)
-├── examples.md (usage examples)
+├── reference.md (detailed guide)
+├── examples.md (complete examples)
 └── scripts/
-    ├── analyze_form.py
-    └── fill_form.py
+    ├── extract.py
+    └── merge.py
 ```
 
-**Pattern 3: Domain-organized (large Skills with multiple domains)**
+SKILL.md under 500 lines. Details in reference files.
+
+**Pattern 3: Domain-organized (multiple domains)**
 ```
 bigquery-analysis/
 ├── SKILL.md (navigation)
-└── reference/
+└── domains/
     ├── finance.md (revenue, billing)
-    ├── sales.md (opportunities, pipeline)
-    ├── product.md (API usage)
-    └── marketing.md (campaigns)
+    ├── sales.md (pipeline, opportunities)
+    └── product.md (API usage)
 ```
+
+When user asks about sales, only `sales.md` is loaded.
 
 ### File Naming Conventions
 
 | File | Purpose |
 |------|---------|
-| `SKILL.md` | Required. Overview, quick examples, navigation. |
-| `reference.md` | Detailed guide, API reference, complete patterns. |
+| `SKILL.md` | Required. Overview, quick start, navigation. |
+| `reference.md` | Detailed guide, complete patterns, API reference. |
+| `examples.md` | Input/output examples, usage walkthroughs. |
 | `best-practices.md` | Authoring principles, guidelines. |
-| `examples.md` | Input/output examples, usage patterns. |
 | `workflows.md` | Multi-step procedures with checklists. |
+| `discovery-checklist.md` | Testing if skill is discoverable. |
 | `scripts/` | Executable utilities (Python, bash, etc.) |
 
 ---
 
 ## Writing SKILL.md
 
-### Frontmatter Requirements
+### Frontmatter
 
 ```yaml
 ---
-name: Skill Name                    # 64 chars max
-description: What it does + when    # 1024 chars max
+name: Skill Name (64 chars max)
+description: What it does + when to use (1024 chars max)
 ---
 ```
 
-**Name best practices:**
-- Gerund form: "Authoring Skills", "Processing PDFs", "Analyzing Data"
+### Name Best Practices
+
+- Gerund form: "Authoring Skills", "Processing PDFs"
 - Noun phrase: "Skill Author", "PDF Processor"
 - Action-oriented: "Author Skills", "Process PDFs"
 - Avoid: "Helper", "Utils", "Tools"
 
-**Description critical.** Must include:
-- What the Skill does (specific capabilities)
-- When to use it (triggers, contexts)
-- Key terms users would mention
-
-**Bad description (vague):**
-```yaml
-description: Helps with data
-```
-
-**Good description (specific):**
-```yaml
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when working with Excel files, spreadsheets, or analyzing tabular data in .xlsx format.
-```
-
 ### SKILL.md Body Structure
 
-Keep SKILL.md under 500 lines. Structure:
+Keep under 500 lines. Include:
 
-1. **When to use** - Context where this Skill applies
-2. **Core principle** - Main idea (one sentence)
-3. **Quick reference** - Decision matrices or key concepts
-4. **Examples** - 1-3 concrete examples
-5. **References** - Links to detailed files
+1. **What It Does** - 1-2 sentences, clear capability
+2. **When to Use** - Situations, triggers, contexts
+3. **Quick Reference** - Decision table, checklist, or type reference
+4. **Minimal Example** - Concrete, realistic scenario
+5. **More** - Links to reference files
 
-**Example structure:**
+### Complete Example
 
 ```markdown
 ---
-name: PDF Processing
-description: Extract text and tables from PDF files, fill forms, merge documents
+name: Git Commit Helper
+description: Write semantic commits from git diffs. Use when making commits, need type(scope) format, or writing conventional commits.
 ---
 
-# PDF Processing
+# Git Commit Helper
 
-## When to use
-- Extracting text from PDFs
-- Filling form fields
-- Merging multiple documents
+## What It Does
+Analyzes staged changes and suggests conventional semantic commit messages.
 
-## Core principle
-Use pdfplumber for text, pypdf for modifications.
+## When to Use
+- You've staged changes with `git add`
+- Need semantic commit format
+- Following type(scope): description pattern
 
-## Quick reference
+## Commit Types
 
-| Task | File |
-|------|------|
-| Extract text | [reference.md](reference.md#extract-text) |
-| Fill forms | [forms.md](forms.md) |
-| Merge docs | [reference.md](reference.md#merge) |
+| Type | Purpose | Example |
+|------|---------|---------|
+| feat | New feature | feat(auth): add oauth login |
+| fix | Bug fix | fix(button): hover broken |
+| docs | Documentation | docs: update readme |
+| refactor | Code reorganization | refactor(api): simplify |
 
-## Example
+## Minimal Example
 
-Extract text from first page:
-```python
-import pdfplumber
-with pdfplumber.open("file.pdf") as pdf:
-    text = pdf.pages[0].extract_text()
+```
+You: "Staged my changes, what's the commit?"
+
+Skill: "Based on your changes:
+
+feat(auth): implement oauth login
+- Adds OAuth provider
+- Stores tokens securely"
+
+You: "commit that"
 ```
 
-For advanced usage, see [reference.md](reference.md).
+## More
+
+See [reference.md](reference.md) for advanced patterns.
 ```
 
 ---
 
 ## Progressive Disclosure Patterns
 
-### Pattern 1: High-level guide with references
+### Pattern 1: Overview + References
 
-**SKILL.md** points to detailed materials:
+SKILL.md provides overview, links to details:
 
 ```markdown
 ## Features
 
-**Extract text**: See [reference.md](reference.md) for methods
-**Fill forms**: See [forms.md](forms.md) for workflow
-**Merge documents**: See [reference.md](reference.md)
+**Extract text:** [reference.md](reference.md#extract)
+**Fill forms:** [forms.md](forms.md)
+**Merge documents:** [reference.md](reference.md#merge)
 ```
 
 Claude reads reference files only when needed.
 
-### Pattern 2: Domain-specific organization
+### Pattern 2: Domain Organization
 
-Keep token usage low by organizing by domain:
+Structure large skills by domain:
 
 ```
 SKILL.md (overview, navigation)
-└── reference/
-    ├── finance.md (metrics: revenue, ARR)
-    ├── sales.md (metrics: pipeline, opportunities)
-    └── product.md (metrics: API usage, features)
+└── domains/
+    ├── finance.md
+    ├── sales.md
+    └── product.md
 ```
 
-When user asks about sales, Claude only loads `sales.md`, not finance or product data.
+When user asks about sales, only `sales.md` loads.
 
-### Pattern 3: Conditional details
+### Pattern 3: Basic + Advanced
 
-Show basic, link to advanced:
+Show basic in SKILL.md, advanced in reference:
 
 ```markdown
-## Creating documents
+## Creating Documents
 
-Use docx-js library. Basic usage:
-[Example in SKILL.md]
+Use docx-js library:
+[Basic example in SKILL.md]
 
-## Advanced features
+## Advanced Features
 
-**Tracked changes**: See [redlining.md](redlining.md)
-**Complex formatting**: See [ooxml.md](ooxml.md)
+**Tracked changes:** See [redlining.md](redlining.md)
+**Complex formatting:** See [ooxml.md](ooxml.md)
 ```
 
 ---
 
-## Token Efficiency for Skills
+## Token Efficiency: Delta Principle
 
-### Delta Principle: Only Document Non-Inferrable Knowledge
+### Only Document Non-Inferrable Knowledge
 
 **Don't document (Claude already knows):**
 - Framework patterns (React hooks, Django models)
 - Library behavior (Stripe API, Firebase)
 - Standard architectures (REST, MVC)
-- File organization (visible via ls)
-- Language syntax and standard libraries
+- Language features (loops, types)
+- File organization visible via ls
 
 **Do document (high-value delta):**
-- Custom patterns (unique to this Skill)
+- Custom patterns unique to this skill
 - Non-obvious decisions (why X over Y?)
 - Hard constraints (performance limits, security rules)
 - Gotchas and edge cases
 - Project-specific configurations
 
-**Examples:**
-
-```
-❌ "Use pdfplumber" (library capability, obvious from import)
-✓ "Use pdfplumber for text extraction (handles most layouts well), pypdf for form filling (better form field support)"
-
-❌ "Excel files use .xlsx format" (standard)
-✓ "Always validate headers in first row, skip rows 2-5 (company metadata), treat empty cells as NULL"
-```
-
 ### Density Principles
 
-**Structure preferences:**
-- Code > prose (show pattern, don't explain)
-- Bullets > paragraphs (one idea per line)
-- Fragments > sentences (remove: the, a, an, is, are)
+**Prefer:**
+- Code > prose
+- Bullets > paragraphs
+- Fragments > sentences (omit: the, a, an, is, are)
+- Symbols: `✓` / `✗`, `→`, `:`
 
-**Use symbols:**
-- `✓` / `✗` instead of yes/no
-- `→` instead of "leads to"
-- `:` instead of "is"
-
-**Example density:**
+**Example:**
 
 Before (27 words):
-> The reason we use the modular approach is because it makes maintenance easier, and it allows developers to understand one concern at a time without getting confused by the entire system.
+> The modular approach makes maintenance easier and allows developers to understand one concern at a time without getting confused.
 
 After (8 words):
 > Modular: ✓ easier maintenance, ✓ isolated concerns
-
----
-
-## Descriptions: Key to Discovery
-
-Claude uses descriptions to decide when to invoke your Skill. Make it specific.
-
-### Specific Description Checklist
-
-- [ ] What does it do? (specific capabilities)
-- [ ] When to use? (triggers, contexts)
-- [ ] Key terms? (what would user mention?)
-- [ ] Third person? ("Processes" not "I can process")
-- [ ] Under 1024 chars?
-
-### Examples
-
-**Too vague:**
-```yaml
-description: Helps with documents
-```
-
-**Specific:**
-```yaml
-description: Extract text and tables from PDF files, fill form fields, merge multiple PDFs. Use when working with PDF files, forms, or document extraction.
-```
 
 ---
 
@@ -260,15 +221,15 @@ description: Extract text and tables from PDF files, fill form fields, merge mul
 
 ### When to Bundle Scripts
 
-Provide pre-made scripts for:
+Include pre-made scripts for:
 - Deterministic operations (validation, transformation)
 - Error-prone tasks (database migrations)
-- Consistency (same behavior every time)
-- Efficiency (no code generation needed)
+- Consistency requirements (same behavior every time)
+- Efficiency needs (no code generation required)
 
-### Error Handling Pattern
+### Error Handling
 
-**Good: Handles errors explicitly**
+**Good: Explicit error handling**
 ```python
 def process_file(path):
     try:
@@ -284,102 +245,152 @@ def process_file(path):
 **Bad: Punts to Claude**
 ```python
 def process_file(path):
-    return open(path).read()  # Will fail
+    return open(path).read()  # Will fail if missing
 ```
 
 ### Script Documentation
 
-Clearly state:
-- **Execute the script:** "Run `analyze_form.py` to extract fields"
-- **Read as reference:** "See `analyze_form.py` for extraction algorithm"
+Clearly state whether to execute or read:
+
+- **Execute:** "Run `analyze_form.py` to extract fields"
+- **Reference:** "See `analyze_form.py` for extraction algorithm"
 
 Most utility scripts should be executed, not read.
 
 ---
 
-## Verification Checklist
+## Discovery Patterns
 
-Before sharing a Skill:
+For detailed discovery testing, see [discovery-checklist.md](discovery-checklist.md).
 
-### Core Quality
-- [ ] Name follows conventions (gerund or noun phrase)?
-- [ ] Description specific and includes key terms?
-- [ ] Description includes both WHAT and WHEN?
-- [ ] SKILL.md under 500 lines?
-- [ ] Additional content in separate files?
-- [ ] No time-sensitive information?
-- [ ] Consistent terminology?
-- [ ] Examples concrete, not abstract?
-- [ ] File references one level deep?
+### Description Structure
 
-### Testing
-- [ ] Tested with real usage scenarios?
-- [ ] Claude discovers it when expected?
-- [ ] Works well with all target models (Haiku, Sonnet, Opus)?
-- [ ] Team feedback incorporated (if applicable)?
+```
+description = What skill does + When to use + Key trigger words
+```
 
-### Content
-- [ ] No framework basics or library docs?
-- [ ] Every line adds unique value?
-- [ ] Delta principle applied (non-inferrable only)?
-- [ ] Progressive disclosure used effectively?
+**Bad (vague):**
+```
+description: Helps with data
+```
+
+**Good (specific, discoverable):**
+```
+description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when working with Excel files, spreadsheets, or .xlsx data analysis.
+```
+
+### Key Ingredients
+
+- Verb + action (Write, Generate, Create, Analyze)
+- Specific capability (not just "helps with")
+- When to use (triggers, contexts)
+- Key terms users mention (not generic words)
 
 ---
 
-## Iteration Pattern: Develop Skills with Claude
+## Iteration Pattern
 
-1. **Complete a task** without a Skill
+### Develop Skills Through Real Usage
+
+1. **Complete a task** manually
 2. **Identify reusable patterns** from the work
-3. **Ask Claude to create a Skill** capturing those patterns
-4. **Review for conciseness** - remove explanations Claude knows
-5. **Improve information architecture** - split into reference files
-6. **Test on similar tasks** - observe if Claude finds right info
+3. **Create a Skill** capturing those patterns
+4. **Review for conciseness** - remove what Claude knows
+5. **Organize information** - split into reference files
+6. **Test on similar tasks** - observe if Claude finds needed info
 7. **Iterate based on observation** - if Claude struggles, refine
 
-**Why this works:** Claude understands both writing Skills and what agents need. You provide domain expertise, Claude refines the form.
+### Refinement Triggers
+
+Update skill if:
+
+- **Underused:** Claude doesn't discover it when should
+  - Action: Expand description with more trigger words
+  - Action: Simplify content
+
+- **Overused:** Claude invokes for unrelated tasks
+  - Action: Narrow description
+  - Action: Add "When NOT to use" section
+
+- **Ineffective:** Users request it but doesn't help
+  - Action: Improve examples
+  - Action: Refine procedure steps
+
+- **Conflicts:** Description too similar to other skills
+  - Action: Add distinguishing keywords
+  - Action: Clarify scope differences
 
 ---
 
-## Common Pitfalls to Avoid
+## Verification Checklist
 
-### Over-Documentation
-- ✗ Framework tutorials
-- ✗ Library API docs (reference official instead)
-- ✗ Standard patterns (REST, CRUD, MVC)
-- ✗ Language features (loops, types)
+Before deploying a Skill:
 
-### Wrong Granularity
-- **Too vague:** "Auth happens" (not actionable)
-- **Too specific:** Every implementation detail (dead weight)
-- **Right:** High-level constraints + key patterns (survives refactors)
+### Content Quality
+- [ ] Name follows conventions (gerund or noun)?
+- [ ] Description specific and includes key terms?
+- [ ] Description includes WHAT and WHEN?
+- [ ] SKILL.md under 500 lines?
+- [ ] Details in separate reference files?
+- [ ] Examples concrete, not abstract?
+- [ ] No framework basics or library docs?
+- [ ] Delta principle applied?
 
-### Nested References
-- ✗ Bad: SKILL.md → advanced.md → details.md
-- ✓ Good: SKILL.md → advanced.md (direct)
+### Structure
+- [ ] Directory layout matches one of three patterns?
+- [ ] File references one level deep?
+- [ ] No nested chains of references?
+- [ ] Consistent terminology?
 
-Keep reference files one level deep from SKILL.md.
+### Testing
+- [ ] Tested with real scenarios?
+- [ ] Claude discovers it when expected?
+- [ ] Works with Haiku, Sonnet, and Opus?
+- [ ] Team feedback incorporated?
 
-### Tool References
-Always use fully qualified MCP tool names:
-- ✓ `BigQuery:bigquery_schema`
-- ✓ `GitHub:create_issue`
-- ✗ `bigquery_schema` (ambiguous, may fail)
+See [discovery-checklist.md](discovery-checklist.md) for comprehensive testing.
 
 ---
 
 ## File Size Guidelines
 
-| Scope | Ideal | Too Small | Too Large |
-|-------|-------|-----------|-----------|
-| SKILL.md | Under 500 | Not applicable | Split into reference files |
-| reference.md | 100-300 | <50 | Split by domain or feature |
-| Other files | 100-200 | <30 merge | >250 split |
+| File | Ideal | Too Small | Too Large |
+|------|-------|-----------|-----------|
+| SKILL.md | <500 | N/A | Split into references |
+| reference.md | 100-300 | <50 | Split by domain |
+| Other files | 100-200 | <30 | >250 split |
+
+---
+
+## Common Pitfalls
+
+### Over-Documentation
+- Framework tutorials
+- Library API docs (link to official instead)
+- Standard patterns (REST, CRUD, MVC)
+- Language features (loops, types, syntax)
+
+### Wrong Granularity
+- **Too vague:** "Auth happens" (not actionable)
+- **Too specific:** Every implementation detail
+- **Right:** High-level constraints + key patterns
+
+### Poor Organization
+- Nested reference chains (SKILL → advanced → details)
+- Keep reference files one level deep
+
+### Tool References
+Always use fully qualified names:
+- ✓ `BigQuery:bigquery_schema`
+- ✓ `GitHub:create_issue`
+- ✗ `bigquery_schema` (ambiguous)
 
 ---
 
 ## Next Steps
 
-1. Review [best-practices.md](best-practices.md) for authoring principles
-2. Check [SKILL.md](SKILL.md) for quick reference matrices
-3. Create your first Skill using these patterns
-4. Test and iterate based on real usage
+1. Read [SKILL.md](SKILL.md) for the 6-phase workflow
+2. Review [workflows.md](workflows.md) for complete examples
+3. Check [discovery-checklist.md](discovery-checklist.md) before launch
+4. See [best-practices.md](best-practices.md) for writing principles
+5. Create your first Skill and test it with real scenarios

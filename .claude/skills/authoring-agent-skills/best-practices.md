@@ -4,13 +4,56 @@ Principles for writing Skills that Claude discovers and uses effectively in real
 
 ---
 
-## Core Principles
+## #1 Priority: Discoverability
 
-### 1. Concise is Key
+A Skill only exists if Claude finds it. Everything else is secondary.
 
-**Challenge each line:** Does Claude need this? Can Claude infer this?
+### The Discovery Challenge
+
+Claude selects from 50+ built-in agents, 20+ user skills, and 10+ project skills. Your skill competes for attention based on a single field: **description**.
+
+**Description determines if your skill is discovered.**
+
+### Writing Discoverable Descriptions
+
+Structure: `What skill does + When to use + Key trigger words`
+
+**Bad (too generic):**
+```yaml
+description: Helps with data
+```
+
+**Good (specific, discoverable):**
+```yaml
+description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when working with Excel files, spreadsheets, or analyzing tabular data in .xlsx format.
+```
+
+**Ingredients:**
+- **Action verb** - Write, Generate, Create, Analyze (not "Helps with")
+- **Specific capability** - "Excel spreadsheets" not just "data"
+- **When to use** - Triggers and contexts that prompt user requests
+- **Key terms** - Words users actually mention
+
+### Test Discoverability
+
+Before publishing, manually test:
+```
+1. Invoke with description keywords → Works?
+2. Invoke with related phrasing → Works?
+3. Without invoking, does Claude use it? → Proactively invoked?
+```
+
+See [discovery-checklist.md](discovery-checklist.md) for complete testing guide.
+
+---
+
+## #2 Priority: Content Quality
+
+### Conciseness is Key
 
 **Default assumption:** Claude is already very smart.
+
+**Challenge every line:** Does Claude need this? Can Claude infer this?
 
 **Good example (concise, 50 tokens):**
 ```markdown
@@ -28,359 +71,286 @@ with pdfplumber.open("file.pdf") as pdf:
 ```markdown
 ## Extract PDF text
 
-PDF (Portable Document Format) files are a common file format that contains
-text, images, and other content. To extract text from a PDF, you'll need to
-use a library. There are many libraries available, but pdfplumber is recommended
-because it's easy to use and handles most cases well. First, you'll need to
-install it using pip. Then you can use...
+PDF (Portable Document Format) files are a common file format containing text, images, and other content. To extract text, you'll need a library. Many libraries are available, but pdfplumber is recommended because it's easy to use and handles most cases well. First, install it...
 ```
 
-The concise version assumes Claude knows PDFs and libraries already.
+The concise version assumes Claude knows PDFs and libraries.
 
-### 2. Set Appropriate Degrees of Freedom
-
-Match specificity to task fragility and variability.
-
-**High freedom (text instructions):**
-- Multiple approaches are valid
-- Decisions depend on context
-- Use heuristics, not rules
-
-Example:
-```markdown
-## Code review process
-
-1. Analyze code structure and organization
-2. Check for potential bugs or edge cases
-3. Suggest improvements for readability and maintainability
-4. Verify adherence to project conventions
-```
-
-**Medium freedom (templates with parameters):**
-- Preferred pattern exists
-- Some variation is acceptable
-- Configuration affects behavior
-
-Example:
-```markdown
-## Generate report
-
-Use this template and customize as needed:
-```python
-def generate_report(data, format="markdown", include_charts=True):
-    # Process data
-    # Generate output in specified format
-```
-```
-
-**Low freedom (specific scripts):**
-- Operations are fragile and error-prone
-- Consistency is critical
-- Specific sequence must be followed
-
-Example:
-```markdown
-## Database migration
-
-Run exactly this script:
-```bash
-python scripts/migrate.py --verify --backup
-```
-
-Do not modify the command or add additional flags.
-```
-
-**Analogy:**
-- Narrow bridge with cliffs on both sides = Low freedom, exact guardrails needed
-- Open field with no hazards = High freedom, general direction sufficient
-
-### 3. Test with All Models
-
-Skills effectiveness depends on the underlying model. Test with:
-- **Claude Haiku** - Fast, economical. Needs enough guidance?
-- **Claude Sonnet** - Balanced. Clear and efficient?
-- **Claude Opus** - Powerful reasoning. Avoid over-explaining?
-
-What works for Opus might need more detail for Haiku. Aim for instructions that work across all.
-
----
-
-## Writing Effective Descriptions
-
-The `description` field is **critical for discovery.** Claude uses it to choose your Skill from potentially 100+ available Skills.
-
-### Required Elements
-
-1. **What it does** - Specific capabilities
-2. **When to use** - Triggers and contexts
-3. **Key terms** - Words user might mention
-
-### Examples
-
-**PDF Processing:**
-```yaml
-description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
-```
-
-**Excel Analysis:**
-```yaml
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when analyzing Excel files, spreadsheets, tabular data, or .xlsx files.
-```
-
-**Git Commit Helper:**
-```yaml
-description: Generate descriptive commit messages by analyzing git diffs. Use when the user asks for help writing commit messages or reviewing staged changes.
-```
-
-**Avoid vague descriptions:**
-```yaml
-description: Helps with documents      # Too generic
-description: Processes data             # Too generic
-description: Does stuff with files     # Too vague
-```
-
-### Write in Third Person
-
-The description is injected into the system prompt. Keep consistent point-of-view.
-
-- ✓ **Good:** "Processes Excel files and generates reports"
-- ✗ **Avoid:** "I can help you process Excel files"
-- ✗ **Avoid:** "You can use this to process Excel files"
-
----
-
-## Content Quality Guidelines
-
-### Delta Principle: Only Document Non-Inferrable Knowledge
+### Delta Principle: Only Non-Inferrable Knowledge
 
 **Ask:** Would Claude miss this by inspection or training?
 
-If no → Don't document it.
-If yes → Include it.
+**Don't document:**
+- Framework patterns (React hooks, Django models)
+- Library behavior (Stripe API, Firebase)
+- Standard architectures (REST, MVC, CRUD)
+- Language features (loops, types, syntax)
+
+**Do document:**
+- Custom patterns unique to this skill
+- Non-obvious decisions (why X over Y?)
+- Hard constraints (performance limits, security rules)
+- Gotchas and edge cases
+- Project-specific configurations
 
 ### Density Principles
 
-**Prefer:**
-- Code over prose (show, don't explain)
-- Bullets over paragraphs (one idea per line)
-- Fragments over sentences (remove the, a, an, is, are)
-- Symbols over words (✓, ✗, →, :)
+Maximize value per token:
+
+- **Code over prose** - Show the pattern, don't explain
+- **Bullets over paragraphs** - One idea per line
+- **Fragments over sentences** - Omit: the, a, an, is, are
+- **Symbols over words** - Use `✓` / `✗`, `→`, `:`
 
 **Example:**
 
-Before: "The reason we use the modular approach is because it makes maintenance easier, and it allows developers to understand one concern at a time without getting confused by the entire system." (27 words)
+Before (27 words):
+> The reason we use the modular approach is because it makes maintenance easier and allows developers to understand one concern at a time.
 
-After: "Modular: ✓ easier maintenance, ✓ isolated concerns" (8 words)
-
-### Terminal Values
-
-- **Every line must justify its token cost**
-- **No framework basics or library docs** (Claude knows these)
-- **No standard patterns** (REST, CRUD, MVC)
-- **Focus on deltas** (unique to this Skill)
+After (8 words):
+> Modular: ✓ easier maintenance, ✓ isolated concerns
 
 ---
 
-## Progressive Disclosure Strategy
+## #3 Priority: Appropriate Structure
 
-### Why It Works
+### SKILL.md is the Discovery Interface
 
-1. **Metadata pre-loaded** - Name and description always available
-2. **Files read on-demand** - Claude accesses content only when needed
-3. **No context penalty** - Large files don't consume tokens until read
-4. **Focused reading** - Claude loads exactly what each task requires
+Keep it under 500 lines. Include:
 
-### Structure for Progressive Disclosure
+1. **What It Does** - 1-2 sentences
+2. **When to Use** - Specific triggers
+3. **Quick Reference** - Table, checklist, or type guide
+4. **Minimal Example** - Concrete, realistic scenario (30 seconds to understand)
+5. **Links** - To reference files for deeper content
+
+### Progressive Disclosure
+
+Structure for discovery + efficiency:
 
 ```
 my-skill/
-├── SKILL.md (100-200 lines)
-│   ├── Quick reference
-│   ├── Examples
-│   └── Links to reference files
-│
-├── reference.md (detailed guide)
-├── examples.md (usage patterns)
-├── workflows.md (multi-step procedures)
+├── SKILL.md (overview, quick reference)
+├── reference.md (detailed patterns)
+├── examples.md (complete workflows)
 └── scripts/ (utilities)
 ```
 
-**Claude loads files on-demand** - reference.md only when user asks about advanced features.
+**Result:** Claude loads SKILL.md for discovery. Loads reference files only when needed.
+
+### One Level Deep References
+
+**Keep it simple:**
+```
+SKILL.md → reference.md
+        → examples.md
+        → workflows.md
+```
+
+**Never nest:**
+```
+SKILL.md → advanced.md → details.md  ✗
+```
+
+When Claude encounters nested references, it skips or reads incomplete content.
 
 ---
 
-## Testing and Iteration
+## Principles by Task
+
+### Set Appropriate Freedom Levels
+
+Match specificity to task fragility:
+
+**High freedom (heuristic instructions):**
+- Multiple approaches valid
+- Decisions depend on context
+- Example: Code review process
+
+```markdown
+1. Analyze code structure
+2. Check for edge cases
+3. Suggest improvements
+```
+
+**Medium freedom (template + customization):**
+- Preferred pattern exists
+- Some variation acceptable
+- Example: Report generation
+
+```python
+def generate_report(data, format="markdown"):
+    # Process data
+    # Generate output
+```
+
+**Low freedom (strict procedures):**
+- Operations fragile/error-prone
+- Consistency critical
+- Example: Database migration
+
+```bash
+# Run exactly this:
+python scripts/migrate.py --verify --backup
+# Do not modify
+```
+
+**Analogy:** Narrow bridge with cliffs = low freedom. Open field = high freedom.
+
+### Test with All Models
+
+Skills effectiveness varies by model:
+
+- **Haiku** - Needs clear, concise guidance?
+- **Sonnet** - Works well with moderate detail?
+- **Opus** - Avoid over-explaining; needs challenge?
+
+Aim for instructions effective across all three.
+
+---
+
+## Testing & Iteration
 
 ### Build Evaluations First
 
-Create test scenarios BEFORE extensive documentation:
+Test BEFORE extensive documentation:
 
-1. **Identify gaps** - Where does Claude fail without the Skill?
-2. **Create evaluations** - 3 representative scenarios
-3. **Establish baseline** - Measure without Skill
-4. **Write minimal instructions** - Just enough to pass evaluations
-5. **Iterate** - Execute evaluations, compare, refine
+1. Identify gaps (where does Claude fail without the skill?)
+2. Create 3 representative test scenarios
+3. Measure baseline (without skill)
+4. Write minimal instructions (just enough to pass)
+5. Iterate based on results
 
-### Develop Skills Iteratively with Claude
+### Develop Iteratively with Claude
 
-**Process:**
-1. Complete a task without a Skill (note context you provide)
-2. Identify reusable patterns from that work
-3. Ask Claude to create a Skill capturing those patterns
-4. Review for conciseness (remove known knowledge)
-5. Test on similar tasks (observe Claude's behavior)
-6. Iterate based on observations
+1. **Complete task manually** - Note context you provide
+2. **Identify patterns** - What repeats?
+3. **Ask Claude to create Skill** - Capturing those patterns
+4. **Review for conciseness** - Remove known knowledge
+5. **Test on similar tasks** - Observe Claude's behavior
+6. **Iterate** - Based on observations, not assumptions
 
-**Why this works:** Claude understands both Skill format and what agents need.
+**Why this works:** Claude understands both skill format and what agents need.
 
-### Observe How Claude Uses Your Skill
+### Observe Real Usage
 
 Pay attention to:
-- **Unexpected exploration paths** - Does Claude read files in order you predicted?
+- **Unexpected paths** - Does Claude read files in predicted order?
 - **Missed connections** - Does Claude follow references?
-- **Overreliance** - Does Claude read same file repeatedly?
+- **Overreliance** - Does Claude re-read same file?
 - **Ignored content** - Do bundled files go unread?
 
-Iterate based on **observations, not assumptions.**
-
----
-
-## Organization Patterns
-
-### One Capability per Skill
-
-**Focused:**
-- "PDF form filling"
-- "Excel data analysis"
-- "Git commit messages"
-
-**Too broad:**
-- "Document processing" (split into Skills)
-- "Data tools" (split by type or operation)
-
-### File Reference Depth
-
-**Keep one level deep from SKILL.md:**
-
-✗ Bad (too nested):
-```
-SKILL.md → advanced.md → details.md
-```
-
-✓ Good (direct):
-```
-SKILL.md → advanced.md
-           → reference.md
-           → examples.md
-```
-
-When Claude encounters nested references, it might use `head -100` to preview instead of reading complete files.
-
-### Large Reference Files
-
-For files >100 lines, include table of contents:
-
-```markdown
-# API Reference
-
-## Contents
-- Authentication and setup
-- Core methods (create, read, update)
-- Advanced features (batch, webhooks)
-- Error handling patterns
-
-## Authentication and setup
-...
-
-## Core methods
-...
-```
-
-Claude can then read complete file or jump to sections as needed.
+**Iterate based on observations.**
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Windows-Style Paths
-
-Always use forward slashes:
-- ✓ `scripts/helper.py`
-- ✗ `scripts\helper.py`
-
-Unix-style paths work on all platforms. Windows-style breaks on Unix.
+### Over-Documentation
+- Framework tutorials
+- Library API docs (link to official instead)
+- Standard patterns (REST, CRUD, MVC)
+- Language features (syntax, types)
 
 ### Too Many Options
-
-Don't present multiple approaches unless necessary:
-
-✗ "You can use pypdf, or pdfplumber, or PyMuPDF, or pdf2image..."
-
-✓ "Use pdfplumber for text extraction:
-```python
-import pdfplumber
+**Bad:**
+```
+You can use pypdf, or pdfplumber, or PyMuPDF, or pdf2image...
 ```
 
-For scanned PDFs requiring OCR, use pdf2image with pytesseract instead."
+**Good:**
+```
+Use pdfplumber for text extraction.
 
-### Assuming Tools Are Installed
+For scanned PDFs requiring OCR, use pdf2image with pytesseract instead.
+```
 
-Don't assume packages are available:
+### Nested References
+**Bad:**
+```
+SKILL.md → advanced.md → details.md
+```
 
-✗ "Use the pdf library to process the file."
+**Good:**
+```
+SKILL.md → advanced.md
+```
 
-✓ "Install required package: `pip install pypdf`
-
-Then use it:
-```python
-from pypdf import PdfReader
-```"
-
-### MCP Tool Names
-
-Always use fully qualified names:
+### Wrong Tool Names
+Always use fully qualified MCP tool names:
 - ✓ `BigQuery:bigquery_schema`
 - ✓ `GitHub:create_issue`
 - ✗ `bigquery_schema` (ambiguous)
 
+### Assuming Tools Are Installed
+**Bad:**
+```
+Use the pdf library.
+```
+
+**Good:**
+```
+Install: `pip install pypdf`
+
+Then:
+```python
+from pypdf import PdfReader
+```
+```
+
+### Windows-Style Paths
+Always use forward slashes:
+- ✓ `scripts/helper.py`
+- ✗ `scripts\helper.py`
+
 ---
 
-## Reflection Checklist
+## Verification Checklist
 
-Before sharing a Skill, ask:
+### Before Publishing
 
-**Discovery & Clarity**
-- [ ] Would Claude discover this Skill for the right requests?
-- [ ] Is the description specific and actionable?
-- [ ] Does description include both WHAT and WHEN?
+**Discovery**
+- [ ] Description includes verb + specifics + trigger words?
+- [ ] Would Claude discover with these keywords?
+- [ ] Description includes both WHAT and WHEN?
 
-**Content Quality**
-- [ ] Is every line necessary? (Token efficiency)
+**Content**
+- [ ] SKILL.md under 500 lines?
+- [ ] Every line justifies its token cost?
 - [ ] No framework basics or library docs?
-- [ ] Delta principle applied? (Non-inferrable only)
-- [ ] Consistent terminology throughout?
+- [ ] Delta principle applied?
 
 **Structure**
-- [ ] SKILL.md under 500 lines?
-- [ ] Reference files separate and focused?
-- [ ] File references one level deep?
-- [ ] Table of contents in long reference files?
-
-**Accessibility**
+- [ ] References one level deep from SKILL.md?
 - [ ] Examples concrete, not abstract?
-- [ ] Code examples complete and runnable?
-- [ ] Workflows have clear steps?
-- [ ] Scripts have error handling?
+- [ ] Code complete and runnable?
+- [ ] Large files have table of contents?
 
 **Testing**
 - [ ] Tested with real scenarios?
 - [ ] Tested with Haiku, Sonnet, Opus?
-- [ ] Team feedback incorporated (if applicable)?
+- [ ] Manual discovery test passed?
+
+See [discovery-checklist.md](discovery-checklist.md) for comprehensive pre-launch testing.
+
+---
+
+## Workflows & Examples
+
+- See [workflows.md](workflows.md) for 3 complete skill creation walkthroughs
+- See [reference.md](reference.md) for structure patterns and organization
+- See [SKILL.md](SKILL.md) for the 6-phase workflow
 
 ---
 
 ## Key Takeaway
 
-**Great Skills are concise, focused, and observable.**
+**Discoverable + Concise + Tested = Great Skills**
 
-Write minimal SKILL.md that Claude can discover. Bundle detailed references on-demand. Test with real usage and iterate based on how Claude actually uses your Skill.
+1. Write a description that Claude will find
+2. Make SKILL.md minimal (under 500 lines)
+3. Put detailed content in reference files (on-demand loading)
+4. Test with real scenarios across all models
+5. Iterate based on how Claude actually uses it
+
+Focus on discovery first. Everything else follows.

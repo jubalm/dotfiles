@@ -1,177 +1,201 @@
 ---
 name: Authoring Agent Skills
-description: Create and refine Agent Skills for Claude Code - structured procedures with progressive disclosure. Use when writing reusable Skills, organizing skill content, or improving existing Skills.
+description: Write reusable procedures that Claude discovers and invokes automatically. Use when creating new skills, testing if skills are discoverable, iterating on underused skills, or improving skill descriptions for better Claude integration.
 ---
 
 # Authoring Agent Skills
 
-**Focused capability:** Write Skills that Claude discovers and uses effectively in real workflows.
+**Focused capability:** Write skills that Claude actually discovers and uses in real workflows.
 
-A Skill is a reusable procedure packaged into discoverable capabilities. This guide teaches how to structure, write, and iterate on Skills for maximum effectiveness.
-
----
-
-## When to Use This Skill
-
-- Writing a new Skill from scratch
-- Refining an existing Skill that isn't being discovered or used
-- Organizing Skill content with progressive disclosure
-- Deciding between user-level (universal) and project-level (project-specific) Skills
-- Applying token efficiency to Skill design
+A Skill is a reusable procedure that Claude discovers automatically based on description matching. Its success is measured by: **Does Claude find it? Does Claude use it? Does it solve the problem?**
 
 ---
 
-## Core Principle: Concise Instructions with Progressive Disclosure
+## Core Principle: Discovery Before Structure
 
-**SKILL.md** is a table of contents:
-- Overview + quick examples (keep under 500 lines)
-- Links to reference files for deeper content
-- Claude reads reference files only when needed
+The best skill structure means nothing if Claude never discovers it.
 
-**Result:** Token-efficient, focused, discoverable.
+**Priority order:**
+1. **Is it discoverable?** (Will Claude find it?)
+2. **Does it work?** (Does it solve the problem?)
+3. **Is it efficient?** (Is it token-optimized?)
+4. **Is it structured well?** (Are reference files organized?)
+
+Structure follows discovery, not the other way around.
 
 ---
 
-## Quick Decision Matrices
+## The Workflow: Write a Discoverable Skill
 
-### 1. Skill or Memory?
+### Phase 1: Decide If It's a Skill
+
+Not everything should be a skill.
+
+| Type | Example | Where |
+|------|---------|-------|
+| **Skill** (procedure/HOW) | "How to write conventional commits" | `~/.claude/skills/` |
+| **Memory** (fact/WHAT) | "Valid commit scopes: nvim, zsh, git" | `.claude/context/` |
+| **Slash Command** (explicit) | `/git-commit` | `.claude/commands/` |
+
+**Decision questions:**
+- Is it a reusable HOW (procedure)? → Skill
+- Is it a project-specific WHAT (fact)? → Memory
+- Does user need to invoke it explicitly? → Slash Command
+
+### Phase 2: Choose Scope (User or Project)
+
+**User-level skills** (`~/.claude/skills/`)
+- Works across all projects
+- Universal best practice
+- Portable, reusable
+
+**Project-level skills** (`.claude/skills/`)
+- Only relevant to this project
+- Project-specific workflow
+- Use sparingly
+
+Default to **user-level** (more discoverable globally).
+
+### Phase 3: Write for Discovery
+
+**The description determines if Claude finds your skill.**
+
+Structure:
+```
+Description = What skill does + When to use it + Key trigger words
+```
+
+**Bad (vague):**
+```
+description: Helps with commit messages
+```
+
+**Good (specific, discoverable):**
+```
+description: Write conventional commit messages from git diffs. Use when making commits, need semantic message format, or following type(scope): description pattern.
+```
+
+**Ingredients:**
+- Verb + action (Write, Generate, Create, Analyze)
+- Specific capability (not just "helps with")
+- When to use (triggers, contexts)
+- Key terms users mention ("semantic commit", "type(scope)")
+
+### Phase 4: Write the Skill
+
+**Core content goes in SKILL.md (keep under 500 lines):**
+1. What this skill does (1 paragraph)
+2. Common scenarios (3-5 use cases)
+3. Quick reference or decision table
+4. 1-2 concrete minimal examples
+5. Links to reference files for details
+
+**Example structure:**
+
+```markdown
+---
+name: Git Commit Helper
+description: Write conventional commit messages from git diffs.
+Use when making commits, creating semantic messages, or following
+type(scope): description pattern.
+---
+
+# Git Commit Helper
+
+## What It Does
+Analyzes staged changes and suggests semantic commit messages.
+
+## When to Use
+- Making a commit with staged changes
+- Unsure about commit message format
+- Need type(scope): description pattern
+- Want to enforce conventional commits
+
+## Quick Reference
+
+| Type | Usage | Example |
+|------|-------|---------|
+| feat | New feature | feat(auth): add login flow |
+| fix | Bug fix | fix(button): hover state broken |
+| docs | Documentation | docs: update README |
+| refactor | Code refactor | refactor(api): simplify endpoints |
+| test | Test changes | test(auth): add login tests |
+
+## Minimal Example
+
+```
+$ git diff --staged
+[shows 3 files changed]
+
+You: "suggest commit message"
+
+Skill: "Based on your changes:
+
+feat(auth): implement user login with oauth
+
+This adds OAuth-based login, storing tokens securely."
+
+You: "commit that"
+```
+
+## More
+
+See [reference.md](reference.md) for advanced patterns.
+```
+
+### Phase 5: Test Discoverability
+
+**Your skill only exists if Claude finds it.**
+
+- [ ] Does description match what users would ask for?
+- [ ] Would Claude discover it explicitly? (Test with description words)
+- [ ] Does it work when invoked?
+- [ ] Try with different phrasing - does it still trigger?
+- [ ] Check if Claude uses it proactively in related tasks
+
+See [discovery-checklist.md](discovery-checklist.md) for detailed testing.
+
+### Phase 6: Iterate Based on Usage
+
+- Does Claude invoke it appropriately?
+- Are users mentioning it explicitly?
+- Could description be clearer?
+- Does the skill need refinement?
+
+Update description and content based on patterns you observe.
+
+---
+
+## Decision Matrix: Skill or Memory?
 
 | Question | Skill | Memory |
 |----------|-------|--------|
-| Procedure (HOW)? | ✓ YES | ✗ NO |
-| Fact (WHAT)? | ✗ NO | ✓ YES |
-| Reusable workflow? | ✓ YES | ✗ NO |
-| Project constraint? | ✗ NO | ✓ YES |
+| Is it a procedure (HOW)? | ✓ YES | ✗ NO |
+| Is it a fact (WHAT)? | ✗ NO | ✓ YES |
+| Reusable across projects? | ✓ YES | ✗ NO |
+| Project-specific constraint? | ✗ NO | ✓ YES |
 
-**If majority left → Skill | If majority right → Memory**
-
-### 2. Skill Location: User-Level or Project-Level?
-
-*Only applies if Step 1 = Skill*
-
-| Question | User-Level | Project-Level |
-|----------|------------|---------------|
-| Works for any project? | ✓ YES | ✗ NO |
-| Universal best practice? | ✓ YES | ✗ NO |
-| Shareable across projects? | ✓ YES | ✗ NO |
-| Only for this project? | ✗ NO | ✓ YES |
-
-**Default: User-level (preferred).** Only use project-level when truly necessary.
-
----
-
-## Essential Structure
-
-### SKILL.md Frontmatter
-
-```yaml
----
-name: Skill Name (64 chars max)
-description: What it does + when to use (1024 chars max)
----
-```
-
-**Description is critical.** Include both what the Skill does and specific triggers/contexts for when to use it.
-
-### Directory Structure
-
-```
-my-skill/
-├── SKILL.md              # Required: overview + quick examples
-├── reference.md          # Optional: detailed guide
-├── best-practices.md     # Optional: authoring principles
-└── scripts/              # Optional: utility scripts
-    └── helper.py
-```
-
----
-
-## Key Principles
-
-1. **One capability per Skill** - Focused, discoverable
-2. **Concise SKILL.md** - Under 500 lines
-3. **Progressive disclosure** - Details in reference files
-4. **Clear descriptions** - Both WHAT and WHEN
-5. **Token efficiency** - Only non-inferrable knowledge
-6. **User-level default** - Portable, reusable
+**Majority left → Skill | Majority right → Memory**
 
 ---
 
 ## Detailed Guidance
 
-For comprehensive authoring patterns:
-- See [reference.md](reference.md) for detailed structure and patterns
-- See [best-practices.md](best-practices.md) for iterative refinement
-
-For framework context:
-- Skills are procedures (HOW to do things)
-- Memory stores facts (WHAT is true about things)
-- Skills can reference Memory for project-specific constraints
+For complete implementation details:
+- See [reference.md](reference.md) for structure patterns and file organization
+- See [best-practices.md](best-practices.md) for writing principles
+- See [discovery-checklist.md](discovery-checklist.md) for testing your skill
+- See [workflows.md](workflows.md) for complete step-by-step examples
 
 ---
 
-## Quick Examples
+## Quick Start
 
-### Simple Skill: Single SKILL.md File
+1. **Decide**: Is it a skill? (Phase 1)
+2. **Choose scope**: User or project? (Phase 2)
+3. **Write description**: Will Claude find it? (Phase 3)
+4. **Write SKILL.md**: Procedure + examples (Phase 4)
+5. **Test discovery**: Does it work? (Phase 5)
+6. **Iterate**: Based on usage patterns (Phase 6)
 
-Focus on one capability, quick startup:
-
-```markdown
----
-name: Git Commit Helper
-description: Generate semantic commit messages from git diffs
----
-
-# Git Commit Helper
-
-## Quick start
-
-1. Run: `git diff --staged`
-2. I'll suggest a commit message with type(scope): description
-3. Explain the change and impact
-
-## Format
-
-Follow these examples:
-- feat(scope): new feature
-- fix(scope): bug fix
-- chore: maintenance
-```
-
-### Complex Skill: SKILL.md + References
-
-Multi-faceted capability, progressive content:
-
-```markdown
----
-name: PDF Processing
-description: Extract text/tables, fill forms, merge PDFs
----
-
-# PDF Processing
-
-## Quick start
-
-**Extract text:** See [reference.md](reference.md)
-**Fill forms:** See [reference.md](reference.md)
-**Merge documents:** See [reference.md](reference.md)
-
-## When to use
-
-- Text extraction from PDFs
-- Form filling workflows
-- Document merging
-```
-
----
-
-## Next Steps
-
-1. Determine: Skill or Memory? User-level or project-level?
-2. Create directory: `~/.claude/skills/skill-name/` (user) or `.claude/skills/skill-name/` (project)
-3. Write SKILL.md with frontmatter + overview
-4. Add reference files for detailed content
-5. Test with real prompts to verify discovery
-6. Iterate based on usage patterns
-
-See [reference.md](reference.md) for complete authoring patterns and [best-practices.md](best-practices.md) for refinement strategies.
+See [workflows.md](workflows.md) for complete walkthroughs of creating new skills from start to finish.
