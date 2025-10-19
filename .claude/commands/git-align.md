@@ -1,93 +1,130 @@
 ---
-allowed-tools: Bash(git:*), Read
-argument-hint: [target-branch]
-description: Check alignment with team's remote state (push or PR readiness)
+allowed-tools: Bash(git:*)
+argument-hint: [target] [mode]
+description: Check branch alignment with target (default: main). Modes: full (default), summary, conflicts. Reports ahead/behind, commits, conflicts, and recommendations.
 ---
 
-# Git Alignment Check
+# Git Align
 
-Am I aligned with the team?
+Check synchronization between current branch and target branch.
 
-## Variables
+## Parameters
 
-TARGET: `$1` (optional - if provided, checks PR alignment; if empty, checks push alignment)
+- **TARGET**: `$ARGUMENTS[0]` or "main" (default)
+  - Branch name to align with (usually: main, develop, production)
 
-## Base Context Gathering
+- **MODE**: `$ARGUMENTS[1]` or "full" (default)
+  - `full` - Complete alignment report
+  - `summary` - Just ahead/behind counts and recommendation
+  - `conflicts` - Conflict detection and resolution guidance
 
-!`git fetch --quiet 2>&1`
+## Data Collection
 
-**Local position:**
-!`git branch --show-current`
+!`git fetch origin 2>/dev/null || true`
 
-**Tracking branch:**
-!`git rev-parse --abbrev-ref @{upstream} 2>/dev/null || echo "no-tracking"`
+Current branch: !`git branch --show-current`
 
-**Commit comparison (if tracking exists):**
-!`git rev-list --count @{upstream}..HEAD 2>/dev/null || echo "0"`
-!`git rev-list --count HEAD..@{upstream} 2>/dev/null || echo "0"`
+Ahead/behind counts: !`git rev-list --left-right --count [target]...HEAD`
 
-## Memory Context
+Your commits: !`git log [target]..HEAD --oneline`
 
-@.claude/CLAUDE.md
+Their commits: !`git log HEAD..[target] --oneline`
 
-## Alignment Analysis
+Diff: !`git diff [target]...HEAD --stat`
 
-### Scenario Detection
+Merge-base: !`git merge-base HEAD [target]`
 
-**If no TARGET provided (push alignment):**
-- Checking alignment with tracking branch
-- Context: Push readiness
+## Output Format
 
-**If TARGET provided (PR alignment):**
-- Checking alignment with target branch: $TARGET
-- Context: PR readiness for merging into $TARGET
+### full mode
 
-### Alignment Report
+```
+<!-- ALIGN -->
+Current: [branch-name]
+Target: [target-branch]
 
-**Your position:**
-- Branch: [current branch name]
-- Local commits: [ahead count]
+Status: Ahead [n] | Behind [m]
 
-**Team's position:**
-[If push context:]
-- Remote tracking: [tracking branch]
-- Remote ahead by: [behind count]
+Your commits ([n]):
+  [hash]  [message]
+  [hash]  [message]
+  ...
 
-[If PR context - use Bash tool conditionally:]
-- Target branch: $TARGET
-- Target ahead by: [calculate with git rev-list]
-- Commits in PR: [calculate with git log]
+Their commits ([m]):
+  [hash]  [message]
+  ...
 
-**Alignment status:**
-- ✅ Aligned: Ready to push/PR
-- ⚠️ Behind: Team ahead, need to pull
-- ⚠️ Ahead: Local commits not pushed
-- ⚠️ Diverged: Both have unique commits
-- ⚠️ No tracking: Need to set upstream
+Changes: [files-changed] file(s), +[lines], -[lines]
 
-**Conflict risk:**
-[If PR context:]
-- Check conflicts: Use `git merge-tree` to detect
-- Show conflicting files if any
+Conflicts: None detected | [conflict-summary]
 
-**To align:**
-[Provide specific commands based on status:]
-- If behind only: `git pull` or `git pull --rebase`
-- If ahead only: `git push` or `git push -u origin [branch]`
-- If diverged: `git pull --rebase` then `git push`
-- If no tracking: `git push -u origin [branch]`
+Recommendation: [aligned/needs-rebase/needs-merge/needs-review]
+<!-- /ALIGN -->
+```
 
-[If PR context with conflicts:]
-- Sync with target first: `git fetch origin $TARGET && git rebase origin/$TARGET`
-- Or merge strategy: `git merge origin/$TARGET`
+### summary mode
 
-**Memory rules applied:**
-- Merge strategy: [extract from CLAUDE.md - rebase/merge preference]
-- Protected branches: [check if target is protected]
-- Alignment workflow: [any project-specific rules]
+```
+<!-- ALIGN-SUMMARY -->
+Target: [target-branch]
+Status: Ahead [n] | Behind [m]
+Conflicts: None | [detected]
+Recommendation: [action]
+<!-- /ALIGN-SUMMARY -->
+```
 
-**Why alignment matters:**
-[Explain specific situation - team pushed X commits, or target branch advanced, etc.]
+### conflicts mode
 
-**Next steps:**
-- [Specific recommendation based on context and memory]
+```
+<!-- CONFLICTS -->
+Target: [target-branch]
+
+Conflict detection:
+  Attempting merge: git merge --no-commit --no-ff [target]
+
+Conflicts found: [list or "None"]
+  [file1]
+  [file2]
+
+Resolution guidance:
+  [recommendations based on conflicts]
+
+Rebase strategy:
+  [safe-to-rebase / risky / needs-manual-resolution]
+<!-- /CONFLICTS -->
+```
+
+## Analysis & Recommendations
+
+**Aligned**
+- 0 ahead, 0 behind
+- No new commits on either side
+- → "Branch is in sync with target"
+
+**Ahead only (typical)**
+- N ahead, 0 behind
+- You have commits not in target
+- → "Ready to propose to target"
+
+**Behind only (out of date)**
+- 0 ahead, M behind
+- Target has moved ahead
+- → "Update with git pull origin [target]"
+
+**Both diverged (risky)**
+- N ahead, M behind
+- Both have new commits
+- → "Rebase recommended before proposing"
+
+**Conflicts possible**
+- Both diverged + overlapping files
+- → "Merge-conflict likely; test first"
+
+## Implementation Notes
+
+- Fetch from origin to ensure current data
+- Use `--left-right --count` for efficient ahead/behind
+- Detect conflicts by attempting dry-run merge
+- Never automatically rebase (only recommend)
+- Provide specific guidance based on mode
+- All output from git commands (no manual formatting)
