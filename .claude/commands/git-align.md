@@ -20,115 +20,94 @@ Check synchronization between current branch and target branch.
 
 ## Data Collection
 
-**Pre-processing (static context):**
+**Pre-processing (static):**
 
 !`git fetch origin 2>/dev/null || true`
 
 !`git branch --show-current`
 
-**Workflow (with $ARGUMENTS):**
+**Workflow execution:**
 
-TARGET=$ARGUMENTS[0] or "main"
+```bash
+#!/bin/bash
+TARGET=${1:-main}
+MODE=${2:-full}
+CURRENT=$(git branch --show-current)
 
-```
-git rev-list --left-right --count $ARGUMENTS[0]...HEAD
-git log $ARGUMENTS[0]..HEAD --oneline
-git log HEAD..$ARGUMENTS[0] --oneline
-git diff --stat $ARGUMENTS[0]...HEAD
-git merge-base HEAD $ARGUMENTS[0]
-```
+# Collect data once
+COUNTS=$(git rev-list --left-right --count origin/$TARGET...HEAD 2>/dev/null || git rev-list --left-right --count $TARGET...HEAD)
+read BEHIND AHEAD <<< "$COUNTS"
+STATS=$(git diff --stat $TARGET...HEAD 2>/dev/null | tail -1)
 
-## Output Format
+# Recommendation logic (DRY)
+rec() {
+  [ $1 -eq 0 -a $2 -eq 0 ] && echo "aligned" && return
+  [ $1 -gt 0 -a $2 -eq 0 ] && echo "ready-to-propose" && return
+  [ $1 -eq 0 -a $2 -gt 0 ] && echo "needs-update" && return
+  echo "needs-rebase"
+}
 
-### full mode
+case "$MODE" in
+  summary)
+    cat <<-EOF
+	<!-- ALIGN-SUMMARY -->
+	Current: $CURRENT | Target: $TARGET
+	Status: Ahead $AHEAD | Behind $BEHIND
+	Recommendation: $(rec $AHEAD $BEHIND)
+	<!-- /ALIGN-SUMMARY -->
+	EOF
+    ;;
 
-```
-<!-- ALIGN -->
-Current: [branch-name]
-Target: [target-branch]
+  conflicts)
+    MERGE_BASE=$(git merge-base $TARGET HEAD)
+    FOUND=$(git merge-tree $MERGE_BASE $TARGET HEAD 2>/dev/null | grep -q "^@@" && echo "Possible conflicts" || echo "None")
+    STRATEGY=$([ "$FOUND" = "None" ] && echo "safe-to-rebase" || echo "needs-manual-resolution")
 
-Status: Ahead [n] | Behind [m]
+    cat <<-EOF
+	<!-- CONFLICTS -->
+	Current: $CURRENT | Target: $TARGET
 
-Your commits ([n]):
-  [hash]  [message]
-  [hash]  [message]
-  ...
+	Conflict detection:
+	  Conflicts found: $FOUND
+	  Rebase strategy: $STRATEGY
+	<!-- /CONFLICTS -->
+	EOF
+    ;;
 
-Their commits ([m]):
-  [hash]  [message]
-  ...
+  *)
+    # full mode (default)
+    cat <<-EOF
+	<!-- ALIGN -->
+	Current: $CURRENT | Target: $TARGET
+	Status: Ahead $AHEAD | Behind $BEHIND
 
-Changes: [files-changed] file(s), +[lines], -[lines]
-
-Conflicts: None detected | [conflict-summary]
-
-Recommendation: [aligned/needs-rebase/needs-merge/needs-review]
-<!-- /ALIGN -->
-```
-
-### summary mode
-
-```
-<!-- ALIGN-SUMMARY -->
-Target: [target-branch]
-Status: Ahead [n] | Behind [m]
-Conflicts: None | [detected]
-Recommendation: [action]
-<!-- /ALIGN-SUMMARY -->
-```
-
-### conflicts mode
-
-```
-<!-- CONFLICTS -->
-Target: [target-branch]
-
-Conflict detection:
-  Method: Attempt merge with `git merge --no-commit --no-ff [target]`
-
-Conflicts found: [list or "None"]
-  [file1]
-  [file2]
-
-Resolution guidance:
-  [recommendations based on conflicts]
-
-Rebase strategy:
-  [safe-to-rebase / risky / needs-manual-resolution]
-<!-- /CONFLICTS -->
+	$( [ $AHEAD -gt 0 ] && printf 'Your commits (%d):\n%s\n' $AHEAD "$(git log --format='  %h %s' --max-count=20 $TARGET...HEAD 2>/dev/null)" )
+	$( [ $BEHIND -gt 0 ] && printf 'Their commits (%d):\n%s\n' $BEHIND "$(git log --format='  %h %s' --max-count=20 HEAD...$TARGET 2>/dev/null)" )
+	Changes: $STATS
+	Recommendation: $(rec $AHEAD $BEHIND)
+	<!-- /ALIGN -->
+	EOF
+    ;;
+esac
 ```
 
-## Analysis & Recommendations
+## Output Reference
 
-**Aligned**
-- 0 ahead, 0 behind
-- No new commits on either side
-- → "Branch is in sync with target"
+**Recommendations** (from `rec()` function):
+- `aligned` → 0 ahead, 0 behind (in sync)
+- `ready-to-propose` → N ahead, 0 behind (ready to PR)
+- `needs-update` → 0 ahead, M behind (pull target)
+- `needs-rebase` → N ahead, M behind (rebase before proposing)
 
-**Ahead only (typical)**
-- N ahead, 0 behind
-- You have commits not in target
-- → "Ready to propose to target"
+**Modes:**
+- `summary` → Compact status with recommendation
+- `conflicts` → Conflict detection + rebase strategy
+- `full` → Complete report with commit lists
 
-**Behind only (out of date)**
-- 0 ahead, M behind
-- Target has moved ahead
-- → "Update with git pull origin [target]"
+## Implementation Details
 
-**Both diverged (risky)**
-- N ahead, M behind
-- Both have new commits
-- → "Rebase recommended before proposing"
-
-**Conflicts possible**
-- Both diverged + overlapping files
-- → "Merge-conflict likely; test first"
-
-## Implementation Notes
-
-- Fetch from origin to ensure current data
-- Use `--left-right --count` for efficient ahead/behind
-- Detect conflicts by attempting dry-run merge
-- Never automatically rebase (only recommend)
-- Provide specific guidance based on mode
-- All output from git commands (no manual formatting)
+- Single `rec()` function encodes all recommendation logic (DRY)
+- Heredocs (`<<-EOF`) for clean, template-based output
+- `git --format` for efficient log formatting
+- Conditional blocks in templates (no duplicated code)
+- Lazy conflict detection (only in conflicts mode)
