@@ -29,7 +29,7 @@ Staged stats: !`git diff --staged --stat`
 
 Recent commits: !`git log -10 --oneline --no-decorate`
 
-Ahead/behind: !`git fetch origin 2>/dev/null && git rev-list --left-right --count origin/$(git branch --show-current)...HEAD 2>/dev/null || echo "0 0"`
+Ahead/behind: !`git fetch origin 2>/dev/null; git rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "0 0"`
 
 Stashes: !`git stash list | wc -l`
 

@@ -20,19 +20,21 @@ Check synchronization between current branch and target branch.
 
 ## Data Collection
 
+Target branch: `${TARGET:-main}` (default: main)
+
 !`git fetch origin 2>/dev/null || true`
 
 Current branch: !`git branch --show-current`
 
-Ahead/behind counts: !`git rev-list --left-right --count [target]...HEAD`
+Ahead/behind counts: !`git rev-list --left-right --count ${TARGET:-main}...HEAD`
 
-Your commits: !`git log [target]..HEAD --oneline`
+Your commits: !`git log ${TARGET:-main}..HEAD --oneline`
 
-Their commits: !`git log HEAD..[target] --oneline`
+Their commits: !`git log HEAD..${TARGET:-main} --oneline`
 
-Diff: !`git diff [target]...HEAD --stat`
+Diff: !`git diff --stat ${TARGET:-main}...HEAD`
 
-Merge-base: !`git merge-base HEAD [target]`
+Merge-base: !`git merge-base HEAD ${TARGET:-main}`
 
 ## Output Format
 
