@@ -84,7 +84,7 @@ Recommendation: [action]
 Target: [target-branch]
 
 Conflict detection:
-  Attempting merge: git merge --no-commit --no-ff [target]
+  Method: Attempt merge with `git merge --no-commit --no-ff [target]`
 
 Conflicts found: [list or "None"]
   [file1]
