@@ -5,298 +5,200 @@ description: Organize project-specific knowledge for Claude Code - facts, decisi
 
 # Authoring Memory
 
-**Focused capability:** Organize project-specific facts and constraints so Claude discovers them when needed.
-
-Memory stores WHAT is true about your project. This guide teaches how to structure, write, and maintain Memory that Claude can retrieve and apply.
+**Core idea:** Memory stores WHAT is true (decisions, constraints, patterns). Claude retrieves it when needed.
 
 ---
 
-## When to Use This Skill
+## Quick Decision Tree
 
-- Starting a Memory system for a new project
-- Deciding what project knowledge to document
-- Organizing existing Memory files for discoverability
-- Promoting discoveries from inbox to permanent Memory
-- Maintaining and auditing Memory quality
+**You want to...** → **Go here**
 
----
+**Start new Memory system?** → See [Bootstrap workflow](workflows.md#bootstrap)
 
-## Core Principle: Retrieval-Based Organization
+**Found something to document?** → [Score it](reference.md#decision-matrix) (3+ yes? Add to inbox)
 
-Organize Memory by **how Claude will be queried**, not by ideology:
+**Move inbox items to permanent?** → See [Promote workflow](workflows.md#promote)
 
-**Query:** "How does auth work?" → Answer in `auth.md`
-**Query:** "What are security constraints?" → Answer in `security.md`
-**Query:** "Why this architecture?" → Answer in `architecture.md`
+**Quarterly review?** → See [Audit workflow](workflows.md#audit)
 
-**Result:** Claude finds what it needs when it needs it.
+**Need examples or templates?** → See [reference.md](reference.md) or [examples.md](examples.md)
+
+**Stuck or unsure?** → See [Troubleshooting](workflows.md#troubleshooting)
 
 ---
 
-## Quick Decision Matrix: What to Document?
+## When Claude Should Offer This Proactively
 
-Score items on 5 criteria (need **3+ yes**):
+Observe → Suggest:
+- New project → "Create Memory system?"
+- Pattern discovery (code review) → "Capture this?"
+- Hard-earned constraint → "Worth documenting?"
+- "Why did you do it this way?" → "This is Memory material"
+- Team onboarding → "Document for new members?"
+- Architecture decision → "Capture the WHY?"
+- "Should we use X or Y?" → "Document this decision"
 
-1. **Would Claude miss?** Not in training or discoverable by inspection
-2. **Project-specific?** Not general knowledge or framework basics
-3. **Prevent bugs if unknown?** High stakes (security, data loss, reliability)
-4. **Save time?** Vs rediscovering through experimentation
-5. **Stable?** Not changing soon
-
-**Results:**
-- **5 yes** → Essential, document now
-- **4 yes** → High priority
-- **3 yes** → Add to permanent Memory
-- **2 yes** → Inbox (verify later)
-- **0-1 yes** → Skip (Claude knows this)
+**Prompt:** "This would make great Memory. Want to capture it?"
 
 ---
 
-## Delta Principle: Only Document Non-Inferrable Knowledge
+## Core Concepts (Concise)
 
-### Don't Document (Claude Already Knows)
+### Decision Matrix: Score Items 1-5 on Each
+
+```
+✓ Would Claude miss?      (not in training, not discoverable)
+✓ Project-specific?       (not framework/library basics)
+✓ Prevent bugs if unknown? (high stakes: security, data loss)
+✓ Save time?              (vs rediscovering through experimentation)
+✓ Stable?                 (durable knowledge, not changing soon)
+```
+
+**Result:** 3+ yes → Document. 5 yes → Essential. 0-2 → Skip.
+
+---
+
+### Delta Principle: Only Document Non-Inferrable Knowledge
+
+**Don't document (Claude already knows):**
 - Framework patterns (React hooks, Django models)
-- Library behavior (Stripe, Firebase capabilities)
-- Standard architectures (REST, GraphQL, MVC)
+- Library capabilities (Stripe API, Firebase features)
+- File structure (ls/grep shows this)
 - Tech stack (visible in package.json)
-- File organization (readable via ls/grep)
-- Language syntax and standard libraries
+- Language syntax (standard libraries)
 
-### Do Document (High-Value Deltas)
+**Do document (High-value deltas):**
+- **Decisions** - Why X over Y (tradeoffs, constraints)
+- **Product logic** - Unique business rules, custom patterns
+- **Hard constraints** - "NEVER" rules that prevent bugs
 
-**Decisions:** Why X over Y
-- Technology choices and tradeoffs
-- Architecture decisions and constraints
-- Cost, performance, scalability implications
+[See diverse examples](reference.md#delta-principle-by-domain)
 
-**Product Logic:** Unique to your application
-- Business rules and access control
-- Domain models and relationships
-- Feature logic and state management
-- Custom patterns
+---
 
-**Hard Constraints:** Rules that prevent bugs
-- Security policies (`NEVER` bypass RLS)
-- Compliance requirements (GDPR implications)
-- Reliability rules (timeouts, retry logic)
-- Performance limits (cache this, never load all)
-
-### Delta Examples
+### Density: Fragments > Sentences
 
 ```
-❌ "We use React" (read package.json)
-✓ "React: server components default, 'use client' only for interactivity"
-
-❌ "PostgreSQL database" (see import)
-✓ "Postgres: RLS policies enforce multi-tenant, NEVER bypass without audit"
-
-❌ "Git for version control" (standard)
-✓ "Git: force-push only feature branches, main always stable"
+❌ "The reason we chose Next.js is because it enables..."
+✓ "Next.js: ✓ SSR/CSR unified, ✓ simpler mental model"
 ```
+
+Use symbols: `✓` / `✗` instead of yes/no, `→` instead of leads to, `:` instead of is.
+
+[See density examples](reference.md#density-guide)
+
+---
+
+### Code in Memory: Constraints Over Implementation
+
+Static code drifts after refactors. Document constraints (stay true) not implementation (changes).
+
+```
+❌ Copy-paste exact code
+✓ Document the NEVER rule
+✓ Use pseudocode + constraint
+✓ Link to actual code
+```
+
+**Why:** Constraint "NEVER bypass auth" survives refactoring. Copy-paste code becomes stale.
+
+[See guidance](reference.md#code-in-memory-the-drift-problem)
 
 ---
 
 ## File Organization
 
-### Directory Structure
+### Starter (Simple Projects)
 
 ```
 .claude/
-├── CLAUDE.md              # Entry point, routing hints
-├── context/
-│   ├── principles.md      # Design philosophy, WHY decisions
-│   ├── architecture.md    # Structure, organization, constraints
-│   ├── patterns.md        # Non-obvious implementations, HOW things work
-│   ├── [feature].md       # Feature-specific logic
-│   ├── [concern].md       # Cross-cutting (security, performance)
-│   └── inbox.md           # Staging area for discoveries
-└── agents/                # Optional: custom agents
-    └── [agent-name].md
+├── CLAUDE.md          # Routing hints
+└── context/
+    ├── conventions.md # All decisions + patterns + constraints
+    └── inbox.md       # Staging area
 ```
 
-### File Size Guidelines
+### Growing (Multiple Concerns)
 
-- **Ideal:** 50-200 lines per file
-- **Too small:** (<30 lines) → Merge into parent file
-- **Too large:** (>250 lines) → Split by domain or feature
-- **Exception:** Inbox has no size limit (staging area)
+```
+.claude/
+├── CLAUDE.md
+└── context/
+    ├── principles.md   # WHY decisions
+    ├── architecture.md # HOW organized + constraints
+    ├── patterns.md     # Non-obvious implementations
+    └── inbox.md
+```
 
-### Naming Conventions
+### Complex (Multi-Domain)
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Entry point, routing hints ("When X → @context/Y") |
-| `principles.md` | Philosophy, design rationale, WHY decisions |
-| `architecture.md` | Structure, organization, HOW it's organized |
-| `patterns.md` | Non-obvious implementations, HOW things work |
-| `[feature].md` | Feature-specific (auth.md, billing.md) |
-| `[concern].md` | Cross-cutting (security.md, testing.md) |
-| `inbox.md` | Discoveries pending promotion |
+```
+.claude/
+├── CLAUDE.md
+└── context/
+    ├── principles.md
+    ├── architecture.md
+    ├── [feature].md    # Feature-specific
+    ├── [concern].md    # Cross-cutting (security, testing)
+    └── inbox.md
+```
 
----
-
-## CLAUDE.md: Entry Point with Routing Hints
-
-CLAUDE.md guides Claude to the right Memory files.
-
-**Format:**
+**CLAUDE.md:**
 ```markdown
-# [Project Name]
+# Project Name
 
-When: [Query pattern] → @context/[file.md]
-When: [Query pattern] → @context/[file.md]
+**When:** [Query] → @context/[file.md]
+(Routing hints: one query → one file)
 
-[Brief project description]
+[Brief description]
 ```
-
-**Example:**
-```markdown
-# Dotfiles Project
-
-**When:** How does modularity work? → @context/architecture.md
-**When:** Why use XDG Base Directory spec? → @context/principles.md
-**When:** How does LSP setup work? → @context/patterns.md
-**When:** What are valid git scopes? → @context/architecture.md
-**When:** Are there brand/consistency guidelines? → @context/principles.md
-
-This is a personal development environment configuration...
-```
-
-**Why routing hints matter:** Claude can find relevant Memory files immediately.
 
 ---
 
-## Authoring Style: Maximum Density
+## Workflow Overview
 
-### Structure Preferences
-
-**Code > prose** - Show patterns in code, not narrative
-**Bullets > paragraphs** - One idea per line
-**Fragments > sentences** - Remove connecting words
-
-### Use Symbols Over Words
-
-- `✓` / `✗` instead of yes/no
-- `→` instead of "leads to"
-- `:` instead of "is"
-
-### Density Example
-
-Before (27 words):
-> The reason we use the modular approach is because it makes maintenance easier, and it allows developers to understand one concern at a time.
-
-After (8 words):
-> Modular: ✓ easier maintenance, ✓ isolated concerns
+| Workflow | Purpose | Time | See |
+|----------|---------|------|-----|
+| **Bootstrap** | Create Memory system from scratch | 2-4 hours | [workflows.md](workflows.md#bootstrap) |
+| **Capture** | Find and add new discoveries | Ongoing | [workflows.md](workflows.md#capture) |
+| **Promote** | Move inbox items to permanent | 15-30 min per item | [workflows.md](workflows.md#promote) |
+| **Audit** | Quarterly freshness check | 1-2 hours | [workflows.md](workflows.md#audit) |
 
 ---
 
-## Memory Lifecycle
+## File Size Guidelines
 
-### Bootstrap: Starting Fresh
+| File | Ideal | Too small | Too large |
+|------|-------|-----------|-----------|
+| principles.md | 80-150 | <50 | >200 |
+| architecture.md | 100-200 | <50 | >250 |
+| patterns.md | 100-200 | <50 | >250 |
+| [feature].md | 50-150 | <30 | >200 |
+| inbox.md | Unlimited | - | - |
 
-1. **Discover** - Scan codebase, package.json, structure
-2. **Interview** - Ask about decisions, product logic, patterns
-3. **Score** - Apply decision matrix (3+ yes?)
-4. **Structure** - Organize by retrieval patterns
-5. **Create** - CLAUDE.md + context files + inbox.md
-6. **Report** - Summary with test queries
-
-### Promote: Inbox → Permanent
-
-1. Read inbox → find target item
-2. Re-score (still 3+ yes?)
-3. Determine destination file
-4. Rewrite for efficiency
-5. Edit destination file → add item
-6. Update inbox: `~~strikethrough~~ (Promoted: YYYY-MM-DD)`
-
-### Capture: Ongoing Discovery
-
-**Proactive:** Monitor for patterns, score silently, suggest promotion
-
-**Explicit:** User requests "add this", score with matrix, add to inbox or permanent file
+Too small → merge into parent. Too large → split by domain.
 
 ---
 
 ## Quality Checklist
 
-### Bootstrap Quality
-- [ ] CLAUDE.md uses relative paths? (`@context/` not `@.claude/context/`)
-- [ ] "When" hints clear and specific?
-- [ ] No framework/library basics?
-- [ ] Structure matches project complexity?
-- [ ] File sizes 50-200 lines?
-
-### Ongoing Maintenance
-- [ ] Decision matrix applied? (3+ yes)
-- [ ] Writing quality checked?
-- [ ] Inbox reviewed monthly?
-- [ ] Stale content archived?
-- [ ] Routing hints updated?
-
-### Promotion Quality
-- [ ] Re-scored (still 3+ yes)?
-- [ ] Destination file semantically correct?
-- [ ] Writing quality applied?
-- [ ] Inbox updated with date?
-
----
-
-## Detailed Guidance
-
-For comprehensive organization patterns:
-- See [reference.md](reference.md) for file structures and templates
-- See [workflows.md](workflows.md) for bootstrap and maintenance workflows
-
-For framework context:
-- Memory stores WHAT (facts, constraints, decisions)
-- Skills provide HOW (procedures, workflows)
-- Together they enable informed execution
-
----
-
-## Quick Examples
-
-### Simple Memory: Single conventions.md
-
-Start minimal, grow as needed:
-
-```markdown
-# Project Conventions
-
-## Technology Decisions
-
-**Framework:** Next.js (fullstack, better DX than separate frontend)
-**Database:** PostgreSQL (open source, battle-tested, RLS support)
-
-## Hard Constraints
-
-- ✗ Never bypass PostgreSQL RLS policies
-- ✗ All sensitive data encrypted at rest
-- ✓ Cache responses for 5+ minutes when possible
-```
-
-### Complex Memory: Multi-file with routing
-
-```
-CLAUDE.md (routing hints)
-├── principles.md (philosophy)
-├── architecture.md (structure, WHY)
-├── patterns.md (implementations, HOW)
-├── security.md (hard constraints)
-├── auth.md (authentication specifics)
-└── inbox.md (discoveries pending promotion)
-```
+✓ Routing hints in CLAUDE.md?
+✓ Files 50-200 lines?
+✓ No framework/library basics?
+✓ Decision matrix applied (3+ yes)?
+✓ Dense writing (fragments > sentences)?
+✓ Constraint-focused (NEVER rules)?
+✓ Code examples use constraints, not copy-paste? (or linked to real code)
 
 ---
 
 ## Next Steps
 
-1. Create CLAUDE.md with routing hints
-2. Score discoveries against decision matrix
-3. Create starter files (principles, architecture, patterns)
-4. Add high-value deltas (decisions, product logic, constraints)
-5. Promote from inbox regularly
-6. Audit quarterly for staleness
+1. Choose structure (starter/growing/complex)
+2. Run [Bootstrap workflow](workflows.md#bootstrap)
+3. Build CLAUDE.md with routing hints
+4. Create starter files (principles, architecture, patterns)
+5. Use [Promote workflow](workflows.md#promote) for ongoing discoveries
+6. [Audit quarterly](workflows.md#audit)
 
-See [reference.md](reference.md) for complete organization patterns and [workflows.md](workflows.md) for bootstrap, promotion, and maintenance workflows.
+**More info:** [reference.md](reference.md) (templates, examples), [examples.md](examples.md) (real-world by domain), [workflows.md](workflows.md) (procedures)

@@ -1,104 +1,27 @@
-# Memory Organization: Complete Reference
-
-Detailed patterns, templates, and organization strategies for Memory systems.
+# Reference: Templates, Examples, Patterns
 
 ---
 
-## File Organization Patterns
-
-### Starter Structure (Simple Projects)
-
-```
-.claude/
-├── CLAUDE.md
-└── context/
-    ├── conventions.md (decisions, patterns, constraints)
-    └── inbox.md (discoveries pending promotion)
-```
-
-**When to use:** Small projects, few custom patterns, straightforward domain
-
-**Example:**
-```markdown
-# CLAUDE.md
-
-**When:** What are the project constraints? → @context/conventions.md
-**When:** What should I learn about this project? → @context/conventions.md
-
-This is a personal todo application...
-```
-
-### Moderate Structure (Growing Projects)
-
-```
-.claude/
-├── CLAUDE.md (routing)
-├── context/
-│   ├── principles.md (WHY decisions)
-│   ├── architecture.md (HOW organized)
-│   ├── conventions.md (WHAT rules)
-│   └── inbox.md (staging)
-```
-
-**When to use:** Multiple concerns, significant custom patterns, evolving domain
-
-**Example routing:**
-```markdown
-**When:** Why use this technology? → @context/principles.md
-**When:** How is the system organized? → @context/architecture.md
-**When:** What constraints apply? → @context/conventions.md
-```
-
-### Complex Structure (Multi-Domain Projects)
-
-```
-.claude/
-├── CLAUDE.md (navigation)
-└── context/
-    ├── principles.md
-    ├── architecture.md
-    ├── backend.md (domain 1)
-    ├── frontend.md (domain 2)
-    ├── security.md (cross-cutting)
-    ├── performance.md (cross-cutting)
-    └── inbox.md
-```
-
-**When to use:** Large teams, multiple domains, complex constraints
-
-**Example:**
-```
-When: Backend structure? → @context/backend.md
-When: Frontend architecture? → @context/frontend.md
-When: Security constraints? → @context/security.md
-```
-
----
-
-## Decision Matrix Detailed
-
-### Complete Scoring Method
+## Decision Matrix: Detailed Scoring
 
 Score each discovery on 5 criteria:
 
-| Criterion | Question | Score |
-|-----------|----------|-------|
-| **Would Claude miss?** | Not in training or discoverable by inspection? | YES = 1 |
-| **Project-specific?** | Not general knowledge or framework basics? | YES = 1 |
-| **Prevent bugs?** | High stakes if unknown (security, data loss)? | YES = 1 |
-| **Save time?** | Rediscovery via experimentation is wasteful? | YES = 1 |
-| **Stable?** | Not changing soon, durable knowledge? | YES = 1 |
+| Criterion | Question | Score if YES |
+|-----------|----------|--------------|
+| **Would Claude miss?** | Not in training or discoverable via inspection? | 1 |
+| **Project-specific?** | Not general knowledge or framework basics? | 1 |
+| **Prevent bugs?** | High stakes if unknown (security, data loss, reliability)? | 1 |
+| **Save time?** | Rediscovery via experimentation is wasteful? | 1 |
+| **Stable?** | Durable knowledge, not changing soon? | 1 |
 
-**Scoring results:**
-- **5 yes** → Essential, add immediately
-- **4 yes** → High priority, add this week
-- **3 yes** → Add to permanent docs or inbox
-- **2 yes** → Inbox (verify later)
-- **0-1 yes** → Skip (Claude already knows)
+**Scoring:**
+- 5 yes → Essential, add immediately
+- 4 yes → High priority
+- 3 yes → Add to permanent or inbox
+- 2 yes → Inbox (verify later)
+- 0-1 yes → Skip (Claude already knows)
 
-### Example: Scoring a Discovery
-
-**Discovery:** "We use PostgreSQL RLS policies to enforce multi-tenancy"
+### Example: RLS Policy Constraint
 
 | Criterion | Assessment | Score |
 |-----------|-----------|-------|
@@ -108,19 +31,123 @@ Score each discovery on 5 criteria:
 | Save time? | Yes, avoids trial-and-error | 1 |
 | Stable? | Yes, core architectural choice | 1 |
 
-**Total: 5 yes → Essential, document immediately**
+**Total: 5 yes → Essential, document now**
 
-**Another example:** "We use React for the frontend"
+### Example: "We use React"
 
 | Criterion | Assessment | Score |
 |-----------|-----------|-------|
 | Would Claude miss? | No, visible in package.json | 0 |
 | Project-specific? | No, general knowledge | 0 |
 | Prevent bugs? | No, standard framework | 0 |
-| Save time? | No, discoverable by inspection | 0 |
-| Stable? | Maybe, but doesn't matter | 0 |
+| Save time? | No, discoverable | 0 |
+| Stable? | Irrelevant | 0 |
 
-**Total: 0 yes → Skip, Claude already knows**
+**Total: 0 yes → Skip**
+
+---
+
+## File Organization Patterns
+
+### Pattern 1: Starter (Simple Projects)
+
+```
+.claude/
+├── CLAUDE.md
+└── context/
+    ├── conventions.md    # Single file: all decisions + patterns + constraints
+    └── inbox.md
+```
+
+**When:** Small team, 1-2 domains, straightforward logic
+
+**conventions.md structure:**
+```markdown
+# Project Conventions
+
+## Technology Decisions
+- Framework: [choice + why]
+- Database: [choice + why]
+
+## Custom Patterns
+- Pattern 1: [description + when to use]
+- Pattern 2: [description + when to use]
+
+## Hard Constraints
+- ✗ Never [rule 1] (consequences)
+- ✗ Never [rule 2] (consequences)
+```
+
+### Pattern 2: Growing Projects
+
+```
+.claude/
+├── CLAUDE.md
+└── context/
+    ├── principles.md    # WHY decisions, philosophy
+    ├── architecture.md  # HOW organized, structure
+    ├── patterns.md      # Implementation patterns
+    └── inbox.md
+```
+
+**When:** Multiple domains, evolving architecture, team growing
+
+**principles.md:** Technology choices, design philosophy, tradeoffs
+**architecture.md:** Folder structure, module boundaries, constraints
+**patterns.md:** Custom implementations, workflows
+
+### Pattern 3: Complex Projects
+
+```
+.claude/
+├── CLAUDE.md
+└── context/
+    ├── principles.md
+    ├── architecture.md
+    ├── backend.md       # Domain-specific knowledge
+    ├── frontend.md      # Domain-specific knowledge
+    ├── security.md      # Cross-cutting concern
+    ├── testing.md       # Cross-cutting concern
+    └── inbox.md
+```
+
+**When:** Multiple teams, multiple domains, complex constraints
+
+---
+
+## Delta Principle by Domain
+
+**Core idea:** Document what Claude CANNOT infer.
+
+### Authentication
+
+❌ Don't: "We use JWT"
+✓ Do: "JWT: 1h access, 7d refresh. Refresh stored in httpOnly cookie, never localStorage. Admin override: email + SMS confirmation."
+
+### Caching
+
+❌ Don't: "We cache frequently accessed data"
+✓ Do: "Cache: 5min for user data, 1h for config. Invalidate on update OR max-age, whichever first. Never cache PII >5min."
+
+### File Organization
+
+❌ Don't: "We organize by feature"
+✓ Do: "Feature structure: components/, hooks/, utils/, types/. Never import across features (use shared/ bridge). Feature coupling detected = refactor."
+
+### API Design
+
+❌ Don't: "We use REST APIs"
+✓ Do: "Endpoints: GET /items (list), POST /items (create), PATCH /items/:id (update). Always paginate lists (default 50, max 500). Errors: standard HTTP codes + JSON {error, details}."
+
+### State Management
+
+❌ Don't: "We manage state with Redux"
+✓ Do: "Redux: Single source of truth. Selectors for computed state (no recompute). Async: redux-thunk. Never mutate state directly."
+
+### Database
+
+❌ Don't: "We use PostgreSQL"
+✓ Do: "Postgres with RLS for multi-tenancy. NEVER bypass RLS. Migrations: immutable, only add. Indexes on foreign keys. Connections pooled: 10 per instance."
 
 ---
 
@@ -131,14 +158,14 @@ Score each discovery on 5 criteria:
 ```markdown
 ## [Decision Name]
 
-**Context:** [Brief situation that prompted decision]
+**Context:** [Situation that prompted decision]
 
 **Decision:** [X chosen over Y]
 
 **Why:**
 - [Reason 1 - avoids what problem?]
 - [Reason 2 - enables what benefit?]
-- [Tradeoff if applicable]
+- Tradeoff: [if applicable]
 
 **Constraint:** [Hard rule to follow this decision]
 ```
@@ -147,14 +174,14 @@ Score each discovery on 5 criteria:
 ```markdown
 ## PostgreSQL for Relational Data
 
-**Context:** Needed database supporting multi-tenancy with strong consistency guarantees
+**Context:** Needed database supporting multi-tenancy with strong consistency
 
 **Decision:** PostgreSQL with RLS policies, not MongoDB
 
 **Why:**
-- ✓ RLS native (vs application-level auth, error-prone)
-- ✓ Strong consistency (vs eventual consistency issues)
-- ✗ Tradeoff: Less flexible schema (better for contracts)
+- RLS native (vs application-level auth, error-prone)
+- Strong consistency (vs eventual consistency issues)
+- Transactional guarantees (vs document-level isolation)
 
 **Constraint:** ✗ NEVER bypass RLS policies without audit trail
 ```
@@ -164,49 +191,82 @@ Score each discovery on 5 criteria:
 ```markdown
 ## [Pattern Name]
 
-**When:** [Situation where this applies]
+**When:** [Situation where pattern applies]
 
 **Pattern:**
 [Code example - minimal and concrete]
 
 **Why differ from default:**
-[How this differs from framework standard]
+[How this differs from framework/library standard]
 
 **Important:**
-- [Gotchas or limits]
-- [Performance implications]
+- [Gotcha 1]
+- [Performance implication]
+- [Common mistake]
 ```
 
 **Example:**
 ```markdown
-## LSP Configuration
+## Server Components by Default
 
-**When:** Setting up language server protocols for editors
+**When:** Building Next.js app components
 
 **Pattern:**
-```lua
-vim.lsp.config('*', {
-  -- Global config for all servers
-})
+```typescript
+// Default: Server component
+export default function Page() { ... }
 
-vim.lsp.config('lua_ls', {
-  -- Specific overrides
-})
+// Explicit client: only for interactivity
+'use client'
+export default function Button() { ... }
 ```
 
-**Why differ:** Modern `vim.lsp.config()` API (Neovim 0.10+)
+**Why differ:** Next.js 13+ prefers server components
 
 **Important:**
-- ✓ Global config prevents repetition
-- ✗ Don't scatter overrides across files
+- ✓ Server components reduce bundle size
+- ✗ Don't add 'use client' unnecessarily
+- Watch for hidden client-side state in parent components
 ```
 
-### Rule Section
+---
+
+## Code in Memory: The Drift Problem
+
+Static code becomes stale. Constraints survive refactors.
+
+**Drift triggers:**
+- Implementation details change (refactoring)
+- Library APIs update
+- Team preferences shift (old → new)
+- Code review catches abandoned patterns
+
+**Strategy: Constraints > Code**
+
+| ❌ Don't | ✓ Do |
+|---------|------|
+| Copy-paste exact code | Document the NEVER rule |
+| Implementation-level details | Link to real code location |
+| Line-by-line code examples | Use pseudocode + constraint |
+| Field names, class structure | Business logic flows |
+
+**Why:** "Use a validator" stays true after refactor. Copy-paste regex becomes stale.
+
+**Decision matrix - Include code only if:**
+- Documents a constraint (NEVER rule)? → YES
+- Code will survive refactor? → Link to actual code
+- Common mistake to show? → Show wrong + right
+- Explains WHY? → Include with commentary
+- Exact syntax is the value? → NO (usually just principle)
+
+**See also:** [Code guidance](workflows.md#problem-code-examples-become-outdated-code-memory-drift)
+
+### Constraint Section
 
 ```markdown
-## [Security/Performance/Reliability Rule]
+## [Constraint Name]
 
-**Rule:** [Constraint in plain language]
+**Rule:** [What to do/not do in plain language]
 
 ✓ Do this
 ✗ Never do this
@@ -216,226 +276,148 @@ vim.lsp.config('lua_ls', {
 
 **Example:**
 ```markdown
-## RLS Policy Enforcement
+## Row-Level Security (RLS)
 
 **Rule:** All database queries must respect PostgreSQL RLS policies
 
-✓ Rely on RLS for row-level access control
+✓ Rely on RLS for access control
 ✓ Use authenticated roles for all connections
-✗ Never bypass RLS with SUPERUSER connections
+✗ Never bypass with SUPERUSER connections
 ✗ Never write application-level row filtering
 
-**Impact:** Bypassing RLS causes data leaks across tenants
+**Impact:** Bypassing RLS = data leaks across tenants (critical security)
 ```
 
 ---
 
-## Delta Principle Examples
+## Density Guide
 
-### Authentication
+### Principle 1: Fragments > Sentences
 
-**Don't document:**
+**Before (narrative, ~40 tokens):**
 ```
-❌ "We use JWT for authentication"
-(Visible in imports, standard approach)
-```
-
-**Do document:**
-```
-✓ "JWT tokens: 1-hour access, 7-day refresh"
-✓ "Refresh tokens stored in httpOnly cookies, ✗ never in localStorage"
-✓ "Admin override: requires email + SMS confirmation"
-(Project-specific, prevents bugs if wrong)
+The reason we chose Next.js is because it provides both server-side
+and client-side rendering capabilities in a single framework, which
+reduces the complexity of managing multiple systems.
 ```
 
-### Caching
-
-**Don't document:**
+**After (fragments, ~12 tokens):**
 ```
-❌ "We cache frequently accessed data"
-(Standard practice, obvious from code)
+Next.js: ✓ SSR/CSR unified, ✓ simpler mental model
 ```
 
-**Do document:**
-```
-✓ "Cache expiration: 5min for user data, 1hour for config"
-✓ "Cache invalidation: on update OR 1hour max-age, whichever first"
-✓ "✗ Never cache PII longer than 5min"
-(Specific constraints, prevents stale security issues)
-```
-
-### File Organization
-
-**Don't document:**
-```
-❌ "We organize code by feature"
-(Visible from file structure)
-```
-
-**Do document:**
-```
-✓ "Feature folder structure: components/, hooks/, utils/, types/"
-✓ "✗ Never import across features (use shared/ for bridges)"
-✓ "Feature coupling detected: feature-A imports feature-B/components"
-(Project-specific pattern that prevents spaghetti)
-```
-
----
-
-## Density Principles: Maximum Signal per Token
-
-### Write in Fragments, Not Sentences
-
-**Before (narrative, 40 tokens):**
-> The reason we chose Next.js is because it provides both server-side and client-side rendering capabilities in a single framework, which reduces the complexity of managing multiple systems and allows developers to reason about the entire application more easily.
-
-**After (fragments, 12 tokens):**
-> Next.js: ✓ SSR/CSR unified, ✓ simpler mental model
-
-### Use Symbols
+### Principle 2: Use Symbols
 
 Replace common phrases:
 - `✓` / `✗` instead of yes/no, do/don't
 - `→` instead of leads to, results in
 - `:` instead of is, means
-- `±` instead of approximately
+- `±` for approximately, variance
 
-### Structure Code Over Prose
+**Before:**
+```
+If the user is an admin and they have permission to delete the resource,
+then they can delete it.
+```
 
-**Before (prose explanation):**
-```markdown
-When a user creates a new account, they provide an email and password.
-The email is validated to ensure it follows standard format rules.
-The password is hashed using bcrypt with a salt of 10 rounds.
-The hashed password is stored in the database...
+**After:**
+```
+Admin + permission → can delete
+```
+
+### Principle 3: Code > Prose
+
+**Before (explanation):**
+```
+When a user creates an account, they provide an email and password.
+The email is validated. The password is hashed with bcrypt (salt 10).
+Both are stored in the database.
 ```
 
 **After (code pattern):**
-```javascript
-// Account creation
+```
+Account creation:
 email → validate format → stored
 password → bcrypt (salt: 10) → stored
 ↓
-User can login within 24 hours or account expires
+User can login for 24h or account expires
 ```
 
 ---
 
-## Routing Hints in CLAUDE.md
+## Anti-Patterns: What NOT to Document
 
-Good routing helps Claude find Memory immediately.
+| ❌ Skip | Why | ✓ Document Instead |
+|--------|-----|------------------|
+| "We use React hooks" | Framework basics | Your custom hooks/patterns |
+| "MVC architecture" | Standard pattern | Your implementation differences |
+| "src/ contains code" | Discoverable via ls | Non-obvious structure rules |
+| "Firebase features" | Library docs | Your usage patterns + constraints |
+| "Spread operator" | Language fundamentals | Custom syntax/patterns |
+| "Line-by-line code" | Implementation noise | High-level constraints |
 
-### Explicit Query-to-File Mapping
+### ⚠️ Borderline Cases
 
-**Format:**
-```markdown
-**When:** [Query pattern] → @context/[file.md]
-```
+✓ Custom validation rules | YES (project-specific)
+✓ Performance tuning applied | YES (non-obvious)
+✓ Error handling strategy | YES (project-specific)
+✗ Standard validation | NO (framework handles)
+✗ Performance concepts | NO (general knowledge)
+✗ Try/catch syntax | NO (language feature)
 
-**Examples:**
-```markdown
-**When:** What's the project philosophy? → @context/principles.md
-**When:** How is the system organized? → @context/architecture.md
-**When:** How do I implement [feature]? → @context/patterns.md
-**When:** What are security constraints? → @context/security.md
-```
+---
 
-### Organizing Routing Hints
+## Common Pitfalls
 
-Group by concern:
-
-```markdown
-# Architecture Questions
-**When:** How is [system/component] organized? → @context/architecture.md
-**When:** What's the folder structure? → @context/architecture.md
-
-# Constraint Questions
-**When:** What security rules apply? → @context/security.md
-**When:** What performance limits exist? → @context/performance.md
-
-# Implementation Questions
-**When:** How do I implement [pattern]? → @context/patterns.md
-```
+| Pitfall | Symptom | Fix |
+|---------|---------|-----|
+| **Over-documentation** | Bloated with noise | Every line → "Why X over Y?" (else remove) |
+| **Wrong granularity** | Too vague OR too specific | Would refactor change it? If yes → too specific |
+| **Stale content** | Outdated decisions remain | Quarterly review. Mark: "Changed: YYYY-MM-DD" |
+| **Poor routing** | Claude can't find answers | CLAUDE.md → file (1 level, not chains) |
+| **Code drift** | Copy-paste code becomes obsolete | Use constraints + link to real code |
 
 ---
 
 ## File Size Guidelines
 
-| Scope | Ideal Range | Too Small | Too Large |
-|-------|-----------|-----------|-----------|
-| CLAUDE.md | 20-50 lines | - | >100 lines, split routing |
-| principles.md | 80-150 | <50 | >200, split by domain |
-| architecture.md | 100-200 | <50 | >250, split by concern |
-| patterns.md | 100-200 | <50 | >250, split by pattern |
-| [feature].md | 50-150 | <30 (merge) | >200 (split) |
+| File | Ideal | Too small | Too large |
+|------|-------|-----------|-----------|
+| CLAUDE.md | 20-50 lines | - | >100 lines |
+| principles.md | 80-150 | <50 | >200 |
+| architecture.md | 100-200 | <50 | >250 |
+| patterns.md | 100-200 | <50 | >250 |
+| [feature].md | 50-150 | <30 | >200 |
 | inbox.md | Unlimited | - | - |
 
-**Why these ranges:**
-- Too small = overhead of separate file, harder to find patterns
+**Why:**
+- Too small = overhead, harder to find patterns
 - Too large = context bloat, hard to navigate
-- Inbox exception = staging area, no need to split
+- Inbox = no size limit (staging area)
 
 ---
 
-## Quality Audit Checklist
+## Quality Checklist
 
-### Before Finalizing Memory
+Before finalizing Memory:
 
-Content Quality:
+**Content:**
 - [ ] Decision matrix applied? (3+ yes)
 - [ ] No framework/library basics?
 - [ ] No standard patterns (REST, CRUD)?
 - [ ] Delta principle followed?
 - [ ] Every line adds unique value?
 
-Organization:
-- [ ] File sizes 50-200 lines?
+**Organization:**
+- [ ] File sizes in range?
 - [ ] Semantic clustering (related ideas together)?
 - [ ] Clear naming (filename describes content)?
 - [ ] Routing hints in CLAUDE.md?
-- [ ] One level of reference depth?
+- [ ] No chains (CLAUDE.md → file → file → file)?
 
-Writing:
-- [ ] Dense, not verbose? (fragments > sentences)
+**Writing:**
+- [ ] Dense, not verbose?
 - [ ] Uses symbols (✓/✗/→)?
 - [ ] Code examples where helpful?
-- [ ] Constraint-focused (NEVER vs. nice-to-have)?
+- [ ] Constraint-focused ("NEVER" vs "nice-to-have")?
 - [ ] Consistent terminology?
-
----
-
-## Common Pitfalls
-
-### Over-Documentation
-
-Don't include:
-- ✗ Framework tutorials
-- ✗ Library API docs (link to official instead)
-- ✗ Standard patterns (REST, MVC, CRUD)
-- ✗ Language features
-- ✗ File listings (ls output)
-
-### Wrong Granularity
-
-- **Too vague:** "Auth happens" (not actionable)
-- **Too specific:** Every implementation detail (becomes dead weight)
-- **Right:** High-level constraints + key patterns (survives refactors)
-
-### Stale Content
-
-- [ ] Review quarterly for outdated patterns
-- [ ] Archive decisions that changed
-- [ ] Update when refactors shift architecture
-- [ ] Mark explicitly: "Changed: YYYY-MM-DD"
-
----
-
-## Next Steps
-
-1. Create CLAUDE.md with routing hints
-2. Score discoveries against decision matrix
-3. Create starter files
-4. Add high-value deltas from your project
-5. Use [workflows.md](workflows.md) for bootstrap and promotion
-
-Start small (conventions.md only), grow as you discover patterns.
