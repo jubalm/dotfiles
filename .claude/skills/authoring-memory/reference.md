@@ -259,7 +259,7 @@ Static code becomes stale. Constraints survive refactors.
 - Explains WHY? → Include with commentary
 - Exact syntax is the value? → NO (usually just principle)
 
-**See also:** [Code guidance](workflows.md#problem-code-examples-become-outdated-code-memory-drift)
+**See also:** [Code drift guidance](@workflows/promote.md#%EF%B8%A0-code-drift-problem)
 
 ### Constraint Section
 
