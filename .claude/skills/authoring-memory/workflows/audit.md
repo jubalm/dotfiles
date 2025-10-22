@@ -1,9 +1,9 @@
-# Audit: Quarterly Quality Check
+# Audit Memory Quality
 
 ## Audit Checklist
 
 ```
-Quarterly Audit:
+Audit (recommended quarterly or on-demand):
 - [ ] Step 1: Freshness - Check for stale content
 - [ ] Step 2: Accuracy - Verify decisions still hold
 - [ ] Step 3: Completeness - Missing high-value items?

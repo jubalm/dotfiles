@@ -18,7 +18,7 @@ Memory stores WHAT is true (decisions, constraints, patterns) so Claude can retr
 | **Create new Memory system** | @workflows/bootstrap.md |
 | **Find something to document** | Score it: @reference.md#decision-matrix (3+ yes? Add to inbox) |
 | **Move inbox items to permanent** | @workflows/promote.md |
-| **Quarterly review** | @workflows/audit.md |
+| **Audit Memory quality** | @workflows/audit.md |
 | **Capture new discovery** | @workflows/capture.md |
 
 **Need foundational concepts?** → @reference.md (Decision Matrix, Delta Principle, Density, Code in Memory)
@@ -75,7 +75,7 @@ Keep routing hints semantic (one query → one file, no chains).
 2. **Bootstrap:** Run @workflows/bootstrap.md (2-4 hours)
 3. **Capture:** Watch for new discoveries during work
 4. **Promote:** Move inbox items using @workflows/promote.md
-5. **Audit:** Quarterly freshness check via @workflows/audit.md
+5. **Audit:** Review Memory quality via @workflows/audit.md
 
 ---
 
@@ -88,4 +88,4 @@ Keep routing hints semantic (one query → one file, no chains).
 | @workflows/bootstrap.md | Step-by-step system creation (7 steps + validation + templates) |
 | @workflows/capture.md | Find and capture discoveries (proactive + explicit) |
 | @workflows/promote.md | Inbox → permanent (6 steps + edge cases + code drift guidance) |
-| @workflows/audit.md | Quarterly review (5 steps + validation checks) |
+| @workflows/audit.md | Audit Memory quality (5 steps + validation checks) |
