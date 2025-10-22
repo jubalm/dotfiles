@@ -4,6 +4,8 @@
   "permissions": {
     "allow": [
       "Bash(nvim:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:etherscan.io)",
       "WebFetch(domain:github.com)",
@@ -18,5 +20,5 @@
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
   },
-  "alwaysThinkingEnabled": true
+  "alwaysThinkingEnabled": false
 }
