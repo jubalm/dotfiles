@@ -1,494 +1,218 @@
 # Real-World Examples by Domain
 
-What to document (and skip) by project type.
+Quick reference: actual Memory snippets per domain. Copy-paste ready.
 
 ---
 
 ## Frontend: React Application
 
-### What to Document
-
-```markdown
-# Frontend Architecture
-
-## Client-Server Boundary
-
-**When:** Deciding what logic lives where
-
-**Rule:**
-✓ Server components: data fetching, auth checks, secrets
-✓ Client components: interactivity, forms, real-time updates
+**Client-Server Boundary**
+✓ Server: data fetching, auth checks, secrets
+✓ Client: interactivity, forms, real-time updates
 ✗ Never fetch secrets in client components
 ✗ Never do expensive computation on every render
+✗ Never add 'use client' unnecessarily (increases bundle)
 
-**Constraint:** Add 'use client' only when component needs interactivity
+**State Management**
+Redux: Single source of truth.
+Selectors → computed state (prevents recompute). Async: redux-thunk.
+✗ Never mutate state directly (use immer)
+✓ Refactor prop drilling with context
 
-## State Management
+**Styling**
+Tailwind: Utility classes, responsive. CSS modules: Component-scoped styles.
+✗ Never inline styles in JS
+Theme: Colors (brand + semantics), 4px spacing base, mobile-first (sm:/md:/lg:)
 
-**Pattern:** Redux for global state
-
-Single source of truth. Selectors compute derived state (no component-level recompute).
-Async: redux-thunk (not sagas, simpler).
-
-```markdown
-// Good: Selector prevents recompute
-const items = useSelector(state => state.items);
-
-// Bad: Computed inline
-const filtered = state.items.filter(...); // recomputes every render
-```
-
-**Important:**
-- ✗ Never mutate state directly (use immer)
-- ✓ Use selectors for all derived state
-- Watch for prop drilling (refactor with context)
-
-## Styling
-
-**Standard:** Tailwind CSS + CSS modules for component-specific
-
-Don't document: How to use Tailwind
-Do document:
-
-```
-Tailwind: Used for utility classes, responsive
-CSS modules: For component-specific scoped styles
-Never: Inline styles in JS
-
-Theme: Defined in tailwind.config.js
-- Colors: Brand primary/secondary + semantics (error, success)
-- Spacing: 4px base unit
-- Responsive: mobile-first (sm:, md:, lg: prefixes)
-```
-
-## Asset Handling
-
-Cache policy: Images cached 1 year (far-future expires), with hash in filename
-
-```
-Static assets: /public (never cache, revalidate every request)
-Generated images: /public/generated (hash-named, cache 1 year)
-User uploads: CDN with 7-day TTL
-```
-
-### What NOT to Document
-
-- ❌ "React uses components" (framework fundamental)
-- ❌ "How to use useEffect hook" (standard library)
-- ❌ "CSS flexbox properties" (language feature)
-- ❌ "Tailwind color naming" (framework docs)
+**Caching**
+Images: 1 year (hash-named files, far-future expires)
+Static assets (/public): Revalidate every request
+Generated images (/public/generated): Hash-named, 1yr cache
+User uploads: CDN, 7d TTL
 
 ---
 
 ## Backend: Node.js API
 
-### What to Document
+**API Design**
+Endpoints: GET /items (paginated), GET /items/:id, POST /items, PATCH /items/:id, DELETE /items/:id
+Pagination: Default 50, max 500. ✗ Never paginate without sorting.
+Errors: HTTP status + JSON {error, code, details}
+✗ Never return 200 with error in body
 
-```markdown
-# Backend Architecture
+**Database**
+Postgres + RLS for multi-tenancy.
+✓ Filter all queries by tenant_id (respects RLS)
+✗ Never SELECT * without tenant check
+Indexes: All FKs, common filters. ✗ Never index without measuring performance.
+Connections: Pooled, 10 per instance max.
 
-## API Design
-
-**Endpoints:**
-- GET /items (list, paginated)
-- GET /items/:id (single item)
-- POST /items (create)
-- PATCH /items/:id (update)
-- DELETE /items/:id (delete)
-
-Pagination: Default 50, max 500 items per page
-Errors: HTTP status + JSON `{error: string, details: object, code: string}`
-
-**Constraint:**
-✗ Never return 200 with error in body (misleading)
-✗ Never paginate large datasets without sorting
-✓ Always validate input before processing
-
-## Database Queries
-
-**Pattern:** Postgres with RLS for multi-tenancy
-
-```sql
--- Good: Respects RLS
-SELECT * FROM items WHERE tenant_id = current_tenant_id();
-
--- Bad: Bypasses RLS
-SELECT * FROM items; -- dangerous!
-```
-
-Indexes:
-- ✓ All foreign keys indexed
-- ✓ Common filter columns indexed
-- ✗ Never add indexes without measuring query performance
-
-**Connections:** Pooled, 10 per instance max
-
-## Authentication
-
-Token: 1-hour access JWT + 7-day refresh (httpOnly cookie)
-
-```
-On login:
-  Generate access + refresh tokens
-  Send access in response body (for fetch calls)
-  Send refresh in secure httpOnly cookie
-
-On logout:
-  Access token: Blacklist immediately
-  Refresh token: Blacklist, revoke all sessions
-
-Admin override: Requires email + SMS confirmation
-```
-
-**Constraints:**
-✗ Never store refresh token in localStorage
-✗ Never trust access token beyond 1 hour
-✓ Use secure httpOnly cookies for sensitive tokens
-
-### What NOT to Document
-
-- ❌ "We use Express.js" (visible in package.json)
-- ❌ "HTTP status codes 200, 201, etc." (standard)
-- ❌ "How to write SQL queries" (database knowledge)
-- ❌ "JWT structure and claims" (library docs)
+**Authentication**
+Token: 1h access JWT (body) + 7d refresh (httpOnly cookie)
+Login: Generate both → access in body (fetch) → refresh in secure cookie
+Logout: Blacklist access immediately → revoke refresh + all sessions
+Admin override: Email + SMS confirmation required
+✗ Never store refresh in localStorage
+✗ Never trust access >1h
+✓ Validate every request
 
 ---
 
 ## DevOps: CI/CD Pipeline
 
-### What to Document
+**Environments & Deployment**
+Dev: Local + Docker. Auto-deploy feature branches → staging.
+Staging: AWS t3.medium, auto-scaled 1-2
+Prod: AWS t3.large, auto-scaled 2-10. Manual approval → auto-deploy.
 
-```markdown
-# Deployment & Infrastructure
-
-## Environments
-
-**Development:** Local + Docker
-**Staging:** AWS t3.medium, auto-scaled 1-2
-**Production:** AWS t3.large, auto-scaled 2-10
-
-Deployment triggers:
-- dev: Push to feature branches → auto-deployed to staging
-- prod: Merge to main → manual approval → auto-deployed
-
-## Database Migrations
-
-**Rule:** Immutable, add-only (never delete columns immediately)
-
-```
-1. Deploy code supporting both old + new schema
-2. Run migration (add columns, create new tables)
-3. Monitor logs for errors
+**Database Migrations**
+Immutable, add-only pattern:
+1. Deploy code supporting old + new schema
+2. Run migration (add columns, create tables)
+3. Monitor logs
 4. Deploy code using new schema only
-5. In next release: Remove old column references
-```
+5. (Next release) Remove old references
 
-**Constraint:**
-✗ Never delete columns in production without 1-week buffer
-✗ Never migrate data without backup
-✓ Test migrations on production-like data size
+✗ Never delete columns without 1-week buffer
+✗ Never migrate without backup
+✓ Test on production-like data size
 
-## Secrets Management
-
-**Provider:** AWS Secrets Manager
-
-Stored:
-- Database credentials
-- API keys
-- Encryption keys
-
-Accessed: Via IAM roles (never hardcoded, never in code)
-
-**Constraint:**
+**Secrets**
+Provider: AWS Secrets Manager
+✓ Store: DB credentials, API keys, encryption keys
+✓ Access: Via IAM roles (never hardcoded, never in code)
 ✗ Never commit secrets to git
-✓ Rotate credentials quarterly
-✓ Audit all secret access
+✓ Rotate quarterly
 
-## Monitoring
-
-**Alerts trigger if:**
-- Error rate > 5% (10 minute window)
-- Response time > 2s (p95)
-- CPU > 80% for 5 minutes
-- Database connections > 8 of 10 pooled
-
-**Important:** Alert fatigue is real. Only alert on actionable issues.
-
-### What NOT to Document
-
-- ❌ "We use Docker for containerization" (visible in Dockerfile)
-- ❌ "How to write GitHub Actions" (docs available)
-- ❌ "AWS EC2 instance types" (AWS docs)
-- ❌ "Kubernetes YAML syntax" (k8s docs)
+**Monitoring**
+Alert on: Error rate >5% (10min window), Response time >2s (p95), CPU >80% (5min), DB connections >8/10.
+✗ Never alert on non-actionable metrics (alert fatigue)
 
 ---
 
 ## Testing: Strategy & Patterns
 
-### What to Document
-
-```markdown
-# Testing Strategy
-
-## Test Pyramid
-
+**Test Pyramid**
 Unit: 70% (logic, helpers, utilities)
-Integration: 20% (API endpoints, database)
-E2E: 10% (critical user flows only)
+Integration: 20% (API endpoints, real database)
+E2E: 10% (critical user flows)
 
-## Unit Tests
+**Unit Tests**
+Test: Business logic in isolation
+✗ Never test implementation details (test behavior, not how)
 
-**When:** Testing business logic in isolation
-
-```javascript
-// Document this - project-specific pattern
-describe('calculatePrice', () => {
-  it('applies discount for bulk orders', () => {
-    const price = calculatePrice(100, { quantity: 50 });
-    expect(price).toBe(90); // 10% discount
-  });
-});
-```
-
-Never test: Implementation details (how, only what)
-
-## Integration Tests
-
-**Pattern:** Test API endpoints with real database
-
-```
+**Integration Tests**
+Pattern: Real API + real database
 1. Setup: Create test database, seed data
 2. Call: API endpoint with test request
-3. Verify: Response body + database state
+3. Verify: Response + database state
 4. Cleanup: Delete test data
-```
 
-Never: Test internal module calls or database queries directly
+✗ Never test internal module calls or queries directly
 
-## Coverage Goals
+**Coverage**
+Target: 70% overall, 90% critical paths
+✗ Never measure generated code
+✗ Never aim for 100% (diminishing returns)
+✓ Use as metric, not requirement
 
-- Overall: 70% code coverage
-- Critical paths: 90% coverage
-- Avoided: 100% coverage (diminishing returns)
-
-**Important:**
-✗ Never measure coverage on generated code
-✗ Never aim for 100% (costs > benefits)
-✓ Coverage is useful metric, not requirement
-
-## Mocking Strategy
-
-**Mock externals:** APIs, email, payment providers
-**Don't mock:** Database, cache (use in-memory or testcontainers)
-
-Example:
-```javascript
-// Good: Mock external API
-jest.mock('stripe', () => ({
-  charges: { create: jest.fn() }
-}));
-
-// Bad: Mock database
-jest.mock('db'); // defeats purpose of integration test
-```
-
-### What NOT to Document
-
-- ❌ "We use Jest for testing" (visible in package.json)
-- ❌ "How to write test assertions" (Jest docs)
-- ❌ "What mocking libraries exist" (testing knowledge)
-- ❌ "Test file naming conventions" (standard)
+**Mocking**
+✓ Mock: External APIs, email, payment providers
+✗ Mock: Database, cache (use in-memory or testcontainers)
 
 ---
 
 ## Monorepo: Shared Packages
 
-### What to Document
-
-```markdown
-# Monorepo Structure
-
-## Workspace Organization
-
+**Structure**
 ```
-apps/
-  web/          # Next.js frontend
-  api/          # Node.js backend
-packages/
-  ui/           # Shared React components
-  utils/        # Shared utilities
-  types/        # Shared TypeScript types
+apps/web, apps/api
+packages/ui, packages/utils, packages/types
 ```
+✗ Never circular dependencies (apps/ → packages/ only)
 
-No circular dependencies: apps/ → packages/, never reverse
+**Components (@org/ui)**
+✓ Public API: Button, Input, Modal, Card, Form helpers, Layout primitives
+✗ Never import internal components
+✗ Never deep imports from packages
 
-## Shared Components (@org/ui)
-
-Available:
-- Button, Input, Modal, Card
-- Form helpers (useForm, validation)
-- Layout primitives (Flex, Grid)
-
-Export from single entry point: `@org/ui`
-
-**Constraint:**
-✗ Never import internal components from packages
-✓ Use public API only (@org/ui exports)
-
-## Shared Types (@org/types)
-
-Centralized TypeScript definitions for:
-- API request/response types
-- Database models
-- Business domain types
-
-Usage:
-```typescript
-import type { User, Post } from '@org/types';
-```
-
-**Constraint:**
-✗ Never duplicate type definitions
+**Types (@org/types)**
+Centralized: API req/res, DB models, domain types
+✗ Never duplicate definitions
 ✗ Never create package-specific types (use shared)
 
-## Dependency Management
-
-**Root package.json:** Defines versions
-**Workspace packages:** Inherit versions (no overrides)
-
-When upgrading dependency:
-1. Update in root package.json
-2. `npm install` (propagates to all)
-3. Test all affected packages
-4. Single commit with all changes
-
-**Constraint:**
+**Dependencies**
+Root package.json: Single source of versions
+Workspace packages: Inherit, no overrides
+When upgrading: Update root → npm install → test all → single commit
 ✗ Never pin different versions of same dependency
-✓ Keep all packages on same version
 
-## Publishing
-
-Packages published to npm: @org/ui, @org/types, @org/utils
-
+**Publishing**
+Packages: @org/ui, @org/types, @org/utils
 Versioning: Semantic (major.minor.patch)
+Pre-publish: ✓ Tests pass, ✓ CHANGELOG updated, ✓ Version bumped, ✓ Manual tested
 
-Before publishing:
-- [ ] All tests passing
-- [ ] CHANGELOG updated
-- [ ] Version bumped in package.json
-- [ ] Manual test in consuming app
-
-## Import Boundaries
-
+**Import Boundaries**
 ```
-apps/web/         → can import from @org/ui, @org/types, @org/utils
-apps/api/         → can import from @org/types, @org/utils (NOT @org/ui)
-packages/ui/      → can import from @org/types, @org/utils (NOT app code)
-packages/utils/   → can import from @org/types only
-packages/types/   → has no internal dependencies
+apps/web       → @org/ui, @org/types, @org/utils
+apps/api       → @org/types, @org/utils (NOT @org/ui)
+packages/ui    → @org/types, @org/utils (NOT app code)
+packages/utils → @org/types (NOT ui)
+packages/types → no deps
 ```
-
-**Constraint:**
-✗ Never import web-specific code into api
-✗ Never import app code into packages
-✓ Follow import boundaries strictly
-
-### What NOT to Document
-
-- ❌ "We use npm workspaces" (visible in package.json)
-- ❌ "How to use TypeScript" (language feature)
-- ❌ "How to publish to npm" (npm docs)
-- ❌ "Monorepo benefits" (general knowledge)
+✗ Never violate boundaries
 
 ---
 
 ## Library: Open-Source Package
 
-### What to Document
+**API Stability**
+Major versions (1.0, 2.0): Breaking allowed
+Minor/Patch: Never break
 
-```markdown
-# Design Principles
-
-## API Stability
-
-Major versions (1.0, 2.0) are breaking. Never change in minor/patch.
-
-### Breaking Changes
-
-Examples of breaking changes (require major version):
-- Remove or rename exported function
-- Change function signature (parameters, return type)
+Breaking changes:
+- Remove/rename exported function
+- Change signature (params, return type)
 - Change default behavior
 
-Non-breaking (minor version okay):
+Non-breaking (minor okay):
 - Add new function
-- Add new optional parameter with sensible default
+- Add new optional param (sensible default)
 - Extend return type with new optional field
 
-**Constraint:**
-✗ Never break API in minor/patch versions
-✗ Never deprecate without documenting migration path
+✗ Never deprecate without migration path
 ✓ Provide codemods for large migrations
 
-## Exports
+**Exports**
+✓ Single entry point: `import { Foo } from 'my-lib'`
+✗ Never deep imports: `import from 'my-lib/internal/foo'`
+✗ Never conditional exports by environment
 
-Single entry point: `import { Foo } from 'my-lib'`
+**Documentation**
+Every export: JSDoc with description, @param, @returns, @example
 
-Never:
-- ✗ Deep imports: `import from 'my-lib/internal/foo'`
-- ✗ Conditional exports that vary by environment
-
-## Documentation
-
-Every export must have JSDoc with:
-- Description
-- @param with types
-- @returns with type
-- Usage example
-
-```typescript
-/**
- * Calculate total cost including tax
- * @param amount - Price before tax
- * @param taxRate - Tax rate as decimal (0.08 for 8%)
- * @returns Total price including tax
- * @example
- * calculateTotal(100, 0.08) // 108
- */
-export function calculateTotal(amount: number, taxRate: number): number {
-  return amount * (1 + taxRate);
-}
-```
-
-## Dependencies
-
-Keep minimal. Each dependency adds:
+**Dependencies**
+Minimize. Each adds:
 - Bundle size
 - Security audit burden
 - Maintenance overhead
 
-**Constraint:**
 ✗ Never add dependency without evaluating cost
-✓ Prefer fewer dependencies over convenience features
-
-### What NOT to Document
-
-- ❌ "We follow semantic versioning" (standard for libraries)
-- ❌ "TypeScript types improve DX" (general knowledge)
-- ❌ "Bundle size matters" (obvious for libs)
-- ❌ "How to publish to npm" (npm docs)
+✓ Prefer fewer dependencies
 
 ---
 
-## Summary: Decision Matrix by Domain
+## Quick Reference
 
-| Domain | Example to Document | Example to Skip |
-|--------|---------------------|-----------------|
-| Frontend | State pattern choice | Tailwind syntax |
-| Backend | Database query pattern | HTTP status codes |
-| DevOps | DB migration strategy | Kubernetes YAML |
-| Testing | Coverage goals | Jest assertions |
-| Monorepo | Import boundaries | npm workspaces |
-| Library | API stability rules | TypeScript features |
+**What to document (high-value deltas):**
+- Decisions: Why X over Y
+- Constraints: NEVER rules preventing bugs
+- Patterns: Custom implementations
+- Product logic: Unique business rules
 
-**Key pattern:** Document WHY and WHEN, let code/docs show HOW.
+**What to skip (Claude already knows):**
+- Framework patterns (React hooks, Django models)
+- Library capabilities (API docs)
+- File structure (ls/grep shows this)
+- Tech stack (package.json)
+- Language syntax (standard libraries)
