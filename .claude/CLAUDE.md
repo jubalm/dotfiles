@@ -2,6 +2,13 @@
 
 Personal dev env config: XDG 1:1 symlink mirroring, modular structure
 
+## Memory Imports
+
+@memory/constraints.md
+@memory/quirks.md
+@memory/decisions.md
+@memory/conventions.md
+
 ## Structure
 
 **Root:**
