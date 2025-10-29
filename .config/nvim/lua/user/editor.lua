@@ -6,6 +6,9 @@ vim.g.maplocalleader = ' '
 vim.o.termguicolors = true
 vim.cmd('colorscheme nord-macos')
 
+-- Match floating window background to normal background
+vim.api.nvim_set_hl(0, 'NormalFloat', { link = 'Normal' })
+
 -- Show cursorline
 vim.o.cursorline = true
 
