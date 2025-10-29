@@ -340,14 +340,39 @@ class DotfilesInstaller:
 
             # Install .claude/skills directory - symlink each skill individually
             skills_source = claude_dir / "skills"
+            skills_home = claude_home / "skills"
+
+            # Create skills directory in home
+            skills_home.mkdir(exist_ok=True)
+
             if skills_source.exists() and skills_source.is_dir():
-                # Create skills directory in home
-                (claude_home / "skills").mkdir(exist_ok=True)
+                # Get the set of skill directories that exist in the dotfiles repo
+                existing_skills = {skill_dir.name for skill_dir in skills_source.iterdir() if skill_dir.is_dir()}
+
+                # Clean up stale symlinks (symlinks whose source no longer exists)
+                if skills_home.exists():
+                    for skill_link in skills_home.iterdir():
+                        if skill_link.is_symlink():
+                            try:
+                                # Check if the symlink target exists
+                                skill_link.resolve(strict=True)
+                            except (OSError, RuntimeError):
+                                # Symlink is broken or target doesn't exist
+                                skill_link.unlink()
+                                self.logger.info(f"Removed stale skill symlink: {skill_link.name}")
+                        elif skill_link.name not in existing_skills:
+                            # Remove directories/files that aren't in our current skills set
+                            if skill_link.is_dir():
+                                shutil.rmtree(skill_link)
+                                self.logger.info(f"Removed orphaned skill directory: {skill_link.name}")
+                            else:
+                                skill_link.unlink()
+                                self.logger.info(f"Removed orphaned skill file: {skill_link.name}")
 
                 # Symlink each skill folder individually
                 for skill_dir in skills_source.iterdir():
                     if skill_dir.is_dir():
-                        skill_target = claude_home / "skills" / skill_dir.name
+                        skill_target = skills_home / skill_dir.name
                         self._install_symlink(skill_dir, skill_target, f".claude/skills/{skill_dir.name}")
 
         # Install Claude CLI
