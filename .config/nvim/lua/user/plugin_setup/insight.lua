@@ -37,7 +37,7 @@ return {
 				modules = {},
 				sync_install = false,
 				ignore_install = {},
-				ensure_installed = { "css", "javascript", "typescript", "tsx", "json", "html", "bash", "lua", "markdown", "markdown_inline", "dockerfile" },
+				ensure_installed = { "astro", "css", "javascript", "typescript", "tsx", "json", "html", "bash", "lua", "markdown", "markdown_inline", "dockerfile" },
 				auto_install = true,
 				highlight = {
 					enable = true,
@@ -137,21 +137,15 @@ return {
 
 			local capabilities = require('cmp_nvim_lsp').default_capabilities(defaultCapabilities)
 
-			local lspconfig = require('lspconfig')
 			local mason_lspconfig = require('mason-lspconfig')
 
 			mason_lspconfig.setup {
-				ensure_installed = {}
+				ensure_installed = { 'astro' }
 			}
 
 			-- Configure LSP servers using the new vim.lsp.config API
 			vim.lsp.config('*', {
 				capabilities = capabilities,
-			})
-
-			-- Biome (JavaScript/TypeScript formatter and linter)
-			vim.lsp.config('biome', {
-				root_markers = { 'package.json', 'node_modules', '.git' },
 			})
 
 			-- TypeScript Language Server
@@ -166,6 +160,12 @@ return {
 					}
 				},
 				single_file_support = false,
+			})
+
+			-- Astro Language Server
+			vim.lsp.config('astro', {
+				capabilities = capabilities,
+				filetypes = { 'astro' },
 			})
 		end
 	},
