@@ -1,265 +1,331 @@
 ---
 name: claude-code-memory
-description: Manage project-specific knowledge for Claude Code by organizing constraints, quirks, decisions, and conventions into auto-loaded memory files and an on-demand inbox system. Use for initializing memory in new projects, capturing knowledge naturally during work, auditing memory for quality, and managing uncertainties.
+description: Manage Claude Code project memory with auto-loaded constraints, quirks, decisions, and conventions. Capture project-specific knowledge through natural conversation, use inbox for uncertainties, and audit memory for quality and conflicts.
 ---
 
-# Claude Code Memory
+# Claude Code Memory Management
 
-This skill helps you build and maintain a structured knowledge system for your project. Every token in memory is auto-loaded into Claude's context, so **memory must complement baseline knowledge, not duplicate it**.
+This skill provides a structured system for capturing and organizing project-specific knowledge that enhances Claude's ability to assist with Claude Code tasks.
 
-Memory captures only project-specific patterns—not generic best practices Claude already knows.
+## Why Memory Matters
 
-## Memory Architecture
+Every context window token is precious. This memory system ensures that:
 
-Memory lives in `.claude/` with two layers:
+- **Project-specific knowledge is always available** - Captured once, auto-loaded into every conversation
+- **Baseline Claude knowledge is never duplicated** - Only store what Claude doesn't already know
+- **Uncertainties are staged, not stored** - Inbox prevents polluting memory with unconfirmed information
+- **Memory stays lean** - Auditing detects bloat and staleness
 
-### Active Memory (Auto-loaded)
-Four concise files imported via `CLAUDE.md`, always in context:
+## Core Principle
 
-1. **constraints.md** - Business/technical limitations (API rate limits, platform restrictions, budget/performance constraints)
-2. **quirks.md** - Non-standard behaviors (unusual configurations, workarounds, deviations from framework defaults)
-3. **decisions.md** - Architectural choices with rationale (why we chose X over Y, tech stack selections)
-4. **conventions.md** - Team standards that are non-obvious (custom workflows, project-specific naming patterns)
+**Memory complements Claude's baseline knowledge, not duplicates it.** Every token in memory is auto-loaded into context, so maximum information density is critical.
 
-### Inbox (On-demand)
-`.claude/memory/inbox/` contains individual `.md` files for uncertainties, deferred questions, and investigations. Load only what you need into context.
+## Memory Structure
 
-**Key benefit:** Inbox isolates verbose discussions without polluting active memory.
-
-## Workflows
-
-### Initialize Memory
-
-**User intent:** "Set up memory for this project" or "Initialize project memory"
-
-**Process:**
-1. Create `.claude/` directory structure
-2. Create CLAUDE.md with imports: `@memory/constraints.md`, `@memory/quirks.md`, `@memory/decisions.md`, `@memory/conventions.md`
-3. Create empty memory files and inbox directory
-4. Analyze codebase with Explore sub-agent
-5. Extract project-specific findings and populate memory files with concise entries
-6. Confirm with summary
-
-**Output:**
-```
-[OK] Memory system initialized at .claude/
-[OK] Analyzed codebase with Explore
-[OK] Captured findings:
-  - 3 constraints (API limits, platform requirements)
-  - 5 quirks (custom build process, DB setup)
-  - 2 decisions (PostgreSQL choice, monorepo structure)
-  - 4 conventions (git workflow, test patterns)
-```
-
-### Natural Capture
-
-**User intent:** "Remember this...", "Save this for next time", "Don't forget that...", "This would be useful team knowledge"
-
-**Process:**
-1. Detect intent and classify: constraint/quirk/decision/convention
-2. Write concise entry (target: <30 tokens, max 50 tokens)
-3. Append to appropriate memory file
-4. Confirm to user
-
-**Example:**
-- **User:** "We use `.env.production` for all environments, not `.env.local`"
-- **Claude writes:** Add to quirks.md: `## Config File` + `Use .env.production (not .env.local) for all environments`
-- **Confirms:** "Added to quirks.md"
-
-### Inbox Capture (Uncertainties)
-
-**User intent:** "Remind me to review X, something feels off", "This works but I want to check later", uncertain language ("might be", "not sure", "possibly")
-
-**Process:**
-1. Create individual `.md` file in inbox/ with YAML frontmatter
-2. Include: id, type, title, priority, status, date, added_by
-3. Add observation, context, discussion (can be lengthy)
-4. Confirm to user: "Added to inbox"
-
-**Entry format:**
-```markdown
----
-id: review-auth-logic
-type: intuition
-title: Review auth logic
-priority: medium
-status: pending
-added_by: user
-date: 2025-10-29
----
-
-# Review auth logic
-
-**Note:** User gut feeling - something feels off
-
-**Context:** Recent refactor of token handling, all tests pass
-
-## Background
-[Discussion, code snippets, investigation notes]
-```
-
-### Inbox Review
-
-**User intent:** "What's in the inbox?", "Show inbox", "Check if we noted X"
-
-**Process:**
-1. List `.claude/memory/inbox/` directory
-2. Read frontmatter from each file
-3. Show summary with id, priority, title
-4. Wait for user selection
-
-**Example output:**
-```
-Inbox (3 items):
-1. [Medium] Review auth logic - gut feeling
-   File: review-auth-logic.md
-2. [Low] Payment flow feels fragile - passing tests
-   File: payment-flow-check.md
-3. Config confusion - needs clarification
-   File: config-confusion.md
-
-Type: "show inbox item 1" or "tackle #1"
-```
-
-User picks one → Claude loads full `.md` into context with discussion, code, notes.
-
-**Token efficiency:** Only load the selected item, not all inbox files.
-
-### Inbox Promotion
-
-**User intent:** "The auth thing—it's a race condition. Save it.", "Config issue resolved—use .env.production"
-
-**Process:**
-1. Read full inbox item content
-2. Write concise entry to appropriate memory file (e.g., "Auth: Token refresh needs mutex lock (race condition)")
-3. Archive/remove from inbox
-4. Confirm: "Promoted to quirks.md"
-
-### Skill Usage as Convention
-
-**User intent:** "Use the docx skill for all reports", "Always use shadcn-ui skill for components"
-
-**Process:**
-1. Recognize skill usage pattern
-2. Write to conventions.md: "UI Components: Always use shadcn-ui skill"
-3. Confirm: "Added to conventions.md"
-
-### Memory Audit
-
-**User intent:** "Audit the memory", "Check for bloat", "Any conflicts in memory?"
-
-**Process:**
-1. Read all memory files (constraints.md, quirks.md, decisions.md, conventions.md)
-2. Analyze each entry for:
-   - **Token count** per entry (target: <25 tokens)
-   - **Generic knowledge patterns** (entries Claude should already know)
-   - **Staleness** (entries >6 months old)
-   - **Conflicts** (contradictory entries)
-   - **Redundancy** (duplicate information)
-3. Report findings with line numbers and suggestions
-
-**Example report:**
-```
-Memory Audit Report
-===================
-
-[OK] Token Efficiency: 18 tokens/entry avg (Target: <25)
-[WARN] Generic Knowledge: 2 entries flagged
-[OK] No Conflicts
-[OK] Freshness: All <6 months
-
-Flagged for Review:
-1. constraints.md line 5: "Use TypeScript for type safety"
-   → Generic best practice, not project-specific
-   → Suggest: Remove
-
-2. conventions.md line 12: "Write tests before deploying"
-   → Universal practice
-   → Suggest: Remove
-```
-
-## Entry Guidelines
-
-### Token Efficiency Rules
-
-**Verbose (❌ ~60 tokens):**
-```markdown
-## API Timeout Issues
-When making requests to the authentication API, we discovered that after 100 requests, 
-the API times out and returns 503 errors. We need to implement batching or caching.
-```
-
-**Concise (✅ ~15 tokens):**
-```markdown
-## API Rate Limit
-Auth API: 100 req/min → 503 errors. Batch or cache requests.
-```
-
-### Entry Format
-
-```markdown
-## [Topic]
-[Single-line description with key constraint/quirk/decision]
-[Optional second line for critical context only]
-
----
-```
-
-### What NOT to Capture
-
-❌ Generic knowledge Claude already knows:
-- "Use TypeScript for type safety"
-- "Write unit tests"
-- "Use git for version control"
-
-✅ Project-specific only:
-- "TypeScript strict mode breaks legacy auth—use loose"
-- "E2E tests timeout in CI at 10s—set to 30s in jest.config"
-- "Use feature branches, deploy via tag push to v/*"
-- "Auth errors must be sanitized—never expose internal details"
-
-## File Structure
+The memory system lives in `.claude/memory/` and auto-loads via `CLAUDE.md`:
 
 ```
 .claude/
-├── CLAUDE.md
-│   @memory/constraints.md
-│   @memory/quirks.md
-│   @memory/decisions.md
-│   @memory/conventions.md
-│
+├── CLAUDE.md (imports memory files)
 └── memory/
-    ├── constraints.md        (auto-loaded)
-    ├── quirks.md             (auto-loaded)
-    ├── decisions.md          (auto-loaded)
-    ├── conventions.md        (auto-loaded)
-    └── inbox/                (on-demand only)
-        ├── item-1.md
-        ├── item-2.md
-        └── item-3.md
+    ├── constraints.md (API limits, platform restrictions, budgets)
+    ├── quirks.md (non-standard behaviors, workarounds)
+    ├── decisions.md (architectural choices with rationale)
+    ├── conventions.md (team standards, skill usage patterns)
+    └── inbox/
+        └── [individual items] (on-demand only, not auto-loaded)
 ```
+
+## Getting Started
+
+### Initialize Memory
+
+Trigger Claude with natural language:
+
+- "Set up memory for this project"
+- "Initialize project memory"
+- "Let's start tracking project knowledge"
+
+Claude will:
+1. Create the `.claude/` directory structure
+2. Explore your codebase to find project-specific patterns
+3. Populate memory files with findings
+4. Confirm with a summary
+
+### Capture During Development
+
+As you work, use natural language triggers:
+
+- "Remember this: We use .env.production for all environments"
+- "Save this for next time: Auth API has 100 req/min limit"
+- "I notice you keep [problem]. Remember [solution]"
+
+Claude detects intent, classifies the entry, checks token efficiency, and adds it automatically.
+
+### Manage Uncertainties with Inbox
+
+When you have gut feelings or need to defer investigation:
+
+- "Remind me to review the auth logic, something feels off"
+- "This works but seems fragile - review later"
+- "May be an issue with X, check next time"
+
+Claude creates an **inbox item** - a separate file that loads only when you need it.
+
+Later, when the issue is confirmed:
+
+- "That auth thing - it's a race condition. Save it."
+
+Claude promotes the item from inbox to active memory.
+
+### Review and Audit
+
+- **"What's in the inbox?"** - See all pending items
+- **"Show inbox item 1"** - Load full content selectively
+- **"Audit the memory"** - Check for bloat, generic knowledge, conflicts
+
+## Memory Types
+
+### constraints.md
+**Business and technical limitations** that affect implementation.
+
+```markdown
+## API Rate Limit
+Auth API: 100 req/min → 503 errors. Batch or cache requests.
+
+## Database Pool
+Max 50 concurrent connections. Use HikariCP with queueTimeout=30s
+```
+
+Target: Deviations from defaults, external limits, legal/compliance requirements.
+
+### quirks.md
+**Non-standard behaviors and workarounds** specific to your project.
+
+```markdown
+## Config Files
+Use .env.production (not .env.local) for all environments
+
+## Async in Legacy Build
+Breaks IE11 - use promises instead of async/await
+```
+
+Target: "This works differently than expected", platform-specific workarounds, custom configurations.
+
+### decisions.md
+**Architectural choices with rationale** - why you chose X over Y.
+
+```markdown
+## Monorepo Architecture
+Chose monorepo for faster local dev, despite slower CI builds
+
+## PostgreSQL Database
+Selected for scalability and JSON support
+```
+
+Target: Tech stack choices, design pattern selections, significant trade-offs made.
+
+### conventions.md
+**Team standards and project-specific practices** that aren't obvious.
+
+```markdown
+## UI Components
+Always use shadcn-ui skill for components
+
+## Git Workflow
+Use feature branches with feat/*, fix/*, docs/* prefixes
+```
+
+Target: Skill usage patterns, naming conventions, workflow standards (only if non-obvious).
+
+## Entry Format
+
+Keep entries concise and scannable:
+
+```markdown
+## [Topic]
+[Single-line description with key detail]
+[Optional second line for critical context only]
+```
+
+**Token target:** < 25 tokens per entry (roughly < 100 characters)
+
+### Verbose Example (❌ ~60 tokens)
+
+```markdown
+## API Timeout Issues
+**Problem:** When making requests to the authentication API, we discovered 
+through testing that after approximately 100 requests, the API begins timing 
+out and returning 503 errors.
+**Solution:** We need to implement request batching.
+```
+
+### Concise Example (✓ ~15 tokens)
+
+```markdown
+## API Rate Limit
+Auth API: 100 req/min limit → 503 errors. Batch or cache requests.
+```
+
+## What NOT to Capture
+
+**✗ Generic best practices** (Claude already knows):
+
+- "Use TypeScript for type safety"
+- "Write unit tests"
+- "Handle errors properly"
+
+**✓ Project-specific deviations**:
+
+- "TypeScript strict mode breaks legacy auth module - use loose"
+- "E2E tests timeout in CI at 10s - set to 30s"
+- "Auth errors must be sanitized - never expose internals"
+
+## Inbox Workflow
+
+The inbox is a **staging area for uncertainties** - items that need investigation or confirmation before becoming memory.
+
+### Create Inbox Item
+
+Natural language trigger:
+
+```
+"Something feels off about the auth logic. Remind me to review it."
+```
+
+Claude creates a separate `.md` file in `inbox/` with:
+- Your note and context
+- Space for investigation notes
+- Metadata (priority, type, date)
+
+### Review Inbox
+
+```
+"What's in the inbox?"
+```
+
+Claude lists all items with priority and type. Select items to load:
+
+```
+"Show inbox item 1"
+```
+
+Only that item loads into context - efficient selective loading.
+
+### Promote to Memory
+
+Once investigation is complete:
+
+```
+"The auth thing - it's a race condition in token refresh. Save it."
+```
+
+Claude:
+1. Reads the full inbox item context
+2. Formulates a concise memory entry
+3. Adds to appropriate memory file
+4. Archives the inbox file
+
+## Audit Memory
+
+Periodically check memory health:
+
+```
+"Audit the memory"
+```
+
+Claude reports:
+- **Token efficiency** - Average tokens per entry
+- **Generic knowledge** - Entries that seem like defaults
+- **Conflicts** - Contradictory entries
+- **Staleness** - Entries older than 6 months
+- **Redundancy** - Duplicate information
+
+## Writing Guidelines
+
+Refer to `references/writing_guidelines.md` for detailed patterns and examples.
+
+Key principles:
+
+1. **Concise first** - Target < 25 tokens per entry
+2. **Project-specific only** - No generic best practices
+3. **Clear topic** - Use consistent naming
+4. **One concern** - One entry, one idea
 
 ## Success Metrics
 
-- **Memory size:** <50 entries per file
-- **Token efficiency:** <25 tokens per entry average
-- **Generic knowledge:** <10% of entries flagged during audit
-- **Staleness:** All entries <6 months old
-- **Friction:** Zero—capture via natural conversation
+A healthy memory system has:
 
-## Anti-patterns to Avoid
+- **< 50 entries per file** initially
+- **< 25 tokens per entry** average
+- **< 10% generic knowledge** entries
+- **All entries < 6 months old**
 
-❌ **Verbose entries** - "The problem we encountered was..."  
-✅ Use: "Problem X → Solution Y"
+## Quick Reference
 
-❌ **Generic knowledge** - "Use async/await for promises"  
-✅ Use: "Async breaks in legacy IE11 build—use promises"
+For common workflows and memory types, see `references/quick_reference.md`.
 
-❌ **Manual processes** - User must edit files directly  
-✅ Use: Natural language triggers
+## Scripts Available
 
-❌ **Immediate promotion** - Uncertainty → memory directly  
-✅ Use: Uncertainty → inbox → confirmed → memory
+Claude invokes these helper scripts (no manual setup needed):
 
-❌ **No auditing** - Let bloat accumulate  
-✅ Use: Regular audits with automated suggestions
+- `init_memory.py` - Create directory structure
+- `add_entry.py` - Add memory entry
+- `inbox_add.py` - Create inbox item
+- `inbox_list.py` - List inbox items
+- `inbox_show.py` - Display inbox item
+- `inbox_promote.py` - Move item to memory
+- `audit_memory.py` - Analyze memory quality
+
+All scripts output JSON for Claude to parse and present naturally.
+
+## Running Scripts in Claude Code
+
+To execute scripts, use:
+
+```bash
+python scripts/init_memory.py .
+python scripts/add_entry.py <type> <entry_text>
+python scripts/inbox_add.py <title> <note>
+python scripts/inbox_list.py
+python scripts/inbox_show.py <item_id>
+python scripts/inbox_promote.py <item_id> <type> <entry_text>
+python scripts/audit_memory.py
+```
+
+**Key workflows:**
+
+**Initialize memory:**
+```bash
+python scripts/init_memory.py .
+```
+
+**Add entry (constraint/quirk/decision/convention):**
+```bash
+python scripts/add_entry.py constraints "API: 100 req/min limit"
+```
+
+**Create inbox item:**
+```bash
+python scripts/inbox_add.py "Review auth" "Something feels off"
+```
+
+**List inbox:**
+```bash
+python scripts/inbox_list.py
+```
+
+**Show inbox item:**
+```bash
+python scripts/inbox_show.py review-auth
+```
+
+**Promote from inbox to memory:**
+```bash
+python scripts/inbox_promote.py review-auth quirks "Auth: Race condition in token refresh"
+```
+
+**Audit memory:**
+```bash
+python scripts/audit_memory.py
+```
