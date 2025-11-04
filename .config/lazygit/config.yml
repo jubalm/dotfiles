@@ -43,7 +43,9 @@ gui:
   mouseEvents: true
   sidePanelWidth: 0.2
 git:
-  pagers: {}
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never
 refresher:
   refreshInterval: 10
   fetchInterval: 60
