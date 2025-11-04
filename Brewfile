@@ -7,7 +7,6 @@ tap "derailed/k9s"
 brew "git"					# Version control system
 brew "gh"					# GitHub CLI for pull requests and issues
 brew "lazygit"				# Terminal UI for git commands
-brew "delta"				# Syntax-highlighting pager for git diffs
 brew "neovim"				# Modern text editor (nvim)
 brew "biome"				# Fast linter and formatter for JavaScript/TypeScript
 
