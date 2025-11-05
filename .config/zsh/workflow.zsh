@@ -14,7 +14,8 @@
 # ===[ Aliases ]===
 alias cld='claude --permission-mode bypassPermissions'
 alias cldp='claude --mcp-config ~/.claude/mcp/test-playwright.mcp.json --permission-mode bypassPermissions'
-alias cldd='claude --mcp-config ~/.claude/mcp/test-devtools.mcp.json --permission-mode bypassPermissions'
+alias cldc='claude --mcp-config ~/.claude/mcp/test-devtools.mcp.json --permission-mode bypassPermissions'
+alias cldd='claude --mcp-config ~/.claude/mcp/dev.mcp.json --permission-mode bypassPermissions'
 
 # ===[ Custom Functions ]===
 # (space for future custom functions and workflow helpers)

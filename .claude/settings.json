@@ -21,6 +21,5 @@
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
-  },
-  "alwaysThinkingEnabled": false
+  }
 }
