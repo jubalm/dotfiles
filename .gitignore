@@ -1,5 +1,9 @@
 # Backups created by install script
 backups/
 
+# Python
+__pycache__/
+*.pyc
+
 # Claude Code
 .claude/settings.local.json
