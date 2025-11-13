@@ -13,6 +13,7 @@ import shutil
 import pathlib
 import threading
 import time
+import argparse
 from datetime import datetime
 from typing import Optional, Tuple
 from contextlib import contextmanager
@@ -104,40 +105,100 @@ class Logger:
 
 class DotfilesInstaller:
     """Main installer class for managing dotfiles setup"""
-    
-    def __init__(self):
+
+    def __init__(self, skip_sections: Optional[list] = None):
         self.dotfiles_dir = pathlib.Path(__file__).parent.absolute()
         self.home_dir = pathlib.Path.home()
         self.backup_dir = self.dotfiles_dir / "backups"
         self.logger = Logger()
+        self.skip_sections = skip_sections or []
     
     def run(self) -> None:
         """Execute the complete installation process"""
         try:
             self.logger.info("Starting dotfiles installation…")
             self.logger.info(f"Dotfiles directory: {self.dotfiles_dir}")
-            
-            self._install_homebrew()
-            self._install_dependencies()
-            self._install_zsh()
-            self._install_git()
-            self._install_nodejs()
-            self._install_claude()
-            self._install_neovim()
-            self._install_tmux()
-            self._install_lazygit()
-            
+
+            if self.skip_sections:
+                self.logger.info(f"Skipping: {', '.join(self.skip_sections)}")
+
+            if 'dependencies' not in self.skip_sections:
+                self._install_homebrew()
+                self._install_dependencies()
+            else:
+                self._remove_section('dependencies')
+
+            if 'zsh' not in self.skip_sections:
+                self._install_zsh()
+            else:
+                self._remove_section('zsh')
+
+            if 'git' not in self.skip_sections:
+                self._install_git()
+            else:
+                self._remove_section('git')
+
+            if 'nodejs' not in self.skip_sections:
+                self._install_nodejs()
+            else:
+                self._remove_section('nodejs')
+
+            if 'claude' not in self.skip_sections:
+                self._install_claude()
+            else:
+                self._remove_section('claude')
+
+            if 'nvim' not in self.skip_sections:
+                self._install_neovim()
+            else:
+                self._remove_section('nvim')
+
+            if 'tmux' not in self.skip_sections:
+                self._install_tmux()
+            else:
+                self._remove_section('tmux')
+
+            if 'lazygit' not in self.skip_sections:
+                self._install_lazygit()
+            else:
+                self._remove_section('lazygit')
+
             self.logger.log("\n🚀 Dotfiles installation complete!")
             self.logger.log("   Configure your terminal to use 'Hack Nerd Font' for best experience")
             self.logger.log("   Restart your terminal or run 'source ~/.zshrc' to apply changes")
-            
+
         except KeyboardInterrupt:
             self.logger.error("Installation interrupted by user")
             sys.exit(1)
         except Exception as e:
             self.logger.error(f"Installation failed: {e}")
             sys.exit(1)
-    
+
+    def _remove_section(self, section: str) -> None:
+        """Remove symlinks for a skipped section"""
+        symlink_map = {
+            'zsh': [(self.home_dir / ".zshrc"), (self.home_dir / ".config" / "zsh")],
+            'git': [(self.home_dir / ".gitignore_global")],
+            'claude': [(self.home_dir / ".claude")],
+            'skills': [(self.home_dir / ".claude" / "skills")],
+            'nvim': [(self.home_dir / ".config" / "nvim")],
+            'tmux': [(self.home_dir / ".config" / "tmux")],
+            'lazygit': [(self.home_dir / ".config" / "lazygit")],
+            'nodejs': [],  # No symlinks to remove
+            'dependencies': [],  # No symlinks to remove
+        }
+
+        for symlink_path in symlink_map.get(section, []):
+            if symlink_path.is_symlink() or symlink_path.exists():
+                try:
+                    if symlink_path.is_dir() and not symlink_path.is_symlink():
+                        shutil.rmtree(symlink_path)
+                    else:
+                        symlink_path.unlink()
+                    self.logger.success(f"Removed: {symlink_path}")
+                except Exception as e:
+                    self.logger.warning(f"Could not remove {symlink_path}: {e}")
+
     def _run_command(self, cmd: list, capture_output: bool = False, check: bool = True, quiet: bool = False) -> Optional[str]:
         """Execute a shell command with proper error handling"""
         try:
@@ -342,41 +403,45 @@ class DotfilesInstaller:
                 self._install_symlink(agents_source, claude_home / "agents", ".claude/agents")
 
             # Install .claude/skills directory - symlink each skill individually
-            skills_source = claude_dir / "skills"
-            skills_home = claude_home / "skills"
+            if 'skills' not in self.skip_sections:
+                skills_source = claude_dir / "skills"
+                skills_home = claude_home / "skills"
 
-            # Create skills directory in home
-            skills_home.mkdir(exist_ok=True)
+                # Create skills directory in home
+                skills_home.mkdir(exist_ok=True)
 
-            if skills_source.exists() and skills_source.is_dir():
-                # Get the set of skill directories that exist in the dotfiles repo
-                existing_skills = {skill_dir.name for skill_dir in skills_source.iterdir() if skill_dir.is_dir()}
+                if skills_source.exists() and skills_source.is_dir():
+                    # Get the set of skill directories that exist in the dotfiles repo
+                    existing_skills = {skill_dir.name for skill_dir in skills_source.iterdir() if skill_dir.is_dir()}
 
-                # Clean up stale symlinks (symlinks whose source no longer exists)
-                if skills_home.exists():
-                    for skill_link in skills_home.iterdir():
-                        if skill_link.is_symlink():
-                            try:
-                                # Check if the symlink target exists
-                                skill_link.resolve(strict=True)
-                            except (OSError, RuntimeError):
-                                # Symlink is broken or target doesn't exist
-                                skill_link.unlink()
-                                self.logger.info(f"Removed stale skill symlink: {skill_link.name}")
-                        elif skill_link.name not in existing_skills:
-                            # Remove directories/files that aren't in our current skills set
-                            if skill_link.is_dir():
-                                shutil.rmtree(skill_link)
-                                self.logger.info(f"Removed orphaned skill directory: {skill_link.name}")
-                            else:
-                                skill_link.unlink()
-                                self.logger.info(f"Removed orphaned skill file: {skill_link.name}")
+                    # Clean up stale symlinks (symlinks whose source no longer exists)
+                    if skills_home.exists():
+                        for skill_link in skills_home.iterdir():
+                            if skill_link.is_symlink():
+                                try:
+                                    # Check if the symlink target exists
+                                    skill_link.resolve(strict=True)
+                                except (OSError, RuntimeError):
+                                    # Symlink is broken or target doesn't exist
+                                    skill_link.unlink()
+                                    self.logger.info(f"Removed stale skill symlink: {skill_link.name}")
+                            elif skill_link.name not in existing_skills:
+                                # Remove directories/files that aren't in our current skills set
+                                if skill_link.is_dir():
+                                    shutil.rmtree(skill_link)
+                                    self.logger.info(f"Removed orphaned skill directory: {skill_link.name}")
+                                else:
+                                    skill_link.unlink()
+                                    self.logger.info(f"Removed orphaned skill file: {skill_link.name}")
 
-                # Symlink each skill folder individually
-                for skill_dir in skills_source.iterdir():
-                    if skill_dir.is_dir():
-                        skill_target = skills_home / skill_dir.name
-                        self._install_symlink(skill_dir, skill_target, f".claude/skills/{skill_dir.name}")
+                    # Symlink each skill folder individually
+                    for skill_dir in skills_source.iterdir():
+                        if skill_dir.is_dir():
+                            skill_target = skills_home / skill_dir.name
+                            self._install_symlink(skill_dir, skill_target, f".claude/skills/{skill_dir.name}")
+            else:
+                # Clean up skills if they're being skipped
+                self._remove_section('skills')
 
         # Install Claude CLI
         if not self._command_exists('claude'):
@@ -434,20 +499,64 @@ class DotfilesInstaller:
 
 def main():
     """Main entry point"""
-    if len(sys.argv) > 1 and sys.argv[1] in ['--help', '-h']:
-        print(__doc__)
-        print("\nUsage: python3 install.py")
-        print("\nThis script will install dotfiles configuration for:")
-        print("  • ZSH & Shell")
-        print("  • Git")
-        print("  • Node.js")
-        print("  • Claude")
-        print("  • Neovim")
-        print("  • Tmux")
-        print("  • Lazygit")
-        return
-    
-    installer = DotfilesInstaller()
+    parser = argparse.ArgumentParser(
+        description="Install and configure dotfiles",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Available flags (use --no-* to skip a section):
+  --no-dependencies   Skip Homebrew and package installation
+  --no-zsh           Skip ZSH configuration
+  --no-git           Skip Git configuration
+  --no-nodejs        Skip Node.js setup
+  --no-claude        Skip Claude CLI and configuration
+  --no-skills        Skip Claude skills installation
+  --no-nvim          Skip Neovim configuration
+  --no-tmux          Skip Tmux configuration
+  --no-lazygit       Skip Lazygit configuration
+
+Examples:
+  python3 install.py                    # Install everything
+  python3 install.py --no-skills        # Install everything except skills
+  python3 install.py --no-nvim          # Install everything except Neovim
+  python3 install.py --no-zsh --no-git  # Skip ZSH and Git
+  python3 install.py --no-claude        # Skip Claude CLI and config (keeps skills if already installed)
+        """
+    )
+
+    parser.add_argument('--no-dependencies', action='store_true', help='Skip Homebrew and packages')
+    parser.add_argument('--no-zsh', action='store_true', help='Skip ZSH configuration')
+    parser.add_argument('--no-git', action='store_true', help='Skip Git configuration')
+    parser.add_argument('--no-nodejs', action='store_true', help='Skip Node.js setup')
+    parser.add_argument('--no-claude', action='store_true', help='Skip Claude CLI and configuration')
+    parser.add_argument('--no-nvim', action='store_true', help='Skip Neovim configuration')
+    parser.add_argument('--no-tmux', action='store_true', help='Skip Tmux configuration')
+    parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
+    parser.add_argument('--no-skills', action='store_true', help='Skip Claude skills installation')
+
+    args = parser.parse_args()
+
+    # Build skip list from arguments
+    skip_sections = []
+    if args.no_dependencies:
+        skip_sections.append('dependencies')
+    if args.no_zsh:
+        skip_sections.append('zsh')
+    if args.no_git:
+        skip_sections.append('git')
+    if args.no_nodejs:
+        skip_sections.append('nodejs')
+    if args.no_claude:
+        skip_sections.append('claude')
+    if args.no_skills:
+        skip_sections.append('skills')
+    if args.no_nvim:
+        skip_sections.append('nvim')
+    if args.no_tmux:
+        skip_sections.append('tmux')
+    if args.no_lazygit:
+        skip_sections.append('lazygit')
+
+    installer = DotfilesInstaller(skip_sections=skip_sections)
     installer.run()
 
 
