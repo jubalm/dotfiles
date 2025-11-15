@@ -3,3 +3,11 @@ backups/
 
 # Claude Code
 .claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+dist/
+build/
