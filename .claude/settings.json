@@ -21,5 +21,10 @@
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
-  }
+  },
+  "enabledPlugins": {
+    "skill-creator@forge": true,
+    "bootstrapping-dev-workflow@forge": true
+  },
+  "alwaysThinkingEnabled": false
 }
