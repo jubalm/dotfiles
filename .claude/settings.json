@@ -12,19 +12,17 @@
       "WebFetch(domain:hono.dev)",
       "mcp__context7",
       "mcp__playwright",
-      "mcp__chrome-devtools"
+      "mcp__chrome-devtools",
+      "mcp__cloudflare-docs"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "default"
   },
   "model": "haiku",
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
-  },
-  "enabledPlugins": {
-    "skill-creator@forge": true,
-    "bootstrapping-dev-workflow@forge": true
   },
   "alwaysThinkingEnabled": false
 }

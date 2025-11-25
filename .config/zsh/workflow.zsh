@@ -12,12 +12,12 @@
 # Depends on all previous layers for full shell functionality.
 
 # ===[ Aliases ]===
-alias cld='claude --permission-mode bypassPermissions'
-alias cldp='claude --mcp-config ~/.claude/mcp/test-playwright.mcp.json --permission-mode bypassPermissions'
-alias cldc='claude --mcp-config ~/.claude/mcp/test-devtools.mcp.json --permission-mode bypassPermissions'
-alias cldd='claude --mcp-config ~/.claude/mcp/dev.mcp.json --permission-mode bypassPermissions'
-alias clda='claude --mcp-config ~/.claude/mcp/dev-docs.mcp.json --permission-mode bypassPermissions'
-alias cldda='claude --mcp-config ~/.claude/mcp/dev-astro.mcp.json --permission-mode bypassPermissions'
+alias cld='claude --allow-dangerously-skip-permissions'
+alias cldp='claude --mcp-config ~/.claude/mcp/test-playwright.mcp.json --allow-dangerously-skip-permissions'
+alias cldc='claude --mcp-config ~/.claude/mcp/test-devtools.mcp.json --allow-dangerously-skip-permissions'
+alias cldd='claude --mcp-config ~/.claude/mcp/dev.mcp.json --allow-dangerously-skip-permissions'
+alias clda='claude --mcp-config ~/.claude/mcp/dev-docs.mcp.json --allow-dangerously-skip-permissions'
+alias cldda='claude --mcp-config ~/.claude/mcp/dev-astro.mcp.json --allow-dangerously-skip-permissions'
 
 # ===[ Custom Functions ]===
 # (space for future custom functions and workflow helpers)
