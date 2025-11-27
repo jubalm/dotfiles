@@ -11,13 +11,11 @@
 #
 # Depends on all previous layers for full shell functionality.
 
-# ===[ Aliases ]===
-alias cld='claude --allow-dangerously-skip-permissions'
-alias cldp='claude --mcp-config ~/.claude/mcp/test-playwright.mcp.json --allow-dangerously-skip-permissions'
-alias cldc='claude --mcp-config ~/.claude/mcp/test-devtools.mcp.json --allow-dangerously-skip-permissions'
-alias cldd='claude --mcp-config ~/.claude/mcp/dev.mcp.json --allow-dangerously-skip-permissions'
-alias clda='claude --mcp-config ~/.claude/mcp/dev-docs.mcp.json --allow-dangerously-skip-permissions'
-alias cldda='claude --mcp-config ~/.claude/mcp/dev-astro.mcp.json --allow-dangerously-skip-permissions'
-
 # ===[ Custom Functions ]===
-# (space for future custom functions and workflow helpers)
+
+# Claude CLI launcher with MCP config support
+# Usage: cld [flags] [-- claude args]
+# Flags: -d (dev), -p (playwright), -c (devtools), -da (docs), -a (astro), -h (help)
+cld() {
+    "${HOME}/.config/dotfiles/bin/cld" "$@"
+}
