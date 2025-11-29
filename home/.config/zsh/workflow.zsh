@@ -12,10 +12,3 @@
 # Depends on all previous layers for full shell functionality.
 
 # ===[ Custom Functions ]===
-
-# Claude CLI launcher with MCP config support
-# Usage: cld [flags] [-- claude args]
-# Flags: -d (dev), -p (playwright), -c (devtools), -da (docs), -a (astro), -h (help)
-cld() {
-    "${HOME}/.config/dotfiles/bin/cld" "$@"
-}

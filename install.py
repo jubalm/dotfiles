@@ -163,6 +163,11 @@ class DotfilesInstaller:
             else:
                 self._remove_section('lazygit')
 
+            if 'bin' not in self.skip_sections:
+                self._install_bin()
+            else:
+                self._remove_section('bin')
+
             self.logger.log("\n🚀 Dotfiles installation complete!")
             self.logger.log("   Configure your terminal to use 'Hack Nerd Font' for best experience")
             self.logger.log("   Restart your terminal or run 'source ~/.zshrc' to apply changes")
@@ -184,6 +189,7 @@ class DotfilesInstaller:
             'nvim': [(self.home_dir / ".config" / "nvim")],
             'tmux': [(self.home_dir / ".config" / "tmux")],
             'lazygit': [(self.home_dir / ".config" / "lazygit")],
+            'bin': [(self.home_dir / ".local" / "bin" / "cld")],
             'nodejs': [],  # No symlinks to remove
             'dependencies': [],  # No symlinks to remove
         }
@@ -493,8 +499,21 @@ class DotfilesInstaller:
         lazygit_source = self.dotfiles_dir / "home" / ".config" / "lazygit"
         if lazygit_source.exists():
             self._install_symlink(lazygit_source, self.home_dir / ".config" / "lazygit", "lazygit")
-        
+
         self.logger.success("Lazygit configuration installed")
+
+    def _install_bin(self) -> None:
+        """Install user executables to ~/.local/bin"""
+        # Create ~/.local/bin if it doesn't exist
+        local_bin = self.home_dir / ".local" / "bin"
+        local_bin.mkdir(parents=True, exist_ok=True)
+
+        # Symlink bin/cld to ~/.local/bin/cld
+        cld_source = self.dotfiles_dir / "bin" / "cld"
+        if cld_source.exists():
+            self._install_symlink(cld_source, local_bin / "cld", ".local/bin/cld")
+
+        self.logger.success("User executables installed")
 
 
 def main():
@@ -513,6 +532,7 @@ Available flags (use --no-* to skip a section):
   --no-nvim          Skip Neovim configuration
   --no-tmux          Skip Tmux configuration
   --no-lazygit       Skip Lazygit configuration
+  --no-bin           Skip user executables installation
 
 Examples:
   python3 install.py                    # Install everything
@@ -532,6 +552,7 @@ Examples:
     parser.add_argument('--no-tmux', action='store_true', help='Skip Tmux configuration')
     parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
     parser.add_argument('--no-skills', action='store_true', help='Skip Claude skills installation')
+    parser.add_argument('--no-bin', action='store_true', help='Skip user executables installation')
 
     args = parser.parse_args()
 
@@ -555,6 +576,8 @@ Examples:
         skip_sections.append('tmux')
     if args.no_lazygit:
         skip_sections.append('lazygit')
+    if args.no_bin:
+        skip_sections.append('bin')
 
     installer = DotfilesInstaller(skip_sections=skip_sections)
     installer.run()
