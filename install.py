@@ -393,10 +393,10 @@ class DotfilesInstaller:
                         f".claude/{claude_file.name}"
                     )
             
-            # Install .claude/mcp directory if it exists
-            mcp_source = claude_dir / "mcp"
-            if mcp_source.exists() and mcp_source.is_dir():
-                self._install_symlink(mcp_source, claude_home / "mcp", ".claude/mcp")
+            # Install .claude/servers directory if it exists
+            servers_source = claude_dir / "servers"
+            if servers_source.exists() and servers_source.is_dir():
+                self._install_symlink(servers_source, claude_home / "servers", ".claude/servers")
 
             # Install .claude/commands directory if it exists
             commands_source = claude_dir / "commands"

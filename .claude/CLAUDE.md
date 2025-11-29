@@ -1,0 +1,47 @@
+# Dotfiles
+
+Personal dev env config: XDG 1:1 symlink mirroring, modular structure
+
+## Memory Imports
+
+@memory/constraints.md
+@memory/quirks.md
+@memory/decisions.md
+@memory/conventions.md
+
+## Structure
+
+**Root:**
+- home/ (all files symlinked to ~/)
+- Brewfile (macOS deps)
+- install.py (symlink installer w/ backups)
+- misc/theme.itermcolors (Nord iTerm2)
+
+**Home (home/ → ~/):**
+- .zshrc → ~/.zshrc
+- .gitignore_global → ~/.gitignore_global
+- .claude/ → ~/.claude/ (settings, MCP configs, memory, skills)
+- .config/ → ~/.config/ (XDG Base Directory)
+  - nvim/ (Lua, lazy.nvim, modular plugin_setup/)
+  - tmux/ (native which-key menus)
+  - lazygit/ (Nord theme)
+  - zsh/ (4-layer arch: platform→runtime→interface→workflow)
+    - completions/ (AWS, kubectl, eksctl, deno)
+    - prompt/ (git status indicators)
+
+## Quick Start
+
+Install:
+```bash
+./install.py
+```
+
+Nvim plugins:
+```vim
+:Lazy sync
+```
+
+Tmux menu:
+```
+Ctrl+b ?
+```

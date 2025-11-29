@@ -15,7 +15,7 @@ set -e
 
 CLAUDE_COMMAND="claude"
 SKIP_PERMISSIONS="--allow-dangerously-skip-permissions"
-MCP_SERVER_DIR="${HOME}/.claude/mcp/servers"
+MCP_SERVER_DIR="${HOME}/.claude/servers"
 TEMP_CONFIG=$(mktemp)
 
 # Trap to clean up temp file on exit
@@ -116,7 +116,7 @@ SHORTHAND FLAGS (used with -m):
     a               Astro documentation
 
 NAMED SERVERS & BUNDLES:
-    Available in: ~/.claude/mcp/servers/
+    Available in: ~/.claude/servers/
 
     Individual Servers:
     - playwright         (shorthand: p)
