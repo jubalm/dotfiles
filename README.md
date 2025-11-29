@@ -79,41 +79,41 @@ nvim --headless -c "Lazy! sync" -c "qall"
 
 ```
 dotfiles/
-├── home/                      # Files symlinked to home directory
+├── home/                      # Files symlinked to ~/
 │   ├── .zshrc                # Shell configuration
 │   ├── .gitignore_global     # Global git ignore patterns
-│   └── .claude/              # Claude CLI configuration
-│       ├── settings.json     # Model and tool settings
-│       ├── mcp/              # MCP server configurations
-│       ├── commands/         # Custom slash commands
-│       ├── agents/           # Agent configurations
-│       ├── memory/           # Project memory system
-│       └── skills/           # Custom Claude skills
-├── .config/                   # XDG Base Directory structure (→ ~/.config/)
-│   ├── nvim/                  # Complete Neovim configuration
-│   │   ├── init.lua          # Entry point
-│   │   ├── lua/user/         # Modular configuration
-│   │   │   ├── editor.lua    # Core editor settings
-│   │   │   ├── keymap.lua    # Global keymaps
-│   │   │   ├── plugins.lua   # Lazy.nvim setup
-│   │   │   └── plugin_setup/ # Plugin configurations
-│   │   │       ├── editing.lua    # Completion, snippets, commenting
-│   │   │       ├── insight.lua    # LSP, Treesitter, diagnostics
-│   │   │       ├── navigation.lua # Telescope fuzzy finder
-│   │   │       └── ui.lua         # Status line, UI, markdown rendering
-│   │   └── colors/           # Custom colorscheme
-│   ├── lazygit/              # Lazygit configuration
-│   │   └── config.yml        # Nord-themed color scheme
-│   ├── tmux/                  # Tmux configuration
-│   │   └── tmux.conf         # Main tmux config with which-key menus
-│   └── zsh/                  # Shell enhancements (4-layer architecture)
-│       ├── platform.zsh      # Foundation layer (Homebrew, PATH)
-│       ├── runtime.zsh       # Shell behavior (vi mode, completions)
-│       ├── interface.zsh     # User interaction (prompt, suggestions)
-│       ├── workflow.zsh      # Personal productivity (aliases, functions)
-│       ├── completions/      # Custom completions (AWS, kubectl, etc.)
-│       ├── prompt/           # Git prompt configuration
-│       └── functions/        # Custom shell functions
+│   ├── .claude/              # Claude CLI configuration
+│   │   ├── settings.json     # Model and tool settings
+│   │   ├── mcp/              # MCP server configurations
+│   │   ├── commands/         # Custom slash commands
+│   │   ├── agents/           # Agent configurations
+│   │   ├── memory/           # Project memory system
+│   │   └── skills/           # Custom Claude skills
+│   └── .config/              # XDG Base Directory structure (→ ~/.config/)
+│       ├── nvim/             # Complete Neovim configuration
+│       │   ├── init.lua      # Entry point
+│       │   ├── lua/user/     # Modular configuration
+│       │   │   ├── editor.lua    # Core editor settings
+│       │   │   ├── keymap.lua    # Global keymaps
+│       │   │   ├── plugins.lua   # Lazy.nvim setup
+│       │   │   └── plugin_setup/ # Plugin configurations
+│       │   │       ├── editing.lua    # Completion, snippets, commenting
+│       │   │       ├── insight.lua    # LSP, Treesitter, diagnostics
+│       │   │       ├── navigation.lua # Telescope fuzzy finder
+│       │   │       └── ui.lua         # Status line, UI, markdown rendering
+│       │   └── colors/       # Custom colorscheme
+│       ├── lazygit/          # Lazygit configuration
+│       │   └── config.yml    # Nord-themed color scheme
+│       ├── tmux/             # Tmux configuration
+│       │   └── tmux.conf     # Main tmux config with which-key menus
+│       └── zsh/              # Shell enhancements (4-layer architecture)
+│           ├── platform.zsh  # Foundation layer (Homebrew, PATH)
+│           ├── runtime.zsh   # Shell behavior (vi mode, completions)
+│           ├── interface.zsh # User interaction (prompt, suggestions)
+│           ├── workflow.zsh  # Personal productivity (aliases, functions)
+│           ├── completions/  # Custom completions (AWS, kubectl, etc.)
+│           ├── prompt/       # Git prompt configuration
+│           └── functions/    # Custom shell functions
 ├── misc/                      # Additional resources
 │   └── theme.itermcolors    # iTerm2 Nord theme
 ├── bin/                       # Utility scripts

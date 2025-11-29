@@ -334,7 +334,7 @@ class DotfilesInstaller:
             self._install_symlink(zshrc_source, self.home_dir / ".zshrc", ".zshrc")
         
         # Install .config/zsh
-        zsh_config_source = self.dotfiles_dir / ".config" / "zsh"
+        zsh_config_source = self.dotfiles_dir / "home" / ".config" / "zsh"
         if zsh_config_source.exists():
             self._install_symlink(zsh_config_source, self.home_dir / ".config" / "zsh", "zsh")
         
@@ -457,7 +457,7 @@ class DotfilesInstaller:
     def _install_neovim(self) -> None:
         """Install Neovim configuration and plugins"""
         # Install Neovim configuration
-        nvim_source = self.dotfiles_dir / ".config" / "nvim"
+        nvim_source = self.dotfiles_dir / "home" / ".config" / "nvim"
         if nvim_source.exists():
             self._install_symlink(nvim_source, self.home_dir / ".config" / "nvim", "nvim")
         
@@ -481,7 +481,7 @@ class DotfilesInstaller:
     def _install_tmux(self) -> None:
         """Install tmux configuration"""
         # Install tmux configuration
-        tmux_source = self.dotfiles_dir / ".config" / "tmux"
+        tmux_source = self.dotfiles_dir / "home" / ".config" / "tmux"
         if tmux_source.exists():
             self._install_symlink(tmux_source, self.home_dir / ".config" / "tmux", "tmux")
         
@@ -490,7 +490,7 @@ class DotfilesInstaller:
     def _install_lazygit(self) -> None:
         """Install lazygit configuration"""
         # Install lazygit configuration
-        lazygit_source = self.dotfiles_dir / ".config" / "lazygit"
+        lazygit_source = self.dotfiles_dir / "home" / ".config" / "lazygit"
         if lazygit_source.exists():
             self._install_symlink(lazygit_source, self.home_dir / ".config" / "lazygit", "lazygit")
         
