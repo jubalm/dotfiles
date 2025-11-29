@@ -329,7 +329,7 @@ class DotfilesInstaller:
     def _install_zsh(self) -> None:
         """Install ZSH configuration"""
         # Install .zshrc
-        zshrc_source = self.dotfiles_dir / ".zshrc"
+        zshrc_source = self.dotfiles_dir / "home" / ".zshrc"
         if zshrc_source.exists():
             self._install_symlink(zshrc_source, self.home_dir / ".zshrc", ".zshrc")
         
@@ -342,7 +342,7 @@ class DotfilesInstaller:
     
     def _install_git(self) -> None:
         """Install Git configuration"""
-        gitignore_source = self.dotfiles_dir / ".gitignore_global"
+        gitignore_source = self.dotfiles_dir / "home" / ".gitignore_global"
         if gitignore_source.exists():
             self._install_symlink(
                 gitignore_source, 
@@ -371,7 +371,7 @@ class DotfilesInstaller:
     def _install_claude(self) -> None:
         """Install Claude configuration and CLI"""
         # Install .claude directory files
-        claude_dir = self.dotfiles_dir / ".claude"
+        claude_dir = self.dotfiles_dir / "home" / ".claude"
         if claude_dir.exists():
             claude_home = self.home_dir / ".claude"
             claude_home.mkdir(exist_ok=True)

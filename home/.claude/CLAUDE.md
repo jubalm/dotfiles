@@ -12,12 +12,15 @@ Personal dev env config: XDG 1:1 symlink mirroring, modular structure
 ## Structure
 
 **Root:**
-- .zshrc → ~/.zshrc
-- .gitignore_global → ~/.gitignore_global
+- home/ (files symlinked to ~/)
 - Brewfile (macOS deps)
 - install.py (symlink installer w/ backups)
-- .claude/ → ~/.claude/ (settings, MCP configs)
 - misc/theme.itermcolors (Nord iTerm2)
+
+**Home (home/ → ~/):**
+- .zshrc → ~/.zshrc
+- .gitignore_global → ~/.gitignore_global
+- .claude/ → ~/.claude/ (settings, MCP configs, memory, skills)
 
 **XDG (mirrors ~/.config/):**
 - nvim/ → ~/.config/nvim/ (Lua, lazy.nvim, modular plugin_setup/)

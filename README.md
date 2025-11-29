@@ -79,12 +79,17 @@ nvim --headless -c "Lazy! sync" -c "qall"
 
 ```
 dotfiles/
-├── .zshrc                      # Shell configuration
-├── .gitignore_global          # Global git ignore patterns
-├── .claude/                   # Claude CLI configuration
-│   ├── settings.json         # Model and tool settings
-│   └── mcp/                  # MCP server configurations
-├── .config/                   # XDG Base Directory structure
+├── home/                      # Files symlinked to home directory
+│   ├── .zshrc                # Shell configuration
+│   ├── .gitignore_global     # Global git ignore patterns
+│   └── .claude/              # Claude CLI configuration
+│       ├── settings.json     # Model and tool settings
+│       ├── mcp/              # MCP server configurations
+│       ├── commands/         # Custom slash commands
+│       ├── agents/           # Agent configurations
+│       ├── memory/           # Project memory system
+│       └── skills/           # Custom Claude skills
+├── .config/                   # XDG Base Directory structure (→ ~/.config/)
 │   ├── nvim/                  # Complete Neovim configuration
 │   │   ├── init.lua          # Entry point
 │   │   ├── lua/user/         # Modular configuration
@@ -111,11 +116,12 @@ dotfiles/
 │       └── functions/        # Custom shell functions
 ├── misc/                      # Additional resources
 │   └── theme.itermcolors    # iTerm2 Nord theme
+├── bin/                       # Utility scripts
 ├── backups/                  # Created during installation (your existing configs)
 ├── Brewfile                  # Homebrew dependencies
 ├── install.py                # Python-based automated installer
-├── CLAUDE.md                 # Development documentation
-└── README.md                 # This file
+├── README.md                 # This file
+└── .gitignore                # Git metadata
 ```
 
 ## Shell Philosophy
