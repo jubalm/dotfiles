@@ -15,7 +15,7 @@ import threading
 import time
 import argparse
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional
 from contextlib import contextmanager
 
 
@@ -31,12 +31,12 @@ class Colors:
 
 class Spinner:
     """Simple spinner for long-running operations"""
-    
+
     def __init__(self, message: str):
         self.message = message
         self.running = False
         self.thread = None
-    
+
     def _spin(self):
         """Internal spinner animation"""
         chars = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
@@ -49,13 +49,13 @@ class Spinner:
         # Completely clear the line
         sys.stdout.write('\r' + ' ' * (len(self.message) + 3) + '\r')
         sys.stdout.flush()
-    
+
     def start(self):
         """Start the spinner"""
         self.running = True
         self.thread = threading.Thread(target=self._spin)
         self.thread.start()
-    
+
     def stop(self):
         """Stop the spinner"""
         self.running = False
@@ -76,27 +76,27 @@ def spinner_context(message: str):
 
 class Logger:
     """Enhanced logging with colors and formatting"""
-    
+
     @staticmethod
     def log(message: str) -> None:
         print(message)
-    
+
     @staticmethod
     def info(message: str) -> None:
         print(f"{Colors.DARKGRAY}*{Colors.NC} {message}")
-    
+
     @staticmethod
     def success(message: str) -> None:
         print(f"{Colors.GREEN}✓{Colors.NC} {message}")
-    
+
     @staticmethod
     def warning(message: str) -> None:
         print(f"{Colors.YELLOW}⚠{Colors.NC} {message}")
-    
+
     @staticmethod
     def error(message: str) -> None:
         print(f"{Colors.RED}✗{Colors.NC} {message}")
-    
+
     @staticmethod
     def busy(message: str):
         """Return a context manager for busy/spinner operations"""
@@ -112,7 +112,7 @@ class DotfilesInstaller:
         self.backup_dir = self.dotfiles_dir / "backups"
         self.logger = Logger()
         self.skip_sections = skip_sections or []
-    
+
     def run(self) -> None:
         """Execute the complete installation process"""
         try:
@@ -211,11 +211,11 @@ class DotfilesInstaller:
             # If quiet is True, redirect stdout/stderr to devnull to avoid interference with spinner
             stdout = subprocess.DEVNULL if quiet and not capture_output else None
             stderr = subprocess.DEVNULL if quiet else None
-            
+
             result = subprocess.run(
-                cmd, 
-                capture_output=capture_output, 
-                text=True, 
+                cmd,
+                capture_output=capture_output,
+                text=True,
                 check=check,
                 stdout=stdout,
                 stderr=stderr
@@ -225,24 +225,24 @@ class DotfilesInstaller:
             if check:
                 raise RuntimeError(f"Command failed: {' '.join(cmd)} - {e}")
             return None
-    
+
     def _command_exists(self, command: str) -> bool:
         """Check if a command exists in PATH"""
         return shutil.which(command) is not None
-    
+
     def _backup_if_needed(self, target_path: pathlib.Path, backup_name: str) -> None:
         """Backup existing file/directory if it exists and isn't already our symlink"""
         if not target_path.exists() and not target_path.is_symlink():
             return
-        
+
         # Create backup directory
         self.backup_dir.mkdir(exist_ok=True)
-        
+
         # Generate safe backup name (replace / with _)
         safe_backup_name = backup_name.replace('/', '_')
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_path = self.backup_dir / f"{safe_backup_name}.backup.{timestamp}"
-        
+
         if target_path.is_symlink():
             # Handle symlinks - backup target if it points outside dotfiles
             try:
@@ -256,7 +256,7 @@ class DotfilesInstaller:
             except (OSError, RuntimeError):
                 self.logger.info("Broken symlink removed - no backup needed")
                 return
-        
+
         # Backup regular files/directories
         if target_path.is_file():
             shutil.copy2(target_path, backup_path)
@@ -264,38 +264,38 @@ class DotfilesInstaller:
         elif target_path.is_dir():
             shutil.copytree(target_path, backup_path)
             self.logger.success(f"Backed up directory to {backup_path}")
-    
+
     def _install_symlink(self, source: pathlib.Path, target: pathlib.Path, backup_name: str) -> None:
         """Create or update a symlink with backup handling"""
         # Backup existing file/directory
         self._backup_if_needed(target, backup_name)
-        
+
         # Create parent directory if needed
         target.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Remove existing file/symlink
         if target.exists() or target.is_symlink():
             if target.is_dir() and not target.is_symlink():
                 shutil.rmtree(target)
             else:
                 target.unlink()
-        
+
         # Create symlink
         target.symlink_to(source)
         self.logger.success(f"Installed symlink: {target} -> {source}")
-    
+
     def _install_homebrew(self) -> None:
         """Install Homebrew if not present"""
         if self._command_exists('brew'):
             self.logger.success("Homebrew already installed")
             return
-        
+
         self.logger.warning("Homebrew not found. Installing Homebrew…")
         install_script = "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
-        
+
         with self.logger.busy("Installing Homebrew…"):
             self._run_command(['/bin/bash', '-c', f'$(curl -fsSL {install_script})'], quiet=True)
-        
+
         # Add Homebrew to PATH for this session
         brew_paths = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]
         for brew_path in brew_paths:
@@ -305,9 +305,9 @@ class DotfilesInstaller:
                 if brew_bin not in os.environ.get('PATH', ''):
                     os.environ['PATH'] = f"{brew_bin}:{os.environ.get('PATH', '')}"
                 break
-        
+
         self.logger.success("Homebrew installed successfully")
-    
+
     def _install_dependencies(self) -> None:
         """Install dependencies from Brewfile"""
         self.logger.info("Installing dependencies from Brewfile…")
@@ -324,7 +324,7 @@ class DotfilesInstaller:
                 # Run brew bundle without quiet flag to show actual progress and errors
                 self._run_command(['brew', 'bundle'], check=True)
                 self.logger.success("Dependencies installed successfully")
-            except RuntimeError as e:
+            except RuntimeError:
                 self.logger.error("Some packages failed to install")
                 self.logger.info("Run 'brew bundle' manually to see detailed error messages")
                 self.logger.info("You can also run 'brew bundle --verbose' for more information")
@@ -338,32 +338,32 @@ class DotfilesInstaller:
         zshrc_source = self.dotfiles_dir / "home" / ".zshrc"
         if zshrc_source.exists():
             self._install_symlink(zshrc_source, self.home_dir / ".zshrc", ".zshrc")
-        
+
         # Install .config/zsh
         zsh_config_source = self.dotfiles_dir / "home" / ".config" / "zsh"
         if zsh_config_source.exists():
             self._install_symlink(zsh_config_source, self.home_dir / ".config" / "zsh", "zsh")
-        
+
         self.logger.success("ZSH configuration installed")
-    
+
     def _install_git(self) -> None:
         """Install Git configuration"""
         gitignore_source = self.dotfiles_dir / "home" / ".gitignore_global"
         if gitignore_source.exists():
             self._install_symlink(
-                gitignore_source, 
-                self.home_dir / ".gitignore_global", 
+                gitignore_source,
+                self.home_dir / ".gitignore_global",
                 ".gitignore_global"
             )
-        
+
         self.logger.success("Git configuration installed")
-    
+
     def _install_nodejs(self) -> None:
         """Install Node.js using n"""
         if not self._command_exists('n'):
             self.logger.warning("Node version manager 'n' not found, skipping Node.js setup")
             return
-        
+
         if not self._command_exists('node'):
             with self.logger.busy("Installing Node.js LTS…"):
                 self._run_command(['n', 'lts'], quiet=True)
@@ -371,9 +371,9 @@ class DotfilesInstaller:
         else:
             node_version = self._run_command(['node', '--version'], capture_output=True)
             self.logger.success(f"Node.js already installed ({node_version})")
-        
+
         self.logger.success("Node.js configuration complete")
-    
+
     def _install_claude(self) -> None:
         """Install Claude configuration and CLI"""
         # Install .claude directory files
@@ -392,7 +392,7 @@ class DotfilesInstaller:
                         claude_home / claude_file.name,
                         f".claude/{claude_file.name}"
                     )
-            
+
             # Install .claude/servers directory if it exists
             servers_source = claude_dir / "servers"
             if servers_source.exists() and servers_source.is_dir():
@@ -457,16 +457,16 @@ class DotfilesInstaller:
             self.logger.success("Claude CLI installed")
         else:
             self.logger.success("Claude CLI already installed")
-        
+
         self.logger.success("Claude configuration installed")
-    
+
     def _install_neovim(self) -> None:
         """Install Neovim configuration and plugins"""
         # Install Neovim configuration
         nvim_source = self.dotfiles_dir / "home" / ".config" / "nvim"
         if nvim_source.exists():
             self._install_symlink(nvim_source, self.home_dir / ".config" / "nvim", "nvim")
-        
+
         # Install Neovim plugins
         nvim_config = self.home_dir / ".config" / "nvim"
         if nvim_config.exists() and self._command_exists('nvim'):
@@ -474,25 +474,25 @@ class DotfilesInstaller:
                 with self.logger.busy("Installing Neovim plugins…"):
                     # Run in background and capture any errors
                     self._run_command([
-                        'nvim', '--headless', 
-                        '-c', 'Lazy! sync', 
+                        'nvim', '--headless',
+                        '-c', 'Lazy! sync',
                         '-c', 'qall'
                     ], check=False, quiet=True)
                 self.logger.success("Neovim plugins installed")
             except Exception:
                 self.logger.warning("Plugin installation failed, but continuing…")
-        
+
         self.logger.success("Neovim configuration installed")
-    
+
     def _install_tmux(self) -> None:
         """Install tmux configuration"""
         # Install tmux configuration
         tmux_source = self.dotfiles_dir / "home" / ".config" / "tmux"
         if tmux_source.exists():
             self._install_symlink(tmux_source, self.home_dir / ".config" / "tmux", "tmux")
-        
+
         self.logger.success("Tmux configuration installed")
-    
+
     def _install_lazygit(self) -> None:
         """Install lazygit configuration"""
         # Install lazygit configuration
