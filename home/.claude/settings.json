@@ -25,5 +25,8 @@
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
   },
+  "enabledPlugins": {
+    "commit-commands@claude-code-plugins": true
+  },
   "alwaysThinkingEnabled": false
 }

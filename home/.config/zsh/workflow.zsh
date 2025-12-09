@@ -12,5 +12,3 @@
 # Depends on all previous layers for full shell functionality.
 
 # ===[ Custom Functions ]===
-
-alias ws='workspace'
