@@ -14,3 +14,8 @@ source ~/.config/zsh/platform.zsh
 source ~/.config/zsh/runtime.zsh
 source ~/.config/zsh/interface.zsh
 source ~/.config/zsh/workflow.zsh
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/jubalm/.lmstudio/bin"
+# End of LM Studio CLI section
+
