@@ -140,11 +140,28 @@ shorten_path() {
 # Shorten the display directory
 display_dir=$(shorten_path "$current_dir" 50)
 
+# Function to format numbers with k suffix
+format_tokens() {
+    local num=$1
+    if (( num >= 1000 )); then
+        # Convert to k format with 1 decimal place
+        local k_value=$(echo "scale=1; $num / 1000" | bc)
+        # Remove trailing .0 if present
+        k_value=$(echo "$k_value" | sed 's/\.0$//')
+        echo "${k_value}k"
+    else
+        echo "$num"
+    fi
+}
+
 # Build token usage info
 token_info=""
 if [[ -n "$used_percentage" ]]; then
     # Calculate total tokens used
     total_tokens=$((total_input + total_output))
+
+    # Format token counts
+    formatted_total=$(format_tokens $total_tokens)
 
     # Color code based on usage percentage
     if (( $(echo "$used_percentage < 50" | bc -l) )); then
@@ -156,7 +173,7 @@ if [[ -n "$used_percentage" ]]; then
     fi
 
     # Format: "12.5% (25k tokens)"
-    token_info=" ${token_color}${used_percentage}%$(printf '\033[0m') $(printf '\033[90m')(${total_tokens})$(printf '\033[0m')"
+    token_info=" ${token_color}${used_percentage}%$(printf '\033[0m') $(printf '\033[90m')(${formatted_total})$(printf '\033[0m')"
 fi
 
 # Print the status line (matches zsh prompt format)

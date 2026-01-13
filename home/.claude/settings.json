@@ -20,6 +20,7 @@
     "ask": [],
     "defaultMode": "default"
   },
+  "model": "haiku",
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline.sh"
@@ -27,6 +28,5 @@
   "enabledPlugins": {
     "plugin-dev@claude-code-plugins": true,
     "commit-commands@claude-code-plugins": true
-  },
-  "model": "haiku"
+  }
 }
