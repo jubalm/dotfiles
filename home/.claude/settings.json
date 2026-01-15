@@ -14,6 +14,7 @@
       "mcp__playwright",
       "mcp__chrome-devtools",
       "mcp__cloudflare-docs",
+      "mcp__figma",
       "mcp__shadcn"
     ],
     "deny": [],

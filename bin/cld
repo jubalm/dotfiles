@@ -28,6 +28,7 @@ resolve_server_name() {
         c) echo "chrome-devtools" ;;
         x) echo "context7" ;;
         a) echo "astro-docs" ;;
+        f) echo "figma" ;;
         *) return 1 ;;
     esac
 }
@@ -114,6 +115,7 @@ SHORTHAND FLAGS (used with -m):
     c               Chrome DevTools
     x               Context7 (Upstash context)
     a               Astro documentation
+    f               Figma design tools
 
 NAMED SERVERS & BUNDLES:
     Available in: ~/.claude/servers/
@@ -123,6 +125,7 @@ NAMED SERVERS & BUNDLES:
     - chrome-devtools    (shorthand: c)
     - context7           (shorthand: x)
     - astro-docs         (shorthand: a)
+    - figma              (shorthand: f)
     - cloudflare-docs
 
     Bundles (multiple servers in one):
@@ -136,12 +139,14 @@ EXAMPLES:
     cld -m p                               # Load Playwright
     cld -m playwright                      # Load Playwright (full name)
     cld -m chrome-devtools                 # Load Chrome DevTools
+    cld -m figma                           # Load Figma
     cld -m cloudflare-docs                 # Load Cloudflare Docs
 
     Multiple servers:
     cld -m p c                             # Load Playwright + Chrome DevTools
+    cld -m p f                             # Load Playwright + Figma
     cld -m playwright context7 cloudflare-docs
-    cld -m p x a                           # Load Playwright + Context7 + Astro
+    cld -m p x a f                         # Load Playwright + Context7 + Astro + Figma
 
     Bundles:
     cld -m dev                             # Load dev bundle (chrome-devtools + context7)
