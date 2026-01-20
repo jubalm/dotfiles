@@ -383,7 +383,7 @@ class DotfilesInstaller:
             claude_home.mkdir(exist_ok=True)
 
             # Files to exclude from global symlink (keep project-specific)
-            excluded_files = {"CLAUDE.md"}
+            excluded_files = set()
 
             for claude_file in claude_dir.glob("*"):
                 if claude_file.is_file() and claude_file.name not in excluded_files:
