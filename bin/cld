@@ -18,6 +18,9 @@ SKIP_PERMISSIONS="--allow-dangerously-skip-permissions"
 MCP_SERVER_DIR="${HOME}/.claude/servers"
 TEMP_CONFIG=$(mktemp)
 
+# Enable LSP support by default
+export ENABLE_LSP_TOOL=1
+
 # Trap to clean up temp file on exit
 trap "rm -f $TEMP_CONFIG" EXIT
 
@@ -98,10 +101,15 @@ merge_mcp_configs() {
 
 show_help() {
     cat << 'EOF'
-Claude CLI launcher with granular MCP server support
+Claude CLI launcher with granular MCP server support and LSP enabled by default
 
 USAGE:
     cld [OPTIONS] [-- CLAUDE_ARGS]
+
+FEATURES:
+    - LSP (Language Server Protocol) enabled by default for IDE-level code intelligence
+    - Supports: Python, TypeScript, Go, Rust, Java, C/C++, C#, PHP, Kotlin, Ruby, HTML/CSS
+    - Operations: goToDefinition, findReferences, hover, documentSymbol, getDiagnostics
 
 COMMANDS:
     ls, list, --list          List available servers
