@@ -181,10 +181,12 @@ FEATURES:
     - Operations: goToDefinition, findReferences, hover, documentSymbol, getDiagnostics
 
 COMMANDS:
-    ls, list, --list          List available servers
+    ls, list, --list          List available MCP servers
+    providers                 List available API providers
     -h, --help                Show this help message
 
 OPTIONS:
+    -p PROVIDER               Use provider configuration from ~/.claude/providers.json
     -m SERVER [SERVER ...]    Load MCP servers by name or shorthand
 
 SHORTHAND FLAGS (used with -m):
@@ -233,6 +235,15 @@ EXAMPLES:
     With Claude args:
     cld -m dev -- --print "test"
     cld -m p x -- --print "compare"
+
+    Provider switching:
+    cld -p zai                             # Use Z.ai provider
+    cld -p local                           # Use local endpoint
+    cld -p zai -m dev                      # Z.ai + dev MCP bundle
+
+    Setup providers:
+    cp ~/.claude/providers.json.example ~/.claude/providers.json
+    # Edit ~/.claude/providers.json with your API keys
 
 EOF
 }
