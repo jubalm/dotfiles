@@ -1,6 +1,9 @@
 # Backups created by install script
 backups/
 
+# Git worktrees
+.worktrees/
+
 # Python
 __pycache__/
 *.pyc
