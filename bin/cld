@@ -17,7 +17,31 @@ CLAUDE_COMMAND="claude"
 SKIP_PERMISSIONS="--allow-dangerously-skip-permissions"
 MCP_SERVER_DIR="${HOME}/.claude/servers"
 PROVIDERS_FILE="${HOME}/.claude/providers.json"
+PROVIDERS_EXAMPLE_FILE="${HOME}/.claude/providers.json.example"
 TEMP_CONFIG=$(mktemp)
+
+# Example provider configurations (used to scaffold ~/.claude/providers.json.example)
+read -r -d '' EXAMPLE_PROVIDERS << 'PROVIDERS_EOF' || true
+{
+  "zai": {
+    "env": {
+      "ANTHROPIC_AUTH_TOKEN": "your-zai-api-key",
+      "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+      "API_TIMEOUT_MS": "3000000",
+      "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+      "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.7",
+      "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4.7"
+    }
+  },
+  "ollama": {
+    "env": {
+      "ANTHROPIC_AUTH_TOKEN": "ollama",
+      "ANTHROPIC_BASE_URL": "http://localhost:11434"
+    },
+    "model": "kimi-k2.5:cloud"
+  }
+}
+PROVIDERS_EOF
 
 # Enable LSP support by default
 export ENABLE_LSP_TOOL=1
@@ -56,14 +80,26 @@ find_server_file() {
     return 1
 }
 
+# Create example providers file if it doesn't exist
+create_example_providers() {
+    if [[ ! -f "$PROVIDERS_EXAMPLE_FILE" ]]; then
+        mkdir -p "$(dirname "$PROVIDERS_EXAMPLE_FILE")"
+        echo "$EXAMPLE_PROVIDERS" > "$PROVIDERS_EXAMPLE_FILE"
+        chmod 600 "$PROVIDERS_EXAMPLE_FILE"
+    fi
+}
+
 # Load provider configuration from providers.json
 load_provider() {
     local provider="$1"
 
     if [[ ! -f "$PROVIDERS_FILE" ]]; then
+        create_example_providers
         echo "Error: Providers file not found at $PROVIDERS_FILE" >&2
-        echo "Create it by copying the example:" >&2
-        echo "  cp ~/.claude/providers.json.example ~/.claude/providers.json" >&2
+        echo "Example created at: $PROVIDERS_EXAMPLE_FILE" >&2
+        echo "Edit it with your API keys, then rename to providers.json:" >&2
+        echo "  mv $PROVIDERS_EXAMPLE_FILE $PROVIDERS_FILE" >&2
+        echo "See docs: https://code.claude.com/docs/en/settings" >&2
         return 1
     fi
 
@@ -88,14 +124,17 @@ load_provider() {
 # List available providers
 list_providers() {
     if [[ ! -f "$PROVIDERS_FILE" ]]; then
-        echo "Available providers configuration file not found."
+        create_example_providers
+        echo "No providers configured yet."
         echo ""
-        echo "To get started, copy the example:"
-        echo "  cp ~/.claude/providers.json.example ~/.claude/providers.json"
+        echo "Example file created at: $PROVIDERS_EXAMPLE_FILE"
         echo ""
-        echo "Then edit ~/.claude/providers.json with your API keys and endpoints."
+        echo "To get started:"
+        echo "  1. Edit: $PROVIDERS_EXAMPLE_FILE"
+        echo "  2. Replace example values with your API keys"
+        echo "  3. Rename: mv $PROVIDERS_EXAMPLE_FILE $PROVIDERS_FILE"
         echo ""
-        echo "Example location: ~/.claude/providers.json.example"
+        echo "Documentation: https://code.claude.com/docs/en/settings"
         return 0
     fi
 
