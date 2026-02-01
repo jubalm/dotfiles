@@ -327,6 +327,27 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# ============================================================
+#                  PROVIDER HANDLING
+# ============================================================
+
+# Load provider settings if specified
+if [[ -n "$PROVIDER_NAME" ]]; then
+    if ! PROVIDER_CONFIG=$(load_provider "$PROVIDER_NAME"); then
+        exit 1
+    fi
+
+    # Extract env vars and export them
+    while IFS= read -r line; do
+        export "$line"
+    done < <(jq -r '.env | to_entries | .[] | "\(.key)=\(.value)"' <<< "$PROVIDER_CONFIG")
+
+    # Extract settings if present and add to Claude command
+    if jq -e '.settings' <<< "$PROVIDER_CONFIG" > /dev/null 2>&1; then
+        PROVIDER_SETTINGS=$(jq -c '.settings' <<< "$PROVIDER_CONFIG")
+    fi
+fi
+
 # Build the command
 CMD=("$CLAUDE_COMMAND" "$SKIP_PERMISSIONS")
 
@@ -339,6 +360,11 @@ if [[ ${#MCP_FILES[@]} -gt 0 ]]; then
     # Write merged config to temp file
     echo "$MERGED_CONFIG" > "$TEMP_CONFIG"
     CMD+=(--mcp-config "$TEMP_CONFIG")
+fi
+
+# Add provider settings if present
+if [[ -n "$PROVIDER_SETTINGS" ]]; then
+    CMD+=(--settings "$PROVIDER_SETTINGS")
 fi
 
 # Add any additional Claude arguments
