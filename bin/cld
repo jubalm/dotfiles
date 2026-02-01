@@ -110,7 +110,7 @@ load_provider() {
     fi
 
     # Check if provider exists
-    if ! jq -e ".[$provider]" "$PROVIDERS_FILE" > /dev/null 2>&1; then
+    if ! jq -e ".[\"$provider\"]" "$PROVIDERS_FILE" > /dev/null 2>&1; then
         echo "Error: Provider '$provider' not found in $PROVIDERS_FILE" >&2
         echo "Available providers:" >&2
         jq -r 'keys[]' "$PROVIDERS_FILE" | sed 's/^/  - /' >&2
@@ -118,7 +118,7 @@ load_provider() {
     fi
 
     # Extract and output the provider config
-    jq ".[$provider]" "$PROVIDERS_FILE"
+    jq ".[\"$provider\"]" "$PROVIDERS_FILE"
 }
 
 # List available providers
