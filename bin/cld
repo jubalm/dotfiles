@@ -392,10 +392,8 @@ if [[ -n "$PROVIDER_NAME" ]]; then
         export "$line"
     done < <(jq -r '.env | to_entries | .[] | "\(.key)=\(.value)"' <<< "$PROVIDER_CONFIG")
 
-    # Extract settings if present and add to Claude command
-    if jq -e '.settings' <<< "$PROVIDER_CONFIG" > /dev/null 2>&1; then
-        PROVIDER_SETTINGS=$(jq -c '.settings' <<< "$PROVIDER_CONFIG")
-    fi
+    # Pass the provider config as settings
+    PROVIDER_SETTINGS=$(jq -c . <<< "$PROVIDER_CONFIG")
 fi
 
 # Build the command
