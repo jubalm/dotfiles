@@ -16,7 +16,32 @@ set -e
 CLAUDE_COMMAND="claude"
 SKIP_PERMISSIONS="--allow-dangerously-skip-permissions"
 MCP_SERVER_DIR="${HOME}/.claude/servers"
+PROVIDERS_FILE="${HOME}/.claude/providers.json"
+PROVIDERS_EXAMPLE_FILE="${HOME}/.claude/providers.json.example"
 TEMP_CONFIG=$(mktemp)
+
+# Example provider configurations (used to scaffold ~/.claude/providers.json.example)
+read -r -d '' EXAMPLE_PROVIDERS << 'PROVIDERS_EOF' || true
+{
+  "zai": {
+    "env": {
+      "ANTHROPIC_AUTH_TOKEN": "your-zai-api-key",
+      "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
+      "API_TIMEOUT_MS": "3000000",
+      "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+      "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.7",
+      "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4.7"
+    }
+  },
+  "ollama": {
+    "env": {
+      "ANTHROPIC_AUTH_TOKEN": "ollama",
+      "ANTHROPIC_BASE_URL": "http://localhost:11434"
+    },
+    "model": "kimi-k2.5:cloud"
+  }
+}
+PROVIDERS_EOF
 
 # Enable LSP support by default
 export ENABLE_LSP_TOOL=1
@@ -53,6 +78,89 @@ find_server_file() {
     fi
 
     return 1
+}
+
+# Create example providers file if it doesn't exist
+create_example_providers() {
+    if [[ ! -f "$PROVIDERS_EXAMPLE_FILE" ]]; then
+        mkdir -p "$(dirname "$PROVIDERS_EXAMPLE_FILE")"
+        echo "$EXAMPLE_PROVIDERS" > "$PROVIDERS_EXAMPLE_FILE"
+        chmod 600 "$PROVIDERS_EXAMPLE_FILE"
+    fi
+}
+
+# Load provider configuration from providers.json
+load_provider() {
+    local provider="$1"
+
+    if [[ ! -f "$PROVIDERS_FILE" ]]; then
+        create_example_providers
+        echo "Error: Providers file not found at $PROVIDERS_FILE" >&2
+        echo "Example created at: $PROVIDERS_EXAMPLE_FILE" >&2
+        echo "Edit it with your API keys, then rename to providers.json:" >&2
+        echo "  mv $PROVIDERS_EXAMPLE_FILE $PROVIDERS_FILE" >&2
+        echo "See docs: https://code.claude.com/docs/en/settings" >&2
+        return 1
+    fi
+
+    # Validate JSON
+    if ! jq . "$PROVIDERS_FILE" > /dev/null 2>&1; then
+        echo "Error: Invalid JSON in $PROVIDERS_FILE" >&2
+        return 1
+    fi
+
+    # Check if provider exists
+    if ! jq -e ".[\"$provider\"]" "$PROVIDERS_FILE" > /dev/null 2>&1; then
+        echo "Error: Provider '$provider' not found in $PROVIDERS_FILE" >&2
+        echo "Available providers:" >&2
+        jq -r 'keys[]' "$PROVIDERS_FILE" | sed 's/^/  - /' >&2
+        return 1
+    fi
+
+    # Extract and output the provider config
+    jq ".[\"$provider\"]" "$PROVIDERS_FILE"
+}
+
+# List available providers
+list_providers() {
+    if [[ ! -f "$PROVIDERS_FILE" ]]; then
+        create_example_providers
+        echo "No providers configured yet."
+        echo ""
+        echo "Example file created at: $PROVIDERS_EXAMPLE_FILE"
+        echo ""
+        echo "To get started:"
+        echo "  1. Edit: $PROVIDERS_EXAMPLE_FILE"
+        echo "  2. Replace example values with your API keys"
+        echo "  3. Rename: mv $PROVIDERS_EXAMPLE_FILE $PROVIDERS_FILE"
+        echo ""
+        echo "Documentation: https://code.claude.com/docs/en/settings"
+        return 0
+    fi
+
+    if ! jq . "$PROVIDERS_FILE" > /dev/null 2>&1; then
+        echo "Error: Invalid JSON in $PROVIDERS_FILE" >&2
+        return 1
+    fi
+
+    local providers=($(jq -r 'keys[]' "$PROVIDERS_FILE"))
+
+    if [[ ${#providers[@]} -eq 0 ]]; then
+        echo "No providers configured in ~/.claude/providers.json"
+        return 0
+    fi
+
+    echo "Available providers in ~/.claude/providers.json:"
+    echo ""
+    for provider in "${providers[@]}"; do
+        echo "  - $provider"
+    done
+    echo ""
+    echo "💡 To get started, copy the example:"
+    echo "  cp ~/.claude/providers.json.example ~/.claude/providers.json"
+    echo ""
+    echo "Then edit ~/.claude/providers.json with your API keys and endpoints."
+    echo "Example template: ~/.claude/providers.json.example"
 }
 
 # List available servers by scanning folder
@@ -112,10 +220,12 @@ FEATURES:
     - Operations: goToDefinition, findReferences, hover, documentSymbol, getDiagnostics
 
 COMMANDS:
-    ls, list, --list          List available servers
+    ls, list, --list          List available MCP servers
+    providers                 List available API providers
     -h, --help                Show this help message
 
 OPTIONS:
+    -p PROVIDER               Use provider configuration from ~/.claude/providers.json
     -m SERVER [SERVER ...]    Load MCP servers by name or shorthand
 
 SHORTHAND FLAGS (used with -m):
@@ -165,6 +275,15 @@ EXAMPLES:
     cld -m dev -- --print "test"
     cld -m p x -- --print "compare"
 
+    Provider switching:
+    cld -p zai                             # Use Z.ai provider
+    cld -p local                           # Use local endpoint
+    cld -p zai -m dev                      # Z.ai + dev MCP bundle
+
+    Setup providers:
+    cp ~/.claude/providers.json.example ~/.claude/providers.json
+    # Edit ~/.claude/providers.json with your API keys
+
 EOF
 }
 
@@ -175,6 +294,8 @@ EOF
 declare -a MCP_FILES
 CLAUDE_ARGS=()
 USE_MCP_MODE=false
+PROVIDER_NAME=""
+PROVIDER_SETTINGS=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -185,6 +306,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         ls|list|--list)
             list_servers
+            exit 0
+            ;;
+        providers)
+            list_providers
             exit 0
             ;;
         -m)
@@ -228,6 +353,15 @@ while [[ $# -gt 0 ]]; do
             fi
             break
             ;;
+        -p)
+            if [[ -z "$2" ]]; then
+                echo "Error: -p requires a provider name" >&2
+                show_help >&2
+                exit 1
+            fi
+            PROVIDER_NAME="$2"
+            shift 2
+            ;;
         --)
             # -- without -m: pass remaining to claude
             shift
@@ -243,6 +377,27 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# ============================================================
+#                  PROVIDER HANDLING
+# ============================================================
+
+# Load provider settings if specified
+if [[ -n "$PROVIDER_NAME" ]]; then
+    if ! PROVIDER_CONFIG=$(load_provider "$PROVIDER_NAME"); then
+        exit 1
+    fi
+
+    # Extract env vars and export them
+    while IFS= read -r line; do
+        export "$line"
+    done < <(jq -r '.env | to_entries | .[] | "\(.key)=\(.value)"' <<< "$PROVIDER_CONFIG")
+
+    # Extract settings if present and add to Claude command
+    if jq -e '.settings' <<< "$PROVIDER_CONFIG" > /dev/null 2>&1; then
+        PROVIDER_SETTINGS=$(jq -c '.settings' <<< "$PROVIDER_CONFIG")
+    fi
+fi
+
 # Build the command
 CMD=("$CLAUDE_COMMAND" "$SKIP_PERMISSIONS")
 
@@ -255,6 +410,11 @@ if [[ ${#MCP_FILES[@]} -gt 0 ]]; then
     # Write merged config to temp file
     echo "$MERGED_CONFIG" > "$TEMP_CONFIG"
     CMD+=(--mcp-config "$TEMP_CONFIG")
+fi
+
+# Add provider settings if present
+if [[ -n "$PROVIDER_SETTINGS" ]]; then
+    CMD+=(--settings "$PROVIDER_SETTINGS")
 fi
 
 # Add any additional Claude arguments
