@@ -7,6 +7,7 @@ This repository contains my personal development environment setup, featuring a 
 ## Features
 
 - **One-command setup**: Complete development environment with automated Homebrew integration
+- **Claude CLI wrapper (`cld`)**: Smart launcher with LSP, MCP servers, and provider switching
 - **Minimal but functional zsh**: Stripped down configuration with essential completions and fast startup
 - **Custom git-aware prompt**: Clean, minimal design showing branch status and changes
 - **Modern Neovim with LSP**: Full development environment with code completion and formatting
@@ -17,12 +18,39 @@ This repository contains my personal development environment setup, featuring a 
 
 ```bash
 # Clone and install everything
-git clone git@github.com:jubalm/dotfiles.git ~/.config/dotfiles
-cd ~/.config/dotfiles
+git clone git@github.com:jubalm/dotfiles.git
+cd dotfiles
 ./install.py
 ```
 
-The installer handles everything: Homebrew setup, tool installation, config symlinks, and Neovim plugin initialization. Your existing configs are safely backed up to `dotfiles/backups/`.
+The installer handles everything: Homebrew setup, tool installation, config symlinks, and Neovim plugin initialization. Your existing configs are safely backed up to `backups/`.
+
+**Optional flags:**
+```bash
+./install.py --no-nvim          # Skip Neovim setup
+./install.py --no-skills        # Skip Claude skills
+./install.py --no-dependencies  # Skip Homebrew packages
+```
+
+## Claude CLI (`cld` Wrapper)
+
+Enhanced Claude Code launcher with integrated development features:
+
+**Core Features:**
+- **LSP enabled by default**: IDE-level code intelligence for Python, TypeScript, Go, Rust, Java, and more
+- **MCP Server Loading**: Load Playwright, Chrome DevTools, Context7, Figma, and custom servers
+- **Provider Switching**: Switch between Anthropic, Z.ai, Ollama, or custom endpoints
+- **Local Settings**: Machine-scoped settings overrides via `~/.claude/settings.local.json`
+
+**Quick Examples:**
+```bash
+cld                                 # Run with LSP and local settings
+cld -m p c                          # Add Playwright + Chrome DevTools
+cld -p zai -m dev                   # Use Z.ai with dev MCP bundle
+cld -m playwright -- --print "foo"  # Pass arguments to Claude
+```
+
+See `cld -h` for full documentation.
 
 ## Neovim Features
 
@@ -70,9 +98,15 @@ Set your terminal font to **"Hack Nerd Font"** (installed automatically) for the
 To update the configuration:
 
 ```bash
-cd ~/.config/dotfiles
+cd dotfiles
 git pull origin main
 nvim --headless -c "Lazy! sync" -c "qall"
+```
+
+To reinstall everything after pulling updates:
+
+```bash
+./install.py
 ```
 
 ## Repository Structure
@@ -83,10 +117,8 @@ dotfiles/
 │   ├── .zshrc                # Shell configuration
 │   ├── .gitignore_global     # Global git ignore patterns
 │   ├── .claude/              # Claude CLI configuration
-│   │   ├── settings.json     # Model and tool settings
-│   │   ├── mcp/              # MCP server configurations
-│   │   ├── commands/         # Custom slash commands
-│   │   ├── agents/           # Agent configurations
+│   │   ├── settings.local.json # Local machine-scoped settings (not committed)
+│   │   ├── servers/          # MCP server configurations
 │   │   ├── memory/           # Project memory system
 │   │   └── skills/           # Custom Claude skills
 │   └── .config/              # XDG Base Directory structure (→ ~/.config/)
@@ -117,6 +149,7 @@ dotfiles/
 ├── misc/                      # Additional resources
 │   └── theme.itermcolors    # iTerm2 Nord theme
 ├── bin/                       # Utility scripts
+│   └── cld                    # Claude CLI wrapper with LSP and MCP support
 ├── backups/                  # Created during installation (your existing configs)
 ├── Brewfile                  # Homebrew dependencies
 ├── install.py                # Python-based automated installer
