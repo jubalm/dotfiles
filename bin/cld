@@ -18,7 +18,9 @@ SKIP_PERMISSIONS="--allow-dangerously-skip-permissions"
 MCP_SERVER_DIR="${HOME}/.claude/servers"
 PROVIDERS_FILE="${HOME}/.claude/providers.json"
 PROVIDERS_EXAMPLE_FILE="${HOME}/.claude/providers.json.example"
+LOCAL_SETTINGS_FILE="${HOME}/.claude/settings.local.json"
 TEMP_CONFIG=$(mktemp)
+TEMP_SETTINGS=$(mktemp)
 
 # Example provider configurations (used to scaffold ~/.claude/providers.json.example)
 read -r -d '' EXAMPLE_PROVIDERS << 'PROVIDERS_EOF' || true
@@ -46,8 +48,8 @@ PROVIDERS_EOF
 # Enable LSP support by default
 export ENABLE_LSP_TOOL=1
 
-# Trap to clean up temp file on exit
-trap "rm -f $TEMP_CONFIG" EXIT
+# Trap to clean up temp files on exit
+trap "rm -f $TEMP_CONFIG $TEMP_SETTINGS" EXIT
 
 # Map shorthand flag to server filename (without extension)
 resolve_server_name() {
@@ -201,6 +203,31 @@ merge_mcp_configs() {
     done
 
     echo "$merged"
+}
+
+# Merge JSON settings with local overrides
+merge_settings() {
+    local base="$1"
+    local local_override="$2"
+
+    if [[ -z "$local_override" ]]; then
+        echo "$base"
+        return 0
+    fi
+
+    if [[ ! -f "$local_override" ]]; then
+        echo "$base"
+        return 0
+    fi
+
+    # Validate local settings JSON
+    if ! jq . "$local_override" > /dev/null 2>&1; then
+        echo "Error: Invalid JSON in $local_override" >&2
+        return 1
+    fi
+
+    # Deep merge: local settings override base settings
+    jq -s '.[0] as $base | .[1] as $override | $base * $override' <(echo "$base") "$local_override"
 }
 
 # ============================================================
@@ -378,10 +405,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ============================================================
-#                  PROVIDER HANDLING
+#                  SETTINGS HANDLING
 # ============================================================
 
-# Load provider settings if specified
+# Load and merge settings (provider + local overrides)
 if [[ -n "$PROVIDER_NAME" ]]; then
     if ! PROVIDER_CONFIG=$(load_provider "$PROVIDER_NAME"); then
         exit 1
@@ -392,8 +419,17 @@ if [[ -n "$PROVIDER_NAME" ]]; then
         export "$line"
     done < <(jq -r '.env | to_entries | .[] | "\(.key)=\(.value)"' <<< "$PROVIDER_CONFIG")
 
-    # Pass the provider config as settings
-    PROVIDER_SETTINGS=$(jq -c . <<< "$PROVIDER_CONFIG")
+    # Merge with local settings if they exist
+    if ! PROVIDER_SETTINGS=$(merge_settings "$PROVIDER_CONFIG" "$LOCAL_SETTINGS_FILE"); then
+        exit 1
+    fi
+    PROVIDER_SETTINGS=$(jq -c . <<< "$PROVIDER_SETTINGS")
+elif [[ -f "$LOCAL_SETTINGS_FILE" ]]; then
+    # Use local settings if no provider specified
+    if ! PROVIDER_SETTINGS=$(jq -c . "$LOCAL_SETTINGS_FILE"); then
+        echo "Error: Invalid JSON in $LOCAL_SETTINGS_FILE" >&2
+        exit 1
+    fi
 fi
 
 # Build the command
