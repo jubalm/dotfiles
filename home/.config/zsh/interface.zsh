@@ -21,6 +21,7 @@ source ~/.config/zsh/completions/aws.zsh
 source ~/.config/zsh/completions/kubectl.zsh
 source ~/.config/zsh/completions/eksctl.zsh
 source ~/.config/zsh/completions/deno.zsh
+source ~/.config/zsh/completions/openclaw.zsh
 
 # ionos CLI completions
 fpath+=(~/.config/ionosctl/completion/zsh)
