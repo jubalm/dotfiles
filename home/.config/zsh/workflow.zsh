@@ -12,3 +12,9 @@
 # Depends on all previous layers for full shell functionality.
 
 # ===[ Custom Functions ]===
+
+# OpenViking CLI wrapper - auto-activates venv and passes all args to openviking
+ov() {
+  source ~/.venv/openviking/bin/activate
+  openviking "$@"
+}
