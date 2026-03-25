@@ -3,8 +3,14 @@
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
-      "Bash(git:*)",
-      "Bash(gh:*)",
+      "Bash(* --help)",
+      "Bash(* --version)",
+      "Bash(ls *)",
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(npm i)",
+      "Bash(npm install)",
+      "Bash(npm run build)",
       "mcp__context7",
       "mcp__playwright",
       "mcp__chrome-devtools",
