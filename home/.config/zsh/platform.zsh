@@ -51,6 +51,9 @@ export PATH=$HOME/.local/bin:$PATH
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
 
+# ===[ LM Studio CLI ]===
+export PATH="$PATH:$HOME/.lmstudio/bin"
+
 # ===[ Docker Desktop CLI ]===
 # Add Docker Desktop CLI tools to PATH if available
 if [[ -d "/Applications/Docker.app/Contents/Resources/bin" ]]; then
