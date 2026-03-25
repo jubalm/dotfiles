@@ -1,16 +1,9 @@
 #!/bin/bash
 
-# Read input from stdin
-input=$(cat)
+declare -r RED=$'\033[31m' GREEN=$'\033[32m' BLUE=$'\033[34m' YELLOW=$'\033[33m' CYAN=$'\033[36m' GREY=$'\033[90m' RESET=$'\033[0m'
 
-# Extract values from JSON input
-current_dir="$(echo "$input" | jq -r '.workspace.current_dir')"
-model_name="$(echo "$input" | jq -r '.model.display_name')"
-
-# Extract context window information
-used_percentage="$(echo "$input" | jq -r '.context_window.used_percentage // empty')"
-total_input="$(echo "$input" | jq -r '.context_window.total_input_tokens // 0')"
-total_output="$(echo "$input" | jq -r '.context_window.total_output_tokens // 0')"
+# Extract all JSON values in a single jq call
+eval "$(jq -r '@json "current_dir=\(.workspace.current_dir) model_name=\(.model.display_name) used_percentage=\(.context_window.used_percentage // empty) total_input=\(.context_window.total_input_tokens // 0) total_output=\(.context_window.total_output_tokens // 0)"')"
 
 # Change to current directory for git operations
 cd "$current_dir" 2>/dev/null
@@ -29,50 +22,44 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
         # Handle detached HEAD
         if [[ "$branch" == *"HEAD (no branch)"* ]]; then
             branch="($(git rev-parse --short HEAD 2>/dev/null)...)"
-            branch_color="$(printf '\033[31m')"  # red
+            branch_color="$RED"
         else
-            # Remove upstream tracking info
             branch="${branch%% \[*}"
             branch="${branch%%...*}"
-            branch_color="$(printf '\033[32m')"  # green
+            branch_color="$GREEN"
         fi
 
         # Parse file status
         status_flags=""
-        has_staged=false
-        has_unstaged=false
-        has_untracked=false
+        has_staged=0 has_unstaged=0 has_untracked=0
 
-        # Simple line-by-line parsing
         while IFS= read -r line; do
             [[ "$line" =~ ^## ]] && continue
             [[ -z "$line" ]] && continue
 
             xy="${line:0:2}"
             case "$xy" in
-                "??") has_untracked=true ;;
-                ?[!\ ]) has_unstaged=true ;;
-                [!\ ]?) has_staged=true ;;
+                "??") has_untracked=1 ;;
+                ?[!\ ]) has_unstaged=1 ;;
+                [!\ ]?) has_staged=1 ;;
             esac
         done <<< "$git_output"
 
         # Build status indicators
-        [[ "$has_unstaged" == true ]] && status_flags+=" $(printf '\033[31m*\033[0m')"
-        [[ "$has_staged" == true ]] && status_flags+="$(printf '\033[32m+\033[0m')"
-        [[ "$has_untracked" == true ]] && status_flags+="$(printf '\033[31m%%\033[0m')"
+        (( has_unstaged )) && status_flags+=" ${RED}*${RESET}"
+        (( has_staged )) && status_flags+="${GREEN}+${RESET}"
+        (( has_untracked )) && status_flags+="${RED}%${RESET}"
 
         # Upstream check from branch line
         if [[ "$branch_line" == *"[ahead "* ]]; then
-            status_flags+="$(printf '\033[34m>\033[0m')"
+            status_flags+="${BLUE}>${RESET}"
         elif [[ "$branch_line" == *"[behind "* ]]; then
-            status_flags+="$(printf '\033[34m<\033[0m')"
+            status_flags+="${BLUE}<${RESET}"
         elif [[ "$branch_line" == *"..."* ]]; then
-            # Has upstream tracking but no ahead/behind = up to date
-            status_flags+="$(printf '\033[34m=\033[0m')"
+            status_flags+="${BLUE}=${RESET}"
         fi
 
-        # Format git info
-        git_info=" ${branch_color}${branch}$(printf '\033[0m')${status_flags}"
+        git_info=" ${branch_color}${branch}${RESET}${status_flags}"
     fi
 fi
 
@@ -95,14 +82,8 @@ shorten_path() {
     local result=""
     local last_index=$((${#components[@]} - 1))
 
-    # Always keep the first component (~ or /)
-    if [[ ${components[0]} == "~" ]] || [[ ${components[0]} == "" ]]; then
-        result="${components[0]}"
-        local start_index=1
-    else
-        result="${components[0]}"
-        local start_index=1
-    fi
+    result="${components[0]}"
+    local start_index=1
 
     # Process middle components - shorten if needed
     for ((i=start_index; i<last_index; i++)); do
@@ -140,18 +121,8 @@ shorten_path() {
 # Shorten the display directory
 display_dir=$(shorten_path "$current_dir" 50)
 
-# Function to format numbers with k suffix
 format_tokens() {
-    local num=$1
-    if (( num >= 1000 )); then
-        # Convert to k format with 1 decimal place
-        local k_value=$(echo "scale=1; $num / 1000" | bc)
-        # Remove trailing .0 if present
-        k_value=$(echo "$k_value" | sed 's/\.0$//')
-        echo "${k_value}k"
-    else
-        echo "$num"
-    fi
+    awk -v num=$1 'BEGIN { if (num >= 1000) { k = num / 1000; if (k == int(k)) print int(k)"k"; else printf "%.1fk\n", k } else print num }'
 }
 
 # Build token usage info
@@ -163,18 +134,17 @@ if [[ -n "$used_percentage" ]]; then
     # Format token counts
     formatted_total=$(format_tokens $total_tokens)
 
-    # Color code based on usage percentage
-    if (( $(echo "$used_percentage < 50" | bc -l) )); then
-        token_color="$(printf '\033[32m')"  # green - plenty of space
-    elif (( $(echo "$used_percentage < 75" | bc -l) )); then
-        token_color="$(printf '\033[33m')"  # yellow - moderate usage
+    # Color code based on usage percentage (compare as integers to avoid bc)
+    pct_int=${used_percentage%%.*}
+    if (( pct_int < 50 )); then
+        token_color="$GREEN"
+    elif (( pct_int < 75 )); then
+        token_color="$YELLOW"
     else
-        token_color="$(printf '\033[31m')"  # red - high usage
+        token_color="$RED"
     fi
 
-    # Format: "12.5% (25k tokens)"
-    token_info=" ${token_color}${used_percentage}%$(printf '\033[0m') $(printf '\033[90m')(${formatted_total})$(printf '\033[0m')"
+    token_info=" ${token_color}${used_percentage}%${RESET} ${GREY}(${formatted_total})${RESET}"
 fi
 
-# Print the status line (matches zsh prompt format)
-printf '\033[36m%s\033[0m%s\n\033[90m→\033[0m %s%s\n' "$display_dir" "$git_info" "$model_name" "$token_info"
+printf '%s\n%s %s%s\n' "$CYAN$display_dir$RESET$git_info" "${GREY}→${RESET}" "$model_name" "$token_info"
