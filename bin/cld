@@ -48,6 +48,9 @@ PROVIDERS_EOF
 # Enable LSP support by default
 export ENABLE_LSP_TOOL=1
 
+# Disable terminal flicker during rendering
+export CLAUDE_CODE_NO_FLICKER=1
+
 # Trap to clean up temp files on exit
 trap "rm -f $TEMP_CONFIG $TEMP_SETTINGS" EXIT
 
