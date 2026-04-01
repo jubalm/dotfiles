@@ -1,57 +1,60 @@
 # Dotfiles
 
-Personal dev env config: XDG 1:1 symlink mirroring, modular structure
+Personal development environment setup for macOS.
 
-## Memory Imports
+## Purpose
 
-@memory/constraints.md
-@memory/quirks.md
-@memory/decisions.md
-@memory/conventions.md
+One-command development environment setup. Modular, XDG-compliant structure that's fast, transparent, and easy to modify.
+
+## How It Works
+
+- `install.py` symlinks `home/` → `~/` with timestamped backups to `backups/`
+- Homebrew dependencies installed via `Brewfile`
+- 4-layer ZSH architecture with explicit load order
+- Neovim with lazy.nvim (async plugin loading)
+- Tmux with which-key menus (visual key discovery)
+
+## On-Demand Context
+
+- [memory/decisions.md](memory/decisions.md) - Historical "why" behind choices
+- [memory/cld.md](memory/cld.md) - Claude CLI wrapper design
 
 ## Structure
 
 **Root:**
-- home/ (all files symlinked to ~/)
-- Brewfile (macOS deps)
-- install.py (symlink installer w/ backups)
-- misc/theme.itermcolors (Nord iTerm2)
+- `home/` (all files symlinked to `~/`)
+- `Brewfile` (macOS deps)
+- `install.py` (symlink installer w/ backups)
+- `misc/theme.itermcolors` (Nord iTerm2)
 
-**Home (home/ → ~/):**
-- .zshrc → ~/.zshrc
-- .gitignore_global → ~/.gitignore_global
-- .claude/ → ~/.claude/ (settings, MCP configs, memory, skills)
-  - settings.local.json (local overrides, not committed)
-- .config/ → ~/.config/ (XDG Base Directory)
-  - nvim/ (Lua, lazy.nvim, modular plugin_setup/)
-  - tmux/ (native which-key menus)
-  - lazygit/ (Nord theme)
-  - zsh/ (4-layer arch: platform→runtime→interface→workflow)
-    - completions/ (AWS, kubectl, eksctl, deno)
-    - prompt/ (git status indicators)
+**Home (`home/` → `~/`):**
+- `.zshrc` → `~/.zshrc`
+- `.gitignore_global` → `~/.gitignore_global`
+- `.claude/` → `~/.claude/` (settings, MCP configs)
+  - `settings.local.json` (local overrides, not committed)
+- `.config/` → `~/.config/` (XDG Base Directory)
+  - `nvim/` (Lua, lazy.nvim, modular plugin_setup/)
+  - `tmux/` (native which-key menus)
+  - `lazygit/` (Nord theme)
+  - `zsh/` (4-layer arch: platform→runtime→interface→workflow)
+    - `completions/` (AWS, kubectl, eksctl, deno)
+    - `prompt/` (git status indicators)
 
-## Claude CLI (`cld` Wrapper)
+## Critical: Shell Load Order
 
-Smart launcher with LSP enabled, MCP server management, and provider switching:
-
-**Features:**
-- LSP enabled by default (IDE-level code intelligence)
-- MCP server loading: `cld -m playwright context7`
-- Provider switching: `cld -p zai` (Z.ai, Ollama, custom endpoints)
-- Local settings overrides via `~/.claude/settings.local.json`
-
-**Settings Management:**
-- `~/.claude/settings.local.json` - Machine-scoped settings (not committed)
-- Provider config merges with local settings (local takes precedence)
-- Supports deep merging of nested JSON objects
-
-**Examples:**
-```bash
-cld                                    # Run with local settings
-cld -m p c                             # Playwright + Chrome DevTools
-cld -p zai -m dev                      # Z.ai provider + dev MCP bundle
-cld -m playwright -- --print "test"    # Pass args to Claude
 ```
+platform.zsh → runtime.zsh → interface.zsh → workflow.zsh
+```
+
+**⚠️ Changing this order breaks dependencies**
+
+## Conventions
+
+- **Editor:** `.editorconfig` (tabs, spacing, line endings)
+- **Leader:** `<space>`
+- **LSP:** `gd` (definition), `gr` (references), `K` (hover), `<leader>rn` (rename), `<leader>ca` (code action)
+- **Telescope:** `<leader>p` (files), `<leader>sg` (grep), `<leader>sw` (word), `<leader>sd` (diagnostics)
+- **Tmux:** `Ctrl+b ?` (menu), `hjkl` (panes), `HJKL` (resize), `|` (vsplit), `-` (hsplit)
 
 ## Quick Start
 
