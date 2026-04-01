@@ -34,13 +34,14 @@ The installer handles everything: Homebrew setup, tool installation, config syml
 
 ## Claude CLI (`cld` Wrapper)
 
-Enhanced Claude Code launcher with integrated development features:
+Convenience wrapper for `claude` CLI with sane defaults:
 
-**Core Features:**
-- **LSP enabled by default**: IDE-level code intelligence for Python, TypeScript, Go, Rust, Java, and more
-- **MCP Server Loading**: Load Playwright, Chrome DevTools, Context7, Figma, and custom servers
-- **Provider Switching**: Switch between Anthropic, Z.ai, Ollama, or custom endpoints
-- **Local Settings**: Machine-scoped settings overrides via `~/.claude/settings.local.json`
+**What It Does:**
+- Enables LSP by default (via `ENABLE_LSP_TOOL=1` env var)
+- Skips permission prompts (`--allow-dangerously-skip-permissions`)
+- Merges multiple MCP server configs into one
+- Provider switching via `~/.claude/providers.json`
+- Local settings overrides via `~/.claude/settings.local.json`
 
 **Quick Examples:**
 ```bash
