@@ -1,0 +1,1 @@
+PI Runner smoke test — executed via GitHub Actions
