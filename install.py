@@ -163,6 +163,11 @@ class DotfilesInstaller:
             else:
                 self._remove_section('lazygit')
 
+            if 'pi' not in self.skip_sections:
+                self._install_pi()
+            else:
+                self._remove_section('pi')
+
             if 'bin' not in self.skip_sections:
                 self._install_bin()
             else:
@@ -186,6 +191,7 @@ class DotfilesInstaller:
             'git': [(self.home_dir / ".gitignore_global")],
             'claude': [(self.home_dir / ".claude")],
             'skills': [(self.home_dir / ".claude" / "skills")],
+            'pi': [(self.home_dir / ".pi" / "agent" / "extensions")],
             'nvim': [(self.home_dir / ".config" / "nvim")],
             'tmux': [(self.home_dir / ".config" / "tmux")],
             'lazygit': [(self.home_dir / ".config" / "lazygit")],
@@ -502,6 +508,31 @@ class DotfilesInstaller:
 
         self.logger.success("Lazygit configuration installed")
 
+    def _install_pi(self) -> None:
+        """Install Pi coding agent and extensions"""
+        # Install Pi CLI via npm global
+        if not self._command_exists('pi'):
+            with self.logger.busy("Installing Pi coding agent…"):
+                self._run_command(['npm', 'install', '-g', '@mariozechner/pi-coding-agent'], quiet=True)
+            self.logger.success("Pi coding agent installed")
+        else:
+            self.logger.success("Pi coding agent already installed")
+
+        # Install extensions
+        pi_extensions_source = self.dotfiles_dir / "home" / ".pi" / "agent" / "extensions"
+        pi_extensions_target = self.home_dir / ".pi" / "agent" / "extensions"
+
+        if pi_extensions_source.exists() and pi_extensions_source.is_dir():
+            pi_extensions_target.mkdir(parents=True, exist_ok=True)
+
+            for ext_item in pi_extensions_source.iterdir():
+                ext_target = pi_extensions_target / ext_item.name
+                self._install_symlink(ext_item, ext_target, f".pi/agent/extensions/{ext_item.name}")
+
+            self.logger.success("Pi extensions installed")
+        else:
+            self.logger.info("No Pi extensions found, skipping")
+
     def _install_bin(self) -> None:
         """Install user executables to ~/.local/bin"""
         # Create ~/.local/bin if it doesn't exist
@@ -529,6 +560,7 @@ Available flags (use --no-* to skip a section):
   --no-nodejs        Skip Node.js setup
   --no-claude        Skip Claude CLI and configuration
   --no-skills        Skip Claude skills installation
+  --no-pi            Skip Pi extensions installation
   --no-nvim          Skip Neovim configuration
   --no-tmux          Skip Tmux configuration
   --no-lazygit       Skip Lazygit configuration
@@ -552,6 +584,7 @@ Examples:
     parser.add_argument('--no-tmux', action='store_true', help='Skip Tmux configuration')
     parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
     parser.add_argument('--no-skills', action='store_true', help='Skip Claude skills installation')
+    parser.add_argument('--no-pi', action='store_true', help='Skip Pi extensions installation')
     parser.add_argument('--no-bin', action='store_true', help='Skip user executables installation')
 
     args = parser.parse_args()
@@ -570,6 +603,8 @@ Examples:
         skip_sections.append('claude')
     if args.no_skills:
         skip_sections.append('skills')
+    if args.no_pi:
+        skip_sections.append('pi')
     if args.no_nvim:
         skip_sections.append('nvim')
     if args.no_tmux:
