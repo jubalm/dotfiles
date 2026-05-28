@@ -513,7 +513,7 @@ class DotfilesInstaller:
         # Install Pi CLI via npm global
         if not self._command_exists('pi'):
             with self.logger.busy("Installing Pi coding agent…"):
-                self._run_command(['npm', 'install', '-g', '@mariozechner/pi-coding-agent'], quiet=True)
+                self._run_command(['npm', 'install', '-g', '--ignore-scripts', '--min-release-age=0', '@earendil-works/pi-coding-agent'], quiet=True)
             self.logger.success("Pi coding agent installed")
         else:
             self.logger.success("Pi coding agent already installed")
