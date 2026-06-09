@@ -163,6 +163,11 @@ class DotfilesInstaller:
             else:
                 self._remove_section('lazygit')
 
+            if 'agent-skills' not in self.skip_sections:
+                self._install_agent_skills()
+            else:
+                self._remove_section('agent-skills')
+
             if 'pi' not in self.skip_sections:
                 self._install_pi()
             else:
@@ -190,7 +195,7 @@ class DotfilesInstaller:
             'zsh': [(self.home_dir / ".zshrc"), (self.home_dir / ".config" / "zsh")],
             'git': [(self.home_dir / ".gitignore_global")],
             'claude': [(self.home_dir / ".claude")],
-            'skills': [(self.home_dir / ".claude" / "skills")],
+            'agent-skills': [(self.home_dir / ".agents" / "skills")],
             'pi': [(self.home_dir / ".pi" / "agent" / "extensions")],
             'nvim': [(self.home_dir / ".config" / "nvim")],
             'tmux': [(self.home_dir / ".config" / "tmux")],
@@ -414,46 +419,13 @@ class DotfilesInstaller:
             if agents_source.exists() and agents_source.is_dir():
                 self._install_symlink(agents_source, claude_home / "agents", ".claude/agents")
 
-            # Install .claude/skills directory - symlink each skill individually
-            if 'skills' not in self.skip_sections:
-                skills_source = claude_dir / "skills"
-                skills_home = claude_home / "skills"
+            # Install .claude/skills as a single symlink to ~/.agents/skills
+            if 'agent-skills' not in self.skip_sections:
+                agents_skills = self.home_dir / ".agents" / "skills"
+                claude_skills_home = claude_home / "skills"
 
-                # Create skills directory in home
-                skills_home.mkdir(exist_ok=True)
-
-                if skills_source.exists() and skills_source.is_dir():
-                    # Get the set of skill directories that exist in the dotfiles repo
-                    existing_skills = {skill_dir.name for skill_dir in skills_source.iterdir() if skill_dir.is_dir()}
-
-                    # Clean up stale symlinks (symlinks whose source no longer exists)
-                    if skills_home.exists():
-                        for skill_link in skills_home.iterdir():
-                            if skill_link.is_symlink():
-                                try:
-                                    # Check if the symlink target exists
-                                    skill_link.resolve(strict=True)
-                                except (OSError, RuntimeError):
-                                    # Symlink is broken or target doesn't exist
-                                    skill_link.unlink()
-                                    self.logger.info(f"Removed stale skill symlink: {skill_link.name}")
-                            elif skill_link.name not in existing_skills:
-                                # Remove directories/files that aren't in our current skills set
-                                if skill_link.is_dir():
-                                    shutil.rmtree(skill_link)
-                                    self.logger.info(f"Removed orphaned skill directory: {skill_link.name}")
-                                else:
-                                    skill_link.unlink()
-                                    self.logger.info(f"Removed orphaned skill file: {skill_link.name}")
-
-                    # Symlink each skill folder individually
-                    for skill_dir in skills_source.iterdir():
-                        if skill_dir.is_dir():
-                            skill_target = skills_home / skill_dir.name
-                            self._install_symlink(skill_dir, skill_target, f".claude/skills/{skill_dir.name}")
-            else:
-                # Clean up skills if they're being skipped
-                self._remove_section('skills')
+                if agents_skills.exists():
+                    self._install_symlink(agents_skills, claude_skills_home, ".claude/skills")
 
         # Install Claude CLI
         if not self._command_exists('claude'):
@@ -508,6 +480,18 @@ class DotfilesInstaller:
 
         self.logger.success("Lazygit configuration installed")
 
+    def _install_agent_skills(self) -> None:
+        """Install agent skills to ~/.agents/skills (single source of truth)"""
+        skills_source = self.dotfiles_dir / "home" / ".agents" / "skills"
+
+        if not skills_source.exists() or not skills_source.is_dir():
+            self.logger.info("No agent skills found in dotfiles, skipping")
+            return
+
+        skills_home = self.home_dir / ".agents" / "skills"
+        self._install_symlink(skills_source, skills_home, ".agents/skills")
+        self.logger.success("Agent skills installed")
+
     def _install_pi(self) -> None:
         """Install Pi coding agent and extensions"""
         # Install Pi CLI via npm global
@@ -533,6 +517,28 @@ class DotfilesInstaller:
         else:
             self.logger.info("No Pi extensions found, skipping")
 
+        # Install Pi skills as symlinks to ~/.agents/skills/<name>
+        if 'agent-skills' not in self.skip_sections:
+            agents_skills = self.home_dir / ".agents" / "skills"
+            pi_skills_home = self.home_dir / ".pi" / "agent" / "skills"
+
+            if agents_skills.exists():
+                pi_skills_home.mkdir(parents=True, exist_ok=True)
+
+                for skill_dir in agents_skills.iterdir():
+                    if skill_dir.is_dir():
+                        skill_target = pi_skills_home / skill_dir.name
+                        self._install_symlink(skill_dir, skill_target, f".pi/agent/skills/{skill_dir.name}")
+
+                # Clean up broken symlinks
+                for skill_link in pi_skills_home.iterdir():
+                    if skill_link.is_symlink():
+                        try:
+                            skill_link.resolve(strict=True)
+                        except (OSError, RuntimeError):
+                            skill_link.unlink()
+                            self.logger.info(f"Removed stale Pi skill symlink: {skill_link.name}")
+
     def _install_bin(self) -> None:
         """Install user executables to ~/.local/bin"""
         # Create ~/.local/bin if it doesn't exist
@@ -554,24 +560,24 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Available flags (use --no-* to skip a section):
-  --no-dependencies   Skip Homebrew and package installation
-  --no-zsh           Skip ZSH configuration
-  --no-git           Skip Git configuration
-  --no-nodejs        Skip Node.js setup
-  --no-claude        Skip Claude CLI and configuration
-  --no-skills        Skip Claude skills installation
-  --no-pi            Skip Pi extensions installation
-  --no-nvim          Skip Neovim configuration
-  --no-tmux          Skip Tmux configuration
-  --no-lazygit       Skip Lazygit configuration
-  --no-bin           Skip user executables installation
+  --no-dependencies    Skip Homebrew and package installation
+  --no-zsh            Skip ZSH configuration
+  --no-git            Skip Git configuration
+  --no-nodejs         Skip Node.js setup
+  --no-claude         Skip Claude CLI and configuration
+  --no-agent-skills   Skip agent skills installation
+  --no-pi             Skip Pi extensions installation
+  --no-nvim           Skip Neovim configuration
+  --no-tmux           Skip Tmux configuration
+  --no-lazygit        Skip Lazygit configuration
+  --no-bin            Skip user executables installation
 
 Examples:
-  python3 install.py                    # Install everything
-  python3 install.py --no-skills        # Install everything except skills
-  python3 install.py --no-nvim          # Install everything except Neovim
-  python3 install.py --no-zsh --no-git  # Skip ZSH and Git
-  python3 install.py --no-claude        # Skip Claude CLI and config (keeps skills if already installed)
+  python3 install.py                          # Install everything
+  python3 install.py --no-agent-skills        # Install everything except agent skills
+  python3 install.py --no-nvim                # Install everything except Neovim
+  python3 install.py --no-zsh --no-git        # Skip ZSH and Git
+  python3 install.py --no-claude              # Skip Claude CLI and config (keeps skills)
         """
     )
 
@@ -583,7 +589,7 @@ Examples:
     parser.add_argument('--no-nvim', action='store_true', help='Skip Neovim configuration')
     parser.add_argument('--no-tmux', action='store_true', help='Skip Tmux configuration')
     parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
-    parser.add_argument('--no-skills', action='store_true', help='Skip Claude skills installation')
+    parser.add_argument('--no-agent-skills', action='store_true', help='Skip agent skills installation')
     parser.add_argument('--no-pi', action='store_true', help='Skip Pi extensions installation')
     parser.add_argument('--no-bin', action='store_true', help='Skip user executables installation')
 
@@ -601,8 +607,8 @@ Examples:
         skip_sections.append('nodejs')
     if args.no_claude:
         skip_sections.append('claude')
-    if args.no_skills:
-        skip_sections.append('skills')
+    if args.no_agent_skills:
+        skip_sections.append('agent-skills')
     if args.no_pi:
         skip_sections.append('pi')
     if args.no_nvim:

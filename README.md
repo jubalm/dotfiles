@@ -26,7 +26,7 @@ For selective installs, see:
 - Git global ignore
 - Node.js tooling
 - Claude CLI settings and `cld` wrapper
-- Claude skills
+- Agent skills (shared by Claude, Pi, and other agents)
 - Pi coding-agent extensions
 - Neovim
 - tmux
