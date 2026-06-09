@@ -1,0 +1,53 @@
+{
+  "skill_name": "tldraw-sdk",
+  "evals": [
+    {
+      "id": 1,
+      "name": "custom-shape-implementation",
+      "prompt": "I need to create a custom card shape for a playing card application. The card should have a front face with suit/rank, be resizable, and show a different back design when flipped. Can you help me implement this ShapeUtil?",
+      "expected_output": "A complete ShapeUtil implementation with: type definition, getDefaultProps(), getGeometry() returning Rectangle2d, component() rendering card faces, indicator() for selection, onResize() handler, and proper registration with the editor"
+    },
+    {
+      "id": 2,
+      "name": "image-asset-upload",
+      "prompt": "How do I set up asset storage so users can upload images to my tldraw app? I want images stored on S3, not inline as base64.",
+      "expected_output": "TLAssetStore implementation with upload() method that posts to S3 (or API proxy), resolve() method that returns signed URLs or CDN paths with optimization based on ctx.steppedScreenScale, and remove() for cleanup. Should include proper error handling and abort signal usage"
+    },
+    {
+      "id": 3,
+      "name": "custom-sticker-tool",
+      "prompt": "I want to add a stamp tool that lets users click anywhere on the canvas to place emoji stickers. The tool should stay active after placing one sticker so they can place multiple in a row.",
+      "expected_output": "StateNode-based tool with idle and pointing child states, onPointerDown handler that creates a shape at click position, tool lock awareness to stay active, proper cursor change in onEnter(), and registration via tools prop"
+    },
+    {
+      "id": 4,
+      "name": "arrow-binding-shapes",
+      "prompt": "I'm building a flowchart editor. How do I make arrows that stick to shapes and move with them when dragged?",
+      "expected_output": "Explanation of tldraw's built-in arrow binding system, ShapeUtil.canBind() implementation to control which shapes accept bindings, and optionally custom BindingUtil if special binding behavior is needed. Should mention getBindingsToShape/getBindingsFromShape APIs"
+    },
+    {
+      "id": 5,
+      "name": "remove-toolbar-tools",
+      "prompt": "I want a minimal toolbar - just select, hand, and draw tools. Remove everything else including text, eraser, and frames.",
+      "expected_output": "TLUiOverrides implementation with tools() function that deletes unwanted tools from the tools object. Should also mention removing keyboard shortcuts for fully disabling tools"
+    },
+    {
+      "id": 6,
+      "name": "camera-zoom-to-shapes",
+      "prompt": "After creating several shapes programmatically, I want to animate the camera to show all of them at once with some padding.",
+      "expected_output": "Use of editor.zoomToBounds() with calculated bounds from shapes, or editor.zoomToFit() for all page shapes. Should include animation option with duration/easing and mention inset for padding"
+    },
+    {
+      "id": 7,
+      "name": "multiplayer-sync-setup",
+      "prompt": "What do I need to set up real-time collaboration so multiple users can edit the same canvas simultaneously?",
+      "expected_output": "TLSocketRoom setup with WebSocket server, explanation of server authoritative store, client sync via TLSyncRoom, presence data handling, and mention of starter kits like the multiplayer template"
+    },
+    {
+      "id": 8,
+      "name": "accessible-custom-shape",
+      "prompt": "I created a custom chart shape but screen readers just announce it as 'shape'. How do I make it accessible?",
+      "expected_output": "Override getAriaDescriptor() or getText() in ShapeUtil to return meaningful description, mention of canTabTo() for keyboard navigation, and optionally usePrefersReducedMotion for animations"
+    }
+  ]
+}
