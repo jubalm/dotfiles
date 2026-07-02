@@ -14,3 +14,4 @@ source ~/.config/zsh/platform.zsh
 source ~/.config/zsh/runtime.zsh
 source ~/.config/zsh/interface.zsh
 source ~/.config/zsh/workflow.zsh
+export PATH="$HOME/.config/folio/bin:$PATH"
