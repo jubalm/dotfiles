@@ -295,6 +295,12 @@ class DotfilesInstaller:
         target.symlink_to(source)
         self.logger.success(f"Installed symlink: {target} -> {source}")
 
+    def _install_agents_md(self, target: pathlib.Path) -> None:
+        """Symlink a CLAUDE.md/AGENTS.md file to ~/.agents/AGENTS.md (single source of truth)"""
+        agents_md = self.home_dir / ".agents" / "AGENTS.md"
+        if agents_md.exists():
+            self._install_symlink(agents_md, target, f"{target.name} -> .agents/AGENTS.md")
+
     def _install_homebrew(self) -> None:
         """Install Homebrew if not present"""
         if self._command_exists('brew'):
@@ -427,6 +433,9 @@ class DotfilesInstaller:
                 if agents_skills.exists():
                     self._install_symlink(agents_skills, claude_skills_home, ".claude/skills")
 
+        # Symlink CLAUDE.md -> ~/.agents/AGENTS.md
+        self._install_agents_md(claude_home / "CLAUDE.md")
+
         # Install Claude CLI
         if not self._command_exists('claude'):
             with self.logger.busy("Installing Claude CLI…"):
@@ -538,6 +547,9 @@ class DotfilesInstaller:
                         except (OSError, RuntimeError):
                             skill_link.unlink()
                             self.logger.info(f"Removed stale Pi skill symlink: {skill_link.name}")
+
+        # Symlink AGENTS.md -> ~/.agents/AGENTS.md
+        self._install_agents_md(self.home_dir / ".pi" / "agent" / "AGENTS.md")
 
     def _install_bin(self) -> None:
         """Install user executables to ~/.local/bin"""
