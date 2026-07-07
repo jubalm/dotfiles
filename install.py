@@ -296,8 +296,17 @@ class DotfilesInstaller:
         self.logger.success(f"Installed symlink: {target} -> {source}")
 
     def _install_agents_md(self, target: pathlib.Path) -> None:
-        """Symlink a CLAUDE.md/AGENTS.md file to ~/.agents/AGENTS.md (single source of truth)"""
+        """Copy dotfiles AGENTS.md to ~/.agents/AGENTS.md, then symlink target to it"""
+        dotfiles_agents = self.dotfiles_dir / "home" / ".agents" / "AGENTS.md"
         agents_md = self.home_dir / ".agents" / "AGENTS.md"
+
+        if dotfiles_agents.exists():
+            shutil.copy2(dotfiles_agents, agents_md)
+            self.logger.success(f"Installed dotfiles AGENTS.md at {agents_md}")
+        else:
+            self.logger.warning("No dotfiles AGENTS.md found, skipping")
+            return
+
         if agents_md.exists():
             self._install_symlink(agents_md, target, f"{target.name} -> .agents/AGENTS.md")
 
