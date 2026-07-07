@@ -471,7 +471,7 @@ class DotfilesInstaller:
                     # Run in background and capture any errors
                     self._run_command([
                         'nvim', '--headless',
-                        '-c', 'Lazy! sync',
+                        '-c', 'Lazy! install',
                         '-c', 'qall'
                     ], check=False, quiet=True)
                 self.logger.success("Neovim plugins installed")
