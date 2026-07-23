@@ -3,6 +3,26 @@ name: web-search
 description: USE FOR web search. Returns ranked results with snippets, URLs, thumbnails. Supports freshness filters, SafeSearch, Goggles for custom ranking, pagination. Primary search endpoint.
 ---
 
+# Authenticate
+
+The API key lives in the macOS Keychain (service `brave-search`, account `$USER`) and is read by `scripts/get-key.js`. Set `$SKILL_DIR` to the absolute path of this skill directory once, then inline the reader on every request so the key is never assigned to a variable, printed, or logged:
+
+```bash
+SKILL_DIR="/absolute/path/to/this/skill"   # e.g. ~/.pi/agent/skills/web-search
+-H "X-Subscription-Token: $(node "$SKILL_DIR/scripts/get-key.js")"
+```
+
+`$SKILL_DIR` must be absolute — a relative path breaks when the request runs from a different CWD.
+
+## Check & use
+
+1. Run `node "$SKILL_DIR/scripts/get-key.js"`.
+2. **Exit 0** → the key is registered. Inline it on every request:
+   `-H "X-Subscription-Token: $(node "$SKILL_DIR/scripts/get-key.js")"` and proceed to [Web Search](#web-search).
+3. **Exit non-zero** → the key is missing (the script prints the setup command itself). Run the full bootstrap in **[references/authenticate.md](references/authenticate.md)** — signup → generate key → register in Keychain — then retry from step 1. Do **not** fall back to env vars or hardcode the key.
+
+> **Security**: keep the key inside `$(...)`. Never `echo`/`printf` it, assign it to a variable, write it to a file, or commit it.
+
 # Web Search
 
 > **Requires API Key**: Get one at https://api.search.brave.com
@@ -15,14 +35,14 @@ description: USE FOR web search. Returns ranked results with snippets, URLs, thu
 ```bash
 curl -s "https://api.search.brave.com/res/v1/web/search?q=python+web+frameworks" \
   -H "Accept: application/json" \
-  -H "X-Subscription-Token: ${BRAVE_SEARCH_API_KEY}"
+  -H "X-Subscription-Token: $(node "$SKILL_DIR/scripts/get-key.js")"
 ```
 
 ### With Parameters
 ```bash
 curl -s "https://api.search.brave.com/res/v1/web/search" \
   -H "Accept: application/json" \
-  -H "X-Subscription-Token: ${BRAVE_SEARCH_API_KEY}" \
+  -H "X-Subscription-Token: $(node "$SKILL_DIR/scripts/get-key.js")" \
   -G \
   --data-urlencode "q=rust programming tutorials" \
   --data-urlencode "country=US" \
@@ -289,13 +309,13 @@ For queries about weather, stocks, sports, currency, etc., use the rich callback
 ```bash
 # 1. Search with rich callback enabled
 curl -s "https://api.search.brave.com/res/v1/web/search?q=weather+san+francisco&enable_rich_callback=true" \
-  -H "X-Subscription-Token: ${BRAVE_SEARCH_API_KEY}"
+  -H "X-Subscription-Token: $(node "$SKILL_DIR/scripts/get-key.js")"
 
 # Response includes: "rich": {"hint": {"callback_key": "abc123...", "vertical": "weather"}}
 
 # 2. Get rich data with the callback key
 curl -s "https://api.search.brave.com/res/v1/web/rich?callback_key=abc123..." \
-  -H "X-Subscription-Token: ${BRAVE_SEARCH_API_KEY}"
+  -H "X-Subscription-Token: $(node "$SKILL_DIR/scripts/get-key.js")"
 ```
 
 **Supported Rich Types**: Calculator, Definitions, Unit Conversion, Unix Timestamp, Package Tracker, Stock, Currency, Cryptocurrency, Weather, American Football, Baseball, Basketball, Cricket, Football/Soccer, Ice Hockey, Web3, Translator
