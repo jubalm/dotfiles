@@ -4,7 +4,7 @@ return {
 		'nvim-lualine/lualine.nvim',
 		config = function()
 			local iceberg_dark = require 'lualine.themes.iceberg_dark'
-			iceberg_dark.normal.c.bg = "#191919"
+			iceberg_dark.normal.c.bg = "#282C34"
 
 			require 'lualine'.setup {
 				options = {

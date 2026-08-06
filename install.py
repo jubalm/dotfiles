@@ -153,6 +153,16 @@ class DotfilesInstaller:
             else:
                 self._remove_section('nvim')
 
+            if 'ghostty' not in self.skip_sections:
+                self._install_ghostty()
+            else:
+                self._remove_section('ghostty')
+
+            if 'herdr' not in self.skip_sections:
+                self._install_herdr()
+            else:
+                self._remove_section('herdr')
+
             if 'tmux' not in self.skip_sections:
                 self._install_tmux()
             else:
@@ -198,6 +208,11 @@ class DotfilesInstaller:
             'agent-skills': [(self.home_dir / ".agents" / "skills")],
             'pi': [(self.home_dir / ".pi" / "agent" / "extensions")],
             'nvim': [(self.home_dir / ".config" / "nvim")],
+            'ghostty': [
+                (self.home_dir / ".config" / "ghostty" / "config"),
+                (self.home_dir / ".config" / "ghostty" / "auto" / "theme.ghostty"),
+            ],
+            'herdr': [(self.home_dir / ".config" / "herdr" / "config.toml")],
             'tmux': [(self.home_dir / ".config" / "tmux")],
             'lazygit': [(self.home_dir / ".config" / "lazygit")],
             'bin': [(self.home_dir / ".local" / "bin" / "cld")],
@@ -456,6 +471,33 @@ class DotfilesInstaller:
 
         self.logger.success("Claude configuration installed")
 
+    def _install_ghostty(self) -> None:
+        """Install Ghostty configuration files without replacing its runtime directory"""
+        ghostty_source = self.dotfiles_dir / "home" / ".config" / "ghostty"
+        config_files = [
+            (ghostty_source / "config", self.home_dir / ".config" / "ghostty" / "config"),
+            (
+                ghostty_source / "auto" / "theme.ghostty",
+                self.home_dir / ".config" / "ghostty" / "auto" / "theme.ghostty",
+            ),
+        ]
+
+        for source, target in config_files:
+            if source.exists():
+                self._install_symlink(source, target, str(target.relative_to(self.home_dir)))
+
+        self.logger.success("Ghostty configuration installed")
+
+    def _install_herdr(self) -> None:
+        """Install Herdr's user configuration without replacing runtime state"""
+        source = self.dotfiles_dir / "home" / ".config" / "herdr" / "config.toml"
+        target = self.home_dir / ".config" / "herdr" / "config.toml"
+
+        if source.exists():
+            self._install_symlink(source, target, str(target.relative_to(self.home_dir)))
+
+        self.logger.success("Herdr configuration installed")
+
     def _install_neovim(self) -> None:
         """Install Neovim configuration and plugins"""
         # Install Neovim configuration
@@ -589,6 +631,8 @@ Available flags (use --no-* to skip a section):
   --no-agent-skills   Skip agent skills installation
   --no-pi             Skip Pi extensions installation
   --no-nvim           Skip Neovim configuration
+  --no-ghostty        Skip Ghostty configuration
+  --no-herdr          Skip Herdr configuration
   --no-tmux           Skip Tmux configuration
   --no-lazygit        Skip Lazygit configuration
   --no-bin            Skip user executables installation
@@ -608,6 +652,8 @@ Examples:
     parser.add_argument('--no-nodejs', action='store_true', help='Skip Node.js setup')
     parser.add_argument('--no-claude', action='store_true', help='Skip Claude CLI and configuration')
     parser.add_argument('--no-nvim', action='store_true', help='Skip Neovim configuration')
+    parser.add_argument('--no-ghostty', action='store_true', help='Skip Ghostty configuration')
+    parser.add_argument('--no-herdr', action='store_true', help='Skip Herdr configuration')
     parser.add_argument('--no-tmux', action='store_true', help='Skip Tmux configuration')
     parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
     parser.add_argument('--no-agent-skills', action='store_true', help='Skip agent skills installation')
@@ -634,6 +680,10 @@ Examples:
         skip_sections.append('pi')
     if args.no_nvim:
         skip_sections.append('nvim')
+    if args.no_ghostty:
+        skip_sections.append('ghostty')
+    if args.no_herdr:
+        skip_sections.append('herdr')
     if args.no_tmux:
         skip_sections.append('tmux')
     if args.no_lazygit:

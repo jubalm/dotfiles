@@ -28,6 +28,8 @@ For selective installs, see:
 - Claude CLI settings and `cld` wrapper
 - Agent skills (shared by Claude, Pi, and other agents)
 - Pi coding-agent extensions
+- Ghostty
+- Herdr
 - Neovim
 - tmux
 - lazygit
