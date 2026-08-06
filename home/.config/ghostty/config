@@ -1,0 +1,16 @@
+# Ghostty Terminal Configuration
+
+# Theme — browse: ghostty +list-themes | fzf
+config-file = ?auto/theme.ghostty
+
+# Font — used by cmux terminal surfaces
+font-family = Hack Nerd Font Mono
+font-size = 13
+
+# Window padding (in pixels)
+window-padding-x = 13
+
+# Window focus opacity
+unfocused-split-opacity = 0.7
+macos-titlebar-proxy-icon = hidden
+macos-titlebar-style = hidden

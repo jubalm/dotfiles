@@ -1,0 +1,8 @@
+onboarding = false
+[ui]
+show_agent_labels_on_pane_borders = false
+pane_borders = false
+
+[theme]
+name = "one-dark"
+auto_switch = false

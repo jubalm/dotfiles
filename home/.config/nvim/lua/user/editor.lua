@@ -4,7 +4,7 @@ vim.g.maplocalleader = ' '
 
 -- Set theme
 vim.o.termguicolors = true
-vim.cmd('colorscheme nord-macos')
+vim.cmd('colorscheme onedark')
 
 -- Match floating window background to normal background
 vim.api.nvim_set_hl(0, 'NormalFloat', { link = 'Normal' })
