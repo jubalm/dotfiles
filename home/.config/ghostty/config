@@ -1,5 +1,8 @@
 # Ghostty Terminal Configuration
 
+# Treat macOS Option as Alt for terminal applications
+macos-option-as-alt = true
+
 # Theme — browse: ghostty +list-themes | fzf
 config-file = ?auto/theme.ghostty
 
