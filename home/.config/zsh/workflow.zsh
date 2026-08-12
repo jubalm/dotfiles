@@ -11,6 +11,10 @@
 #
 # Depends on all previous layers for full shell functionality.
 
+# ===[ Aliases ]===
+
+alias cld='claude'
+
 # ===[ Custom Functions ]===
 
 # OpenViking CLI wrapper - auto-activates venv and passes all args to openviking

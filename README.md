@@ -20,7 +20,6 @@ See `./install.py --help` for selective installs.
 - Ghostty, Herdr, Handy, Neovim, and lazygit
 - Claude and Pi agent configuration and extensions
 - Shared agent skills
-- User executables in `bin/`
 
 ### Tools
 
@@ -33,7 +32,6 @@ See `./install.py --help` for selective installs.
 ```text
 .
 ├── Brewfile       # Homebrew dependencies
-├── bin/           # User executables
 ├── home/          # Files symlinked into $HOME
 └── install.py     # Installer
 ```
