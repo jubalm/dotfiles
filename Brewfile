@@ -9,6 +9,7 @@ brew "gh"					# GitHub CLI for pull requests and issues
 brew "lazygit"				# Terminal UI for git commands
 brew "neovim"				# Modern text editor (nvim)
 brew "biome"				# Fast linter and formatter for JavaScript/TypeScript
+brew "pi-coding-agent"			# AI coding agent
 
 # ===[ CLI Utilities ]===
 

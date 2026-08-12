@@ -651,14 +651,11 @@ class DotfilesInstaller:
         self.logger.success("Agent skills installed")
 
     def _install_pi(self) -> None:
-        """Install Pi coding agent and extensions"""
-        # Install Pi CLI via npm global
-        if not self._command_exists('pi'):
-            with self.logger.busy("Installing Pi coding agent…"):
-                self._run_command(['npm', 'install', '-g', '--ignore-scripts', '--min-release-age=0', '@earendil-works/pi-coding-agent'], quiet=True)
-            self.logger.success("Pi coding agent installed")
+        """Verify the Homebrew-installed Pi coding agent and install extensions"""
+        if self._command_exists('pi'):
+            self.logger.success("Pi coding agent is available")
         else:
-            self.logger.success("Pi coding agent already installed")
+            self.logger.warning("Pi coding agent not found; run 'brew bundle' to install it")
 
         # Install extensions
         pi_extensions_source = self.dotfiles_dir / "home" / ".pi" / "agent" / "extensions"
@@ -728,7 +725,7 @@ Available flags (use --no-* to skip a section):
   --no-nodejs         Skip Node.js setup
   --no-claude         Skip Claude CLI and configuration
   --no-agent-skills   Skip agent skills installation
-  --no-pi             Skip Pi extensions installation
+  --no-pi             Skip Pi configuration and extensions
   --no-nvim           Skip Neovim configuration
   --no-ghostty        Skip Ghostty configuration
   --no-herdr          Skip Herdr configuration
@@ -757,7 +754,7 @@ Examples:
     parser.add_argument('--no-tmux', action='store_true', help='Skip Tmux configuration')
     parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
     parser.add_argument('--no-agent-skills', action='store_true', help='Skip agent skills installation')
-    parser.add_argument('--no-pi', action='store_true', help='Skip Pi extensions installation')
+    parser.add_argument('--no-pi', action='store_true', help='Skip Pi configuration and extensions')
     parser.add_argument('--no-bin', action='store_true', help='Skip user executables installation')
 
     args = parser.parse_args()
