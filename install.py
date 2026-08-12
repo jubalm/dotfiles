@@ -6,11 +6,13 @@ A modern alternative to the bash install script with enhanced error handling,
 better cross-platform support, and cleaner code organization.
 """
 
+import json
 import os
 import sys
 import subprocess
 import shutil
 import pathlib
+import tempfile
 import threading
 import time
 import argparse
@@ -128,6 +130,11 @@ class DotfilesInstaller:
             else:
                 self._remove_section('dependencies')
 
+            if 'handy' not in self.skip_sections:
+                self._install_handy()
+            else:
+                self._remove_section('handy')
+
             if 'zsh' not in self.skip_sections:
                 self._install_zsh()
             else:
@@ -218,6 +225,7 @@ class DotfilesInstaller:
             'bin': [(self.home_dir / ".local" / "bin" / "cld")],
             'nodejs': [],  # No symlinks to remove
             'dependencies': [],  # No symlinks to remove
+            'handy': [(self.home_dir / ".config" / "handy" / "settings.shared.json")],
         }
 
         for symlink_path in symlink_map.get(section, []):
@@ -372,6 +380,96 @@ class DotfilesInstaller:
                 # Don't re-raise - continue with other installation steps
         finally:
             os.chdir(original_cwd)
+
+    def _install_handy(self) -> None:
+        """Install Handy's shared settings without replacing local state."""
+        shared_source = self.dotfiles_dir / "home" / ".config" / "handy" / "settings.shared.json"
+        shared_target = self.home_dir / ".config" / "handy" / "settings.shared.json"
+
+        if not shared_source.exists():
+            self.logger.warning("No shared Handy settings found, skipping")
+            return
+
+        self._install_symlink(
+            shared_source,
+            shared_target,
+            ".config/handy/settings.shared.json",
+        )
+
+        settings_store = (
+            self.home_dir
+            / "Library"
+            / "Application Support"
+            / "com.pais.handy"
+            / "settings_store.json"
+        )
+
+        try:
+            with shared_source.open(encoding="utf-8") as file:
+                shared_store = json.load(file)
+
+            shared_settings = shared_store.get("settings")
+            if not isinstance(shared_settings, dict):
+                raise ValueError("shared settings must contain a JSON object at 'settings'")
+
+            if settings_store.exists():
+                with settings_store.open(encoding="utf-8") as file:
+                    current_store = json.load(file)
+                if not isinstance(current_store, dict):
+                    raise ValueError("Handy settings store must contain a JSON object")
+            else:
+                current_store = {}
+
+            current_settings = current_store.get("settings", {})
+            if not isinstance(current_settings, dict):
+                raise ValueError("Handy settings store has an invalid 'settings' value")
+
+            merged_settings = dict(current_settings)
+            for key, value in shared_settings.items():
+                if key != "bindings":
+                    merged_settings[key] = value
+                    continue
+
+                if not isinstance(value, dict):
+                    raise ValueError("shared Handy bindings must be a JSON object")
+
+                current_bindings = merged_settings.get("bindings", {})
+                if not isinstance(current_bindings, dict):
+                    current_bindings = {}
+
+                merged_bindings = dict(current_bindings)
+                for binding_id, binding in value.items():
+                    if not isinstance(binding, dict):
+                        raise ValueError(f"shared Handy binding '{binding_id}' must be a JSON object")
+                    existing_binding = current_bindings.get(binding_id, {})
+                    if not isinstance(existing_binding, dict):
+                        existing_binding = {}
+                    merged_bindings[binding_id] = {**existing_binding, **binding}
+
+                merged_settings["bindings"] = merged_bindings
+
+            merged_store = dict(current_store)
+            merged_store["settings"] = merged_settings
+            settings_store.parent.mkdir(parents=True, exist_ok=True)
+
+            # Replace atomically so a failed install cannot leave Handy's store truncated.
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=settings_store.parent,
+                prefix=f".{settings_store.name}.",
+                delete=False,
+            ) as file:
+                temporary_store = pathlib.Path(file.name)
+                json.dump(merged_store, file, indent=2, ensure_ascii=False)
+                file.write("\n")
+
+            os.replace(temporary_store, settings_store)
+            self.logger.success(f"Merged shared Handy settings into {settings_store}")
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+            if "temporary_store" in locals():
+                temporary_store.unlink(missing_ok=True)
+            self.logger.warning(f"Could not merge shared Handy settings: {error}")
 
     def _install_zsh(self) -> None:
         """Install ZSH configuration"""
@@ -624,7 +722,8 @@ def main():
         epilog="""
 Available flags (use --no-* to skip a section):
   --no-dependencies    Skip Homebrew and package installation
-  --no-zsh            Skip ZSH configuration
+  --no-handy            Skip Handy configuration
+  --no-zsh              Skip ZSH configuration
   --no-git            Skip Git configuration
   --no-nodejs         Skip Node.js setup
   --no-claude         Skip Claude CLI and configuration
@@ -647,6 +746,7 @@ Examples:
     )
 
     parser.add_argument('--no-dependencies', action='store_true', help='Skip Homebrew and packages')
+    parser.add_argument('--no-handy', action='store_true', help='Skip Handy configuration')
     parser.add_argument('--no-zsh', action='store_true', help='Skip ZSH configuration')
     parser.add_argument('--no-git', action='store_true', help='Skip Git configuration')
     parser.add_argument('--no-nodejs', action='store_true', help='Skip Node.js setup')
@@ -666,6 +766,8 @@ Examples:
     skip_sections = []
     if args.no_dependencies:
         skip_sections.append('dependencies')
+    if args.no_handy:
+        skip_sections.append('handy')
     if args.no_zsh:
         skip_sections.append('zsh')
     if args.no_git:

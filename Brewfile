@@ -41,5 +41,6 @@ brew "eksctl"			# EKS cluster management tool
 
 # ===[ Misc ]===
 
+cask "handy"			# Offline speech-to-text
 # https://github.com/ryanoasis/nerd-fonts#patched-fonts
 cask "font-hack-nerd-font"	# Programming font with icons

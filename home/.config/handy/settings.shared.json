@@ -1,0 +1,67 @@
+{
+  "settings": {
+    "append_trailing_space": false,
+    "audio_feedback": false,
+    "audio_feedback_volume": 1.0,
+    "auto_submit": false,
+    "auto_submit_key": "enter",
+    "clipboard_handling": "dont_modify",
+    "custom_words": [
+      "herdr",
+      "Augur",
+      "pane",
+      "pi",
+      "chatGPT",
+      "Codex",
+      "Claude"
+    ],
+    "extra_recording_buffer_ms": 0,
+    "history_limit": 5,
+    "lazy_stream_close": false,
+    "mute_while_recording": true,
+    "overlay_position": "top",
+    "overlay_style": "minimal",
+    "paste_delay_after_ms": 60,
+    "paste_delay_ms": 60,
+    "paste_method": "ctrl_v",
+    "post_process_enabled": false,
+    "post_process_provider_id": "openai",
+    "push_to_talk": true,
+    "recording_retention_period": "preserve_limit",
+    "reliable_paste": false,
+    "selected_language": "auto",
+    "show_tray_icon": true,
+    "sound_theme": "marimba",
+    "start_hidden": true,
+    "theme": "system",
+    "transcribe_accelerator": "auto",
+    "translate_to_english": true,
+    "typing_tool": "auto",
+    "update_checks_enabled": true,
+    "vad_enabled": true,
+    "word_correction_threshold": 0.18,
+    "bindings": {
+      "cancel": {
+        "current_binding": "escape",
+        "default_binding": "escape",
+        "description": "Cancels the current recording.",
+        "id": "cancel",
+        "name": "Cancel"
+      },
+      "transcribe": {
+        "current_binding": "option+space",
+        "default_binding": "option+space",
+        "description": "Converts your speech into text.",
+        "id": "transcribe",
+        "name": "Transcribe"
+      },
+      "transcribe_with_post_process": {
+        "current_binding": "option+shift+space",
+        "default_binding": "option+shift+space",
+        "description": "Converts your speech into text and applies AI post-processing.",
+        "id": "transcribe_with_post_process",
+        "name": "Transcribe with Post-Processing"
+      }
+    }
+  }
+}
