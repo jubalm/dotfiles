@@ -151,6 +151,7 @@ class DotfilesInstaller:
                 self._remove_section('nodejs')
 
             self._install_agents_md()
+            self._remove_legacy_cld()
 
             if 'claude' not in self.skip_sections:
                 self._install_claude()
@@ -187,11 +188,6 @@ class DotfilesInstaller:
             else:
                 self._remove_section('pi')
 
-            if 'bin' not in self.skip_sections:
-                self._install_bin()
-            else:
-                self._remove_section('bin')
-
             self.logger.log("\n🚀 Dotfiles installation complete!")
             self.logger.log("   Configure your terminal to use 'Hack Nerd Font' for best experience")
             self.logger.log("   Restart your terminal or run 'source ~/.zshrc' to apply changes")
@@ -218,7 +214,6 @@ class DotfilesInstaller:
             ],
             'herdr': [(self.home_dir / ".config" / "herdr" / "config.toml")],
             'lazygit': [(self.home_dir / ".config" / "lazygit")],
-            'bin': [(self.home_dir / ".local" / "bin" / "cld")],
             'nodejs': [],  # No symlinks to remove
             'dependencies': [],  # No symlinks to remove
             'handy': [(self.home_dir / ".config" / "handy" / "settings.shared.json")],
@@ -690,19 +685,14 @@ class DotfilesInstaller:
                 self.home_dir / ".pi" / "agent" / "AGENTS.md",
                 "AGENTS.md -> home/.agents/AGENTS.md",
             )
+    def _remove_legacy_cld(self) -> None:
+        """Remove the old cld wrapper symlink now that cld is a shell alias"""
+        target = self.home_dir / ".local" / "bin" / "cld"
+        legacy_source = self.dotfiles_dir / "bin" / "cld"
 
-    def _install_bin(self) -> None:
-        """Install user executables to ~/.local/bin"""
-        # Create ~/.local/bin if it doesn't exist
-        local_bin = self.home_dir / ".local" / "bin"
-        local_bin.mkdir(parents=True, exist_ok=True)
-
-        # Symlink bin/cld to ~/.local/bin/cld
-        cld_source = self.dotfiles_dir / "bin" / "cld"
-        if cld_source.exists():
-            self._install_symlink(cld_source, local_bin / "cld", ".local/bin/cld")
-
-        self.logger.success("User executables installed")
+        if target.is_symlink() and target.resolve(strict=False) == legacy_source:
+            target.unlink()
+            self.logger.success(f"Removed legacy cld wrapper: {target}")
 
 
 def main():
@@ -724,7 +714,6 @@ Available flags (use --no-* to skip a section):
   --no-ghostty        Skip Ghostty configuration
   --no-herdr          Skip Herdr configuration
   --no-lazygit        Skip Lazygit configuration
-  --no-bin            Skip user executables installation
 
 Examples:
   python3 install.py                          # Install everything
@@ -747,7 +736,6 @@ Examples:
     parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
     parser.add_argument('--no-agent-skills', action='store_true', help='Skip agent skills installation')
     parser.add_argument('--no-pi', action='store_true', help='Skip Pi configuration and extensions')
-    parser.add_argument('--no-bin', action='store_true', help='Skip user executables installation')
 
     args = parser.parse_args()
 
@@ -777,8 +765,6 @@ Examples:
         skip_sections.append('herdr')
     if args.no_lazygit:
         skip_sections.append('lazygit')
-    if args.no_bin:
-        skip_sections.append('bin')
 
     installer = DotfilesInstaller(skip_sections=skip_sections)
     installer.run()
