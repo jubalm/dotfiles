@@ -16,7 +16,6 @@ brew "pi-coding-agent"			# AI coding agent
 brew "ripgrep"				# Fast text search tool (rg)
 brew "httpie"				# User-friendly HTTP client
 brew "jq"					# JSON processor and query tool
-brew "tmux"					# Terminal multiplexer for session management
 brew "zsh-autosuggestions"	# Command line auto-completion
 # brew "fd"					# Fast file finder (alternative to find)
 # brew "fzf"				# Command-line fuzzy finder

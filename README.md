@@ -17,7 +17,7 @@ See `./install.py --help` for selective installs.
 ### Configuration
 
 - Zsh shell and Git global ignore
-- Ghostty, Herdr, Handy, Neovim, tmux, and lazygit
+- Ghostty, Herdr, Handy, Neovim, and lazygit
 - Claude and Pi agent configuration and extensions
 - Shared agent skills
 - User executables in `bin/`
@@ -35,8 +35,7 @@ See `./install.py --help` for selective installs.
 ├── Brewfile       # Homebrew dependencies
 ├── bin/           # User executables
 ├── home/          # Files symlinked into $HOME
-├── install.py     # Installer
-└── misc/          # Additional resources
+└── install.py     # Installer
 ```
 
 ## Disclaimer

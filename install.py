@@ -170,11 +170,6 @@ class DotfilesInstaller:
             else:
                 self._remove_section('herdr')
 
-            if 'tmux' not in self.skip_sections:
-                self._install_tmux()
-            else:
-                self._remove_section('tmux')
-
             if 'lazygit' not in self.skip_sections:
                 self._install_lazygit()
             else:
@@ -220,7 +215,6 @@ class DotfilesInstaller:
                 (self.home_dir / ".config" / "ghostty" / "auto" / "theme.ghostty"),
             ],
             'herdr': [(self.home_dir / ".config" / "herdr" / "config.toml")],
-            'tmux': [(self.home_dir / ".config" / "tmux")],
             'lazygit': [(self.home_dir / ".config" / "lazygit")],
             'bin': [(self.home_dir / ".local" / "bin" / "cld")],
             'nodejs': [],  # No symlinks to remove
@@ -620,15 +614,6 @@ class DotfilesInstaller:
 
         self.logger.success("Neovim configuration installed")
 
-    def _install_tmux(self) -> None:
-        """Install tmux configuration"""
-        # Install tmux configuration
-        tmux_source = self.dotfiles_dir / "home" / ".config" / "tmux"
-        if tmux_source.exists():
-            self._install_symlink(tmux_source, self.home_dir / ".config" / "tmux", "tmux")
-
-        self.logger.success("Tmux configuration installed")
-
     def _install_lazygit(self) -> None:
         """Install lazygit configuration"""
         # Install lazygit configuration
@@ -729,7 +714,6 @@ Available flags (use --no-* to skip a section):
   --no-nvim           Skip Neovim configuration
   --no-ghostty        Skip Ghostty configuration
   --no-herdr          Skip Herdr configuration
-  --no-tmux           Skip Tmux configuration
   --no-lazygit        Skip Lazygit configuration
   --no-bin            Skip user executables installation
 
@@ -751,7 +735,6 @@ Examples:
     parser.add_argument('--no-nvim', action='store_true', help='Skip Neovim configuration')
     parser.add_argument('--no-ghostty', action='store_true', help='Skip Ghostty configuration')
     parser.add_argument('--no-herdr', action='store_true', help='Skip Herdr configuration')
-    parser.add_argument('--no-tmux', action='store_true', help='Skip Tmux configuration')
     parser.add_argument('--no-lazygit', action='store_true', help='Skip Lazygit configuration')
     parser.add_argument('--no-agent-skills', action='store_true', help='Skip agent skills installation')
     parser.add_argument('--no-pi', action='store_true', help='Skip Pi configuration and extensions')
@@ -783,8 +766,6 @@ Examples:
         skip_sections.append('ghostty')
     if args.no_herdr:
         skip_sections.append('herdr')
-    if args.no_tmux:
-        skip_sections.append('tmux')
     if args.no_lazygit:
         skip_sections.append('lazygit')
     if args.no_bin:
