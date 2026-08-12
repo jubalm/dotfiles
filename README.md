@@ -30,6 +30,7 @@ For selective installs, see:
 - Pi coding-agent extensions
 - Ghostty
 - Herdr
+- Handy + shared settings
 - Neovim
 - tmux
 - lazygit
