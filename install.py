@@ -150,6 +150,8 @@ class DotfilesInstaller:
             else:
                 self._remove_section('nodejs')
 
+            self._install_agents_md()
+
             if 'claude' not in self.skip_sections:
                 self._install_claude()
             else:
@@ -312,20 +314,15 @@ class DotfilesInstaller:
         target.symlink_to(source)
         self.logger.success(f"Installed symlink: {target} -> {source}")
 
-    def _install_agents_md(self, target: pathlib.Path) -> None:
-        """Copy dotfiles AGENTS.md to ~/.agents/AGENTS.md, then symlink target to it"""
-        dotfiles_agents = self.dotfiles_dir / "home" / ".agents" / "AGENTS.md"
-        agents_md = self.home_dir / ".agents" / "AGENTS.md"
+    def _install_agents_md(self) -> None:
+        """Install the shared agent instructions as a symlink to the repository"""
+        source = self.dotfiles_dir / "home" / ".agents" / "AGENTS.md"
+        target = self.home_dir / ".agents" / "AGENTS.md"
 
-        if dotfiles_agents.exists():
-            shutil.copy2(dotfiles_agents, agents_md)
-            self.logger.success(f"Installed dotfiles AGENTS.md at {agents_md}")
+        if source.exists():
+            self._install_symlink(source, target, ".agents/AGENTS.md")
         else:
             self.logger.warning("No dotfiles AGENTS.md found, skipping")
-            return
-
-        if agents_md.exists():
-            self._install_symlink(agents_md, target, f"{target.name} -> .agents/AGENTS.md")
 
     def _install_homebrew(self) -> None:
         """Install Homebrew if not present"""
@@ -549,8 +546,14 @@ class DotfilesInstaller:
                 if agents_skills.exists():
                     self._install_symlink(agents_skills, claude_skills_home, ".claude/skills")
 
-        # Symlink CLAUDE.md -> ~/.agents/AGENTS.md
-        self._install_agents_md(claude_home / "CLAUDE.md")
+        # Symlink CLAUDE.md directly to the repository source
+        agents_source = self.dotfiles_dir / "home" / ".agents" / "AGENTS.md"
+        if agents_source.exists():
+            self._install_symlink(
+                agents_source,
+                claude_home / "CLAUDE.md",
+                "CLAUDE.md -> home/.agents/AGENTS.md",
+            )
 
         # Install Claude CLI
         if not self._command_exists('claude'):
@@ -679,8 +682,14 @@ class DotfilesInstaller:
                             skill_link.unlink()
                             self.logger.info(f"Removed stale Pi skill symlink: {skill_link.name}")
 
-        # Symlink AGENTS.md -> ~/.agents/AGENTS.md
-        self._install_agents_md(self.home_dir / ".pi" / "agent" / "AGENTS.md")
+        # Symlink AGENTS.md directly to the repository source
+        agents_source = self.dotfiles_dir / "home" / ".agents" / "AGENTS.md"
+        if agents_source.exists():
+            self._install_symlink(
+                agents_source,
+                self.home_dir / ".pi" / "agent" / "AGENTS.md",
+                "AGENTS.md -> home/.agents/AGENTS.md",
+            )
 
     def _install_bin(self) -> None:
         """Install user executables to ~/.local/bin"""
