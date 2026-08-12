@@ -8,7 +8,6 @@ This repository reproduces a single macOS development environment. Favor clear, 
 - `home/` — files mapped to equivalent paths under `$HOME`.
 - `install.py` — installation, linking, and migration logic.
 - `bin/` — user executables.
-- `misc/` — supplemental resources.
 
 ## Directives
 
