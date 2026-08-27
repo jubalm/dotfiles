@@ -16,6 +16,7 @@ import tempfile
 import threading
 import time
 import argparse
+import re
 from datetime import datetime
 from typing import Optional
 from contextlib import contextmanager
@@ -255,6 +256,74 @@ class DotfilesInstaller:
         """Check if a command exists in PATH"""
         return shutil.which(command) is not None
 
+    def _run_streaming_command(self, cmd: list) -> tuple[int, str]:
+        """Run a command while preserving its output and collecting it for inspection."""
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        output = []
+
+        try:
+            if process.stdout is not None:
+                for line in process.stdout:
+                    print(line, end='')
+                    output.append(line)
+            returncode = process.wait()
+        except BaseException:
+            process.kill()
+            process.wait()
+            raise
+
+        return returncode, ''.join(output)
+
+    def _brewfile_entries(self) -> dict:
+        """Return the formula and cask names declared in Brewfile."""
+        brewfile = self.dotfiles_dir / "Brewfile"
+        entries = {}
+        entry_pattern = re.compile(r"^\s*(brew|cask)\s+['\"]([^'\"]+)['\"]")
+
+        for line in brewfile.read_text(encoding="utf-8").splitlines():
+            match = entry_pattern.match(line)
+            if match:
+                entries[match.group(2)] = match.group(1)
+
+        return entries
+
+    def _failed_brew_entries(self, output: str) -> list:
+        """Extract entries that Homebrew Bundle reported as failed."""
+        # Bundle prefixes status lines with terminal escape sequences when attached
+        # to a TTY. Strip those before matching both TTY and non-TTY output.
+        plain_output = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', output)
+        failure_pattern = re.compile(r'(?:Installing|Upgrading)\s+([^\s]+)\s+has failed!')
+        return list(dict.fromkeys(match.group(1) for match in failure_pattern.finditer(plain_output)))
+
+    def _brew_entry_is_installed(self, entry_type: str, name: str) -> bool:
+        """Check whether Homebrew recorded an entry as installed."""
+        package_flag = '--cask' if entry_type == 'cask' else '--formula'
+        installed = self._run_command(
+            ['brew', 'list', package_flag, '--versions', name],
+            capture_output=True,
+            check=False,
+        )
+        return bool(installed)
+
+    def _repair_failed_brew_entries(self, failed_entries: list, entries: dict) -> None:
+        """Reinstall entries left registered after a failed Homebrew install."""
+        for name in failed_entries:
+            entry_type = entries.get(name)
+            if entry_type is None or not self._brew_entry_is_installed(entry_type, name):
+                continue
+
+            package_flag = '--cask' if entry_type == 'cask' else '--formula'
+            self.logger.warning(f"Retrying incomplete Homebrew {entry_type}: {name}")
+            try:
+                self._run_command(['brew', 'reinstall', package_flag, name], check=True)
+            except RuntimeError as error:
+                self.logger.warning(f"Could not repair {name}: {error}")
+
     def _backup_if_needed(self, target_path: pathlib.Path, backup_name: str) -> None:
         """Backup existing file/directory if it exists and isn't already our symlink"""
         if not target_path.exists() and not target_path.is_symlink():
@@ -344,26 +413,36 @@ class DotfilesInstaller:
         self.logger.success("Homebrew installed successfully")
 
     def _install_dependencies(self) -> None:
-        """Install dependencies from Brewfile"""
+        """Install dependencies from Brewfile, retrying incomplete Homebrew installs."""
         self.logger.info("Installing dependencies from Brewfile…")
         brewfile = self.dotfiles_dir / "Brewfile"
 
         if not brewfile.exists():
             raise FileNotFoundError("Brewfile not found!")
 
-        # Change to dotfiles directory and run brew bundle
+        # Change to dotfiles directory and run brew bundle. Homebrew can leave a
+        # failed cask/formula registered as installed, causing later bundle runs
+        # to skip it. Capture the failure lines so that entry can be reinstalled.
         original_cwd = os.getcwd()
         try:
             os.chdir(self.dotfiles_dir)
-            try:
-                # Run brew bundle without quiet flag to show actual progress and errors
-                self._run_command(['brew', 'bundle'], check=True)
+            returncode, output = self._run_streaming_command(['brew', 'bundle'])
+            if returncode == 0:
                 self.logger.success("Dependencies installed successfully")
-            except RuntimeError:
-                self.logger.error("Some packages failed to install")
-                self.logger.info("Run 'brew bundle' manually to see detailed error messages")
-                self.logger.info("You can also run 'brew bundle --verbose' for more information")
-                # Don't re-raise - continue with other installation steps
+                return
+
+            failed_entries = self._failed_brew_entries(output)
+            self.logger.error("Some packages failed to install")
+            if failed_entries:
+                self._repair_failed_brew_entries(failed_entries, self._brewfile_entries())
+
+            self.logger.info("Retrying Homebrew dependencies…")
+            retry_returncode, _ = self._run_streaming_command(['brew', 'bundle'])
+            if retry_returncode == 0:
+                self.logger.success("Dependencies installed successfully on retry")
+            else:
+                self.logger.error("Some packages still failed to install")
+                self.logger.info("Run 'brew bundle --verbose' manually to see detailed error messages")
         finally:
             os.chdir(original_cwd)
 
