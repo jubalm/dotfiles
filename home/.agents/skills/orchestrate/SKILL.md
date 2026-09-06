@@ -9,6 +9,8 @@ description: Use when a user asks to orchestrate, coordinate, dispatch, or deleg
 
 Orchestration is an operator-local decision: choose the smallest sufficient topology while the operator retains scope, synthesis, authorization, and the completion claim. Zero workers is valid. Nexus, Flue, and remote workflow delegation are outside this skill's current scope.
 
+The workflow defines what must happen. An execution preflight defines how this instance will happen. Model routing decides who should perform each bounded step.
+
 ## Directives
 
 - Delegate only when the expected token, context, latency, specialization, or verification benefit exceeds handoff and supervision cost.
@@ -16,6 +18,8 @@ Orchestration is an operator-local decision: choose the smallest sufficient topo
 - Detect capabilities before choosing an adapter or model; availability never forces use.
 - Keep product decisions and ungranted external effects with the operator.
 - Never absorb unrelated resources or infer lifecycle state.
+- Do not hard-code providers or models to roles when runtime discovery can make a better assignment.
+- Separate planning, execution, review, and acceptance when doing so materially reduces correlated failure or cost.
 
 ## Evaluation
 
@@ -38,9 +42,32 @@ If no advantage is defensible, work directly. A scout may investigate one bounde
 
 Before launching anything, inventory the local harness's adapters, isolation and continuation capabilities, and actual model catalog. Prefer native delegation when sufficient. When `HERDR_ENV=1`, surface Herdr as an available visible-pane adapter rather than automatically preferring it. If Herdr is selected, use the `herdr` skill for mechanics.
 
-**REQUIRED REFERENCE:** Read `references/model-routing.md` before assigning models.
+**REQUIRED REFERENCES:** Read `references/model-routing.md` before assigning models. Read `references/execution-preflight.md` before delegated write or consequential execution.
 
 Recommend one best topology, adapter, and model-routing configuration with a brief rationale. Different roles may use different models. Mention alternatives only when the recommendation is unavailable, materially more expensive, or genuinely ambiguous.
+
+## Execution Preflight
+
+Before meaningful delegated execution, outline the execution shape before performing it. The preflight is an operational contract, not a prose status update.
+
+For each bounded step, state:
+
+- objective and ownership
+- required capabilities and relevant context
+- proposed adapter/model only after runtime discovery
+- expected evidence or verification
+- authority boundary and side effects
+- escalation or rerouting conditions
+
+The preflight may be revised when new evidence changes scope, risk, context requirements, or capability needs. Do not preserve a stale routing decision merely because execution has started.
+
+Authority defaults:
+
+- Probe or low-risk bounded work: preflight, then proceed.
+- Routine write or medium-risk work: preflight, operator evaluation, then proceed unless new authorization is required.
+- Consequential work: preflight and retain explicit human authority for actions that require it.
+
+Do not turn preflight into a mandatory human confirmation gate for routine work.
 
 ## Consent Gate
 
@@ -55,7 +82,9 @@ A probe brief names the question, evidence surface, scout/model, report shape, a
 
 Read-only scouts may inspect the operator workspace. During delegated writes, the operator workspace remains read-only and every writer uses an isolated worktree or sandbox. Concurrent writers require separate environments, explicit ownership, frozen interfaces, and named integration responsibility. One writer owns each coupled surface.
 
-Give each role a bounded prompt and require changes, evidence, deviations, and pending items in its report. Preserve the same worker context across corrections when possible; otherwise hand over durable state and a bounded delta. On timeout or ambiguity, inspect native status, output, and effects before intervening.
+Give each role a bounded prompt and require changes, evidence, deviations, and pending items in its report. Adapt delegated prompts to the selected model's known operating characteristics when runtime evidence supports doing so; do not fabricate provider-specific behavior. Preserve the same worker context across corrections when possible; otherwise hand over durable state and a bounded delta. On timeout or ambiguity, inspect native status, output, and effects before intervening.
+
+Planning and execution models may differ. A stronger reasoning model may decompose or integrate while a cheaper or specialist model executes bounded work. Escalate or reroute when evidence shows that the selected model is no longer sufficient.
 
 ## Review and Completion
 
@@ -69,5 +98,6 @@ Before claiming completion, verify required checks and one load-bearing result, 
 
 ## References
 
+- `references/execution-preflight.md` — execution-plan contract, authority levels, rerouting, and adaptation
 - `references/model-routing.md` — runtime model discovery and smallest-sufficient role assignment
 - `herdr` — Herdr-specific launch, lifecycle, evidence, continuation, and cleanup mechanics
