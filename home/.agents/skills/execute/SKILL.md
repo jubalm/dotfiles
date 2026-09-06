@@ -43,7 +43,7 @@ If no advantage is defensible, work directly. A scout may investigate one bounde
 
 Before launching anything, inventory the local harness's adapters, isolation and continuation capabilities, and actual model catalog. Prefer native delegation when sufficient. When `HERDR_ENV=1`, surface Herdr as an available visible-pane adapter rather than automatically preferring it. If Herdr is selected, use the `herdr` skill for mechanics.
 
-**REQUIRED REFERENCES:** Read `references/model-routing.md` before assigning models. Read `references/execution-preflight.md` before delegated write or consequential execution.
+**REQUIRED REFERENCES:** Read `references/model-routing.md` before assigning models. Read `references/execution-preflight.md` before delegated write or consequential execution. Read `references/prompting.md` before constructing delegated role prompts. Use `references/model-guidance.md` and `models/` when maintained model-specific guidance is relevant.
 
 Recommend one best topology, adapter, and routing configuration with a brief rationale. Different roles may use different models. Mention alternatives only when the recommendation is unavailable, materially more expensive, or genuinely ambiguous.
 
@@ -83,7 +83,7 @@ A probe brief names the question, evidence surface, scout/model, report shape, a
 
 Read-only scouts may inspect the operator workspace. During delegated writes, the operator workspace remains read-only and every writer uses an isolated worktree or sandbox. Concurrent writers require separate environments, explicit ownership, frozen interfaces, and named integration responsibility. One writer owns each coupled surface.
 
-Give each role a bounded prompt and require changes, evidence, deviations, and pending items in its report. Adapt delegated prompts to the selected model's known operating characteristics when runtime evidence supports doing so; do not fabricate provider-specific behavior. Preserve the same worker context across corrections when possible; otherwise hand over durable state and a bounded delta. On timeout or ambiguity, inspect native status, output, and effects before intervening.
+Give each role a bounded prompt and require changes, evidence, deviations, and pending items in its report. Start from the neutral role contracts in `references/prompting.md`, then adapt prompts to the selected model only when runtime evidence or maintained guidance supports doing so. Preserve the same worker context across corrections when possible; otherwise hand over durable state and a bounded delta. On timeout or ambiguity, inspect native status, output, and effects before intervening.
 
 Planning and execution models may differ. A stronger reasoning model may decompose or integrate while a cheaper or specialist model executes bounded work. Escalate or reroute when evidence shows that the selected model is no longer sufficient.
 
@@ -110,5 +110,8 @@ Before claiming completion, verify required checks and one load-bearing result, 
 
 - `references/execution-preflight.md` — execution-plan contract, authority levels, rerouting, and adaptation
 - `references/model-routing.md` — runtime model discovery and smallest-sufficient role assignment
+- `references/model-guidance.md` — maintained evidence/freshness policy for model-specific capability and prompting notes
+- `references/prompting.md` — neutral planner, executor, integrator, reviewer, and scout prompt contracts
+- `models/` — optional per-model profiles; advisory only, never the runtime inventory
 - `verify` — independent contract validation when correlated failure or consequence warrants separation
 - `herdr` — Herdr-specific launch, lifecycle, evidence, continuation, and cleanup mechanics
