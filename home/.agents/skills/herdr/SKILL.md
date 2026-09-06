@@ -1,13 +1,13 @@
 ---
 name: herdr
-description: "Use when the user asks to inspect or control Herdr panes, tabs, workspaces, terminals, commands, or agents, or when Herdr is the selected local adapter for an orchestration task. Requires a Herdr-managed environment."
+description: "Use when the user asks to inspect or control Herdr panes, tabs, workspaces, terminals, commands, or agents, or when Herdr is the selected local adapter for an execution task. Requires a Herdr-managed environment."
 ---
 
 # Herdr
 
 Herdr is a terminal multiplexer and runtime for coding agents. It organizes terminals into workspaces, tabs, and panes, detects agent identity and status, and exposes the running session through the `herdr` CLI.
 
-This skill owns Herdr mechanics: availability, panes, launch, lifecycle, evidence retrieval, continuation, and cleanup. It does not decide whether delegation is worthwhile, choose topology or models, or define review and completion. For delegated work, use `orchestrate` for those decisions and this skill only after Herdr is selected. Direct Herdr inspection or control does not require orchestration qualification unless it introduces delegated work.
+This skill owns Herdr mechanics: availability, panes, launch, lifecycle, evidence retrieval, continuation, and cleanup. It does not decide whether delegation is worthwhile, choose topology or models, or define review and completion. For delegated work, use `execute` for those decisions and this skill only after Herdr is selected. Direct Herdr inspection or control does not require execution qualification unless it introduces delegated work.
 
 Do not use Herdr merely because a task could benefit from a background terminal or parallel work. Before issuing any control command, check that this agent is running inside a Herdr-managed pane:
 

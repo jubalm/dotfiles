@@ -6,6 +6,8 @@ Choose the smallest sufficient model configuration from the models actually avai
 
 Routing is capability-driven and provider-agnostic. A provider name, family, or familiar alias is never itself a reason to select a model.
 
+Use `model-guidance.md` and any applicable profile under `../models/` only as advisory evidence after runtime discovery confirms the model is available. Runtime evidence wins.
+
 ## Runtime Inventory
 
 Use the harness's authoritative model listing or configuration surface. Normalize relevant candidates before assigning roles:
@@ -29,18 +31,19 @@ For each preflight step:
 
 1. Define the minimum capabilities the role requires before naming a model.
 2. Filter to runtime-available candidates with the necessary tools, modalities, context, and authority fit.
-3. Use cheaper capacity for bounded execution when it will not create supervision or rework cost.
-4. Allocate stronger reasoning to consequential planning, integration, adversarial review, and escalation when justified.
-5. Keep the topology small; a separate model is not required for every role.
-6. Use an independent model or reviewer when correlated failure would undermine a load-bearing claim.
-7. Select the lowest sufficient reasoning effort: low or medium for routine work, high for demonstrated complexity, and maximum only when evidence warrants it.
-8. Present one recommended routing configuration with a short rationale, not a menu of combinations.
+3. Consult maintained model guidance only for candidates that remain viable after runtime filtering.
+4. Use cheaper capacity for bounded execution when it will not create supervision or rework cost.
+5. Allocate stronger reasoning to consequential planning, integration, adversarial review, and escalation when justified.
+6. Keep the topology small; a separate model is not required for every role.
+7. Use an independent model or reviewer when correlated failure would undermine a load-bearing claim.
+8. Select the lowest sufficient reasoning effort: low or medium for routine work, high for demonstrated complexity, and maximum only when evidence warrants it.
+9. Present one recommended routing configuration with a short rationale, not a menu of combinations.
 
 Planning and execution do not need to use the same model. Prefer specialist or cheaper executors for well-bounded work when a stronger planner can provide a decision-complete handoff.
 
 ## Prompt Adaptation
 
-Model selection and prompting are coupled. Once a model is selected, shape the handoff around runtime-supported characteristics rather than generic stereotypes.
+Model selection and prompting are coupled. Start from the neutral role contract in `prompting.md`, then shape the handoff around runtime-supported or maintained evidence-backed characteristics rather than generic stereotypes.
 
 Useful adaptations include:
 

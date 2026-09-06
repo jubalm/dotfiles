@@ -101,7 +101,7 @@ A common efficient shape is:
 request
   -> operator/planner creates preflight
   -> bounded executor performs implementation
-  -> operator or independent reviewer verifies evidence
+  -> operator or independent verifier checks evidence
   -> operator integrates and claims completion
 ```
 
