@@ -15,3 +15,14 @@ source ~/.config/zsh/runtime.zsh
 source ~/.config/zsh/interface.zsh
 source ~/.config/zsh/workflow.zsh
 export PATH="$HOME/.config/folio/bin:$PATH"
+
+# Hermes Agent — ensure ~/.local/bin is on PATH
+export PATH="$HOME/.local/bin:$PATH"
+
+# >>> headroom persistent env >>>
+export HEADROOM_PORT="8787"
+export HEADROOM_HOST="127.0.0.1"
+export HEADROOM_MODE="cache"
+export HEADROOM_BACKEND="anthropic"
+export HEADROOM_TELEMETRY="off"
+# <<< headroom persistent env <<<
