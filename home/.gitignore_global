@@ -1,2 +1,4 @@
 .DS_Store
 .folio
+
+**/.claude/settings.local.json
