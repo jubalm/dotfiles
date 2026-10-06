@@ -27,6 +27,16 @@ See `./install.py --help` for selective installs.
 - Node.js tooling
 - Claude CLI
 
+## Project Workflow Skills
+
+Shared sources live in `home/.agents/skills`; the installer links them into the shared skills directory and Claude/Pi skill paths.
+
+| Skill | Purpose |
+| --- | --- |
+| [project-context](home/.agents/skills/project-context/SKILL.md) | Bootstrap and repair durable repository context |
+| [handoff-work](home/.agents/skills/handoff-work/SKILL.md) | Prepare compact, executable assignments and continuation handoffs |
+| [review-change](home/.agents/skills/review-change/SKILL.md) | Review current changes for supported findings and verification limits |
+
 ## Repository Layout
 
 ```text
