@@ -1,4 +1,0 @@
-interface:
-  display_name: "Handoff Work"
-  short_description: "Prepare compact, executable work handoffs"
-  default_prompt: "Use $handoff-work to prepare an assignment with clear scope and completion evidence."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Context"
-  short_description: "Bootstrap and repair durable repository context"
-  default_prompt: "Use $project-context to inspect this repository and make the smallest justified context improvements."

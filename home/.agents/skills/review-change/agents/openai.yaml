@@ -1,4 +1,0 @@
-interface:
-  display_name: "Review Change"
-  short_description: "Review current changes for supported merge risks"
-  default_prompt: "Use $review-change to review the current change and report only supported, material findings."
