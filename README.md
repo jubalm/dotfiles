@@ -18,9 +18,14 @@ The installer backs up existing files before creating symlinks, and symlinks
 ./install.py --help
 ```
 
-Each `--no-*` flag skips a section **and removes that section's existing
-symlinks**, so `./install.py --no-nvim` un-links Neovim rather than leaving it
-untouched. `--no-*` is for removing a configuration, not for a quick partial run.
+Each `--no-*` flag skips that section without removing or changing its existing
+configuration. These flags do not uninstall software. Shared agent rules at
+`~/.agents/AGENTS.md` are still installed on every run.
+
+Enabled Claude/Pi sections prune only dangling symlinks that match this repo's
+per-entry source paths. Unrelated links, files, and directories are left alone.
+The installer also removes the dangling repo-owned `~/.config/tmux` link left by
+the retired tmux configuration.
 
 ## What's Included
 
@@ -60,12 +65,24 @@ Also synced, but vendored from upstream:
 | [find-skills](home/.agents/skills/find-skills/SKILL.md) | Discover and install agent skills |
 | [herdr](home/.agents/skills/herdr/SKILL.md) | Inspect and control Herdr panes, tabs, and agents |
 
+## Testing
+
+Run the installer regression suite from the repository root:
+
+```sh
+python3 -B -m unittest discover -s tests -v
+```
+
+Tests use temporary home directories and do not install packages or modify your
+active home directory.
+
 ## Repository Layout
 
 ```text
 .
 ├── Brewfile       # Homebrew dependencies
 ├── home/          # Files symlinked into $HOME
+├── tests/         # Installer regression tests
 └── install.py     # Installer
 ```
 

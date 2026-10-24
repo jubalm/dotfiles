@@ -128,66 +128,43 @@ class DotfilesInstaller:
             if 'dependencies' not in self.skip_sections:
                 self._install_homebrew()
                 self._install_dependencies()
-            else:
-                self._remove_section('dependencies')
 
             if 'handy' not in self.skip_sections:
                 self._install_handy()
-            else:
-                self._remove_section('handy')
 
             if 'zsh' not in self.skip_sections:
                 self._install_zsh()
-            else:
-                self._remove_section('zsh')
+                self._remove_legacy_cld()
 
             if 'git' not in self.skip_sections:
                 self._install_git()
-            else:
-                self._remove_section('git')
 
             if 'nodejs' not in self.skip_sections:
                 self._install_nodejs()
-            else:
-                self._remove_section('nodejs')
 
             self._install_agents_md()
-            self._remove_legacy_cld()
-
-            if 'claude' not in self.skip_sections:
-                self._install_claude()
-            else:
-                self._remove_section('claude')
-
-            if 'nvim' not in self.skip_sections:
-                self._install_neovim()
-            else:
-                self._remove_section('nvim')
-
-            if 'ghostty' not in self.skip_sections:
-                self._install_ghostty()
-            else:
-                self._remove_section('ghostty')
-
-            if 'herdr' not in self.skip_sections:
-                self._install_herdr()
-            else:
-                self._remove_section('herdr')
-
-            if 'lazygit' not in self.skip_sections:
-                self._install_lazygit()
-            else:
-                self._remove_section('lazygit')
+            self._remove_legacy_tmux()
 
             if 'agent-skills' not in self.skip_sections:
                 self._install_agent_skills()
-            else:
-                self._remove_section('agent-skills')
+
+            if 'claude' not in self.skip_sections:
+                self._install_claude()
+
+            if 'nvim' not in self.skip_sections:
+                self._install_neovim()
+
+            if 'ghostty' not in self.skip_sections:
+                self._install_ghostty()
+
+            if 'herdr' not in self.skip_sections:
+                self._install_herdr()
+
+            if 'lazygit' not in self.skip_sections:
+                self._install_lazygit()
 
             if 'pi' not in self.skip_sections:
                 self._install_pi()
-            else:
-                self._remove_section('pi')
 
             self.logger.log("\n🚀 Dotfiles installation complete!")
             self.logger.log("   Configure your terminal to use 'Hack Nerd Font' for best experience")
@@ -199,37 +176,6 @@ class DotfilesInstaller:
         except Exception as e:
             self.logger.error(f"Installation failed: {e}")
             sys.exit(1)
-
-    def _remove_section(self, section: str) -> None:
-        """Remove symlinks for a skipped section"""
-        symlink_map = {
-            'zsh': [(self.home_dir / ".zshrc"), (self.home_dir / ".config" / "zsh")],
-            'git': [(self.home_dir / ".gitignore_global")],
-            'claude': [(self.home_dir / ".claude")],
-            'agent-skills': [(self.home_dir / ".agents" / "skills")],
-            'pi': [(self.home_dir / ".pi" / "agent" / "extensions")],
-            'nvim': [(self.home_dir / ".config" / "nvim")],
-            'ghostty': [
-                (self.home_dir / ".config" / "ghostty" / "config"),
-                (self.home_dir / ".config" / "ghostty" / "auto" / "theme.ghostty"),
-            ],
-            'herdr': [(self.home_dir / ".config" / "herdr" / "config.toml")],
-            'lazygit': [(self.home_dir / ".config" / "lazygit")],
-            'nodejs': [],  # No symlinks to remove
-            'dependencies': [],  # No symlinks to remove
-            'handy': [(self.home_dir / ".config" / "handy" / "settings.shared.json")],
-        }
-
-        for symlink_path in symlink_map.get(section, []):
-            if symlink_path.is_symlink() or symlink_path.exists():
-                try:
-                    if symlink_path.is_dir() and not symlink_path.is_symlink():
-                        shutil.rmtree(symlink_path)
-                    else:
-                        symlink_path.unlink()
-                    self.logger.success(f"Removed: {symlink_path}")
-                except Exception as e:
-                    self.logger.warning(f"Could not remove {symlink_path}: {e}")
 
     def _run_command(self, cmd: list, capture_output: bool = False, check: bool = True, quiet: bool = False) -> Optional[str]:
         """Execute a shell command with proper error handling"""
@@ -377,6 +323,40 @@ class DotfilesInstaller:
         # Create symlink
         target.symlink_to(source)
         self.logger.success(f"Installed symlink: {target} -> {source}")
+
+    def _remove_stale_symlinks(self, target_dir: pathlib.Path, source_dir: pathlib.Path) -> None:
+        """Prune dangling per-entry links only when they match this repo's mapping."""
+        if target_dir.is_symlink() or not target_dir.is_dir():
+            return
+
+        try:
+            source_root = source_dir.resolve()
+            if not source_root.is_relative_to(self.dotfiles_dir.resolve()):
+                return
+        except (OSError, RuntimeError) as error:
+            self.logger.warning(f"Could not check symlink source directory {source_dir}: {error}")
+            return
+
+        try:
+            targets = list(target_dir.iterdir())
+        except OSError as error:
+            self.logger.warning(f"Could not scan symlink directory {target_dir}: {error}")
+            return
+
+        for target in targets:
+            if not target.is_symlink():
+                continue
+            try:
+                expected_source = source_root / target.name
+                if target.resolve(strict=False) != expected_source:
+                    continue
+                try:
+                    expected_source.lstat()
+                except FileNotFoundError:
+                    target.unlink()
+                    self.logger.info(f"Removed stale dotfiles symlink: {target}")
+            except (OSError, RuntimeError) as error:
+                self.logger.warning(f"Could not check stale symlink {target}: {error}")
 
     def _install_agents_md(self) -> None:
         """Install the shared agent instructions as a symlink to the repository"""
@@ -582,8 +562,8 @@ class DotfilesInstaller:
         """Install Claude configuration and CLI"""
         # Install .claude directory files
         claude_dir = self.dotfiles_dir / "home" / ".claude"
+        claude_home = self.home_dir / ".claude"
         if claude_dir.exists():
-            claude_home = self.home_dir / ".claude"
             claude_home.mkdir(exist_ok=True)
 
             # Files to exclude from global symlink (keep project-specific)
@@ -612,13 +592,15 @@ class DotfilesInstaller:
             if agents_source.exists() and agents_source.is_dir():
                 self._install_symlink(agents_source, claude_home / "agents", ".claude/agents")
 
-            # Install .claude/skills as a single symlink to ~/.agents/skills
-            if 'agent-skills' not in self.skip_sections:
-                agents_skills = self.home_dir / ".agents" / "skills"
-                claude_skills_home = claude_home / "skills"
+        # Install .claude/skills as a single symlink to ~/.agents/skills
+        if 'agent-skills' not in self.skip_sections:
+            agents_skills = self.home_dir / ".agents" / "skills"
+            claude_skills_home = claude_home / "skills"
 
-                if agents_skills.exists():
-                    self._install_symlink(agents_skills, claude_skills_home, ".claude/skills")
+            if agents_skills.exists():
+                self._install_symlink(agents_skills, claude_skills_home, ".claude/skills")
+
+        self._remove_stale_symlinks(claude_home, claude_dir)
 
         # Symlink CLAUDE.md directly to the repository source
         agents_source = self.dotfiles_dir / "home" / ".agents" / "AGENTS.md"
@@ -734,6 +716,8 @@ class DotfilesInstaller:
         else:
             self.logger.info("No Pi extensions found, skipping")
 
+        self._remove_stale_symlinks(pi_extensions_target, pi_extensions_source)
+
         # Install Pi skills as symlinks to ~/.agents/skills/<name>
         if 'agent-skills' not in self.skip_sections:
             agents_skills = self.home_dir / ".agents" / "skills"
@@ -747,14 +731,10 @@ class DotfilesInstaller:
                         skill_target = pi_skills_home / skill_dir.name
                         self._install_symlink(skill_dir, skill_target, f".pi/agent/skills/{skill_dir.name}")
 
-                # Clean up broken symlinks
-                for skill_link in pi_skills_home.iterdir():
-                    if skill_link.is_symlink():
-                        try:
-                            skill_link.resolve(strict=True)
-                        except (OSError, RuntimeError):
-                            skill_link.unlink()
-                            self.logger.info(f"Removed stale Pi skill symlink: {skill_link.name}")
+            self._remove_stale_symlinks(
+                pi_skills_home,
+                self.dotfiles_dir / "home" / ".agents" / "skills",
+            )
 
         # Symlink AGENTS.md directly to the repository source
         agents_source = self.dotfiles_dir / "home" / ".agents" / "AGENTS.md"
@@ -764,6 +744,24 @@ class DotfilesInstaller:
                 self.home_dir / ".pi" / "agent" / "AGENTS.md",
                 "AGENTS.md -> home/.agents/AGENTS.md",
             )
+
+    def _remove_legacy_tmux(self) -> None:
+        """Remove only the dangling link to the retired tmux configuration."""
+        target = self.home_dir / ".config" / "tmux"
+        source = self.dotfiles_dir / "home" / ".config" / "tmux"
+
+        if target.is_symlink():
+            try:
+                if target.resolve(strict=False) != source.resolve(strict=False):
+                    return
+                try:
+                    source.lstat()
+                except FileNotFoundError:
+                    target.unlink()
+                    self.logger.success(f"Removed legacy tmux symlink: {target}")
+            except (OSError, RuntimeError) as error:
+                self.logger.warning(f"Could not check legacy tmux symlink: {error}")
+
     def _remove_legacy_cld(self) -> None:
         """Remove the old cld wrapper symlink now that cld is a shell alias"""
         target = self.home_dir / ".local" / "bin" / "cld"
