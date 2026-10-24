@@ -8,9 +8,19 @@ cd dotfiles
 ./install.py
 ```
 
-The installer backs up existing files before creating symlinks.
+The installer backs up existing files before creating symlinks, and symlinks
+`~/.agents/AGENTS.md` and `~/.claude/CLAUDE.md` to the shared agent rules in
+`home/.agents/AGENTS.md`.
 
-See `./install.py --help` for selective installs.
+## Selective Installs
+
+```bash
+./install.py --help
+```
+
+Each `--no-*` flag skips a section **and removes that section's existing
+symlinks**, so `./install.py --no-nvim` un-links Neovim rather than leaving it
+untouched. `--no-*` is for removing a configuration, not for a quick partial run.
 
 ## What's Included
 
@@ -18,24 +28,37 @@ See `./install.py --help` for selective installs.
 
 - Zsh shell and Git global ignore
 - Ghostty, Herdr, Handy, Neovim, and lazygit
-- Claude and Pi agent configuration and extensions
-- Shared agent skills
+- Claude configuration and MCP servers
+- Shared agent rules and skills
+- Pi coding agent, with shared skills linked into its skill path
 
 ### Tools
 
-- Homebrew packages and applications, including Pi
-- Node.js tooling
-- Claude CLI
+- Homebrew packages and applications from `Brewfile`
+- Node.js tooling, via `n`
+- Claude CLI, installed with `curl -fsSL https://claude.ai/install.sh | bash` when missing
 
 ## Project Workflow Skills
 
-Shared sources live in `home/.agents/skills`; the installer links them into the shared skills directory and Claude/Pi skill paths.
+Shared sources live in `home/.agents/skills`; the installer links the directory
+into `~/.agents/skills` and `~/.claude/skills`, and links each skill
+individually into `~/.pi/agent/skills`.
+
+Maintained here:
 
 | Skill | Purpose |
 | --- | --- |
-| [project-context](home/.agents/skills/project-context/SKILL.md) | Bootstrap and repair durable repository context |
+| [git-inspect](home/.agents/skills/git-inspect/SKILL.md) | Inspect repo state and propose commit, sync, and cleanup actions |
 | [handoff-work](home/.agents/skills/handoff-work/SKILL.md) | Prepare compact, executable assignments and continuation handoffs |
-| [review-change](home/.agents/skills/review-change/SKILL.md) | Review current changes for supported findings and verification limits |
+| [project-context](home/.agents/skills/project-context/SKILL.md) | Bootstrap and repair durable repository context |
+| [review-change](home/.agents/skills/review-change/SKILL.md) | Review changes for supported findings and verification limits |
+
+Also synced, but vendored from upstream:
+
+| Skill | Purpose |
+| --- | --- |
+| [find-skills](home/.agents/skills/find-skills/SKILL.md) | Discover and install agent skills |
+| [herdr](home/.agents/skills/herdr/SKILL.md) | Inspect and control Herdr panes, tabs, and agents |
 
 ## Repository Layout
 
