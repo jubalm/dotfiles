@@ -320,7 +320,7 @@ class InstallerTests(unittest.TestCase):
             "pi": ["_install_pi"],
         }
         files = [
-            ".zshrc", ".gitignore_global", ".config/zsh/local.zsh",
+            ".zshrc", ".zshenv", ".gitignore_global", ".config/zsh/local.zsh",
             ".claude/local-data", ".config/nvim/local.lua", ".config/lazygit/local.yml",
             ".config/ghostty/config", ".config/ghostty/auto/theme.ghostty",
             ".config/herdr/config.toml", ".config/handy/settings.shared.json",

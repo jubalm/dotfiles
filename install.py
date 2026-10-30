@@ -523,6 +523,11 @@ class DotfilesInstaller:
         if zshrc_source.exists():
             self._install_symlink(zshrc_source, self.home_dir / ".zshrc", ".zshrc")
 
+        # Install .zshenv
+        zshenv_source = self.dotfiles_dir / "home" / ".zshenv"
+        if zshenv_source.exists():
+            self._install_symlink(zshenv_source, self.home_dir / ".zshenv", ".zshenv")
+
         # Install .config/zsh
         zsh_config_source = self.dotfiles_dir / "home" / ".config" / "zsh"
         if zsh_config_source.exists():
