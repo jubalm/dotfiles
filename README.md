@@ -54,9 +54,9 @@ Maintained here:
 | Skill | Purpose |
 | --- | --- |
 | [adaptive-communication](home/.agents/skills/adaptive-communication/SKILL.md) | Match explanations and decision support to the recipient's actual question |
+| [documenting](home/.agents/skills/documenting/SKILL.md) | Audit, migrate and write repository docs against the personal baseline |
 | [git-inspect](home/.agents/skills/git-inspect/SKILL.md) | Inspect repo state and propose commit, sync, and cleanup actions |
 | [handoff-work](home/.agents/skills/handoff-work/SKILL.md) | Prepare compact, executable assignments and continuation handoffs |
-| [project-context](home/.agents/skills/project-context/SKILL.md) | Bootstrap and repair durable repository context |
 | [review-change](home/.agents/skills/review-change/SKILL.md) | Review changes for supported findings and verification limits |
 
 ### Default communication instruction
